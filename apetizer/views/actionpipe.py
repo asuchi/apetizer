@@ -5,20 +5,21 @@ Created on 16 mai 2014
 '''
 from collections import OrderedDict
 import copy
+import json
+import uuid
+
+from apetizer.views.httpapi import HttpAPIView
 from django.contrib import messages
 from django.core.cache import cache as action_cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.datetime_safe import strftime
 from django.utils.timezone import now
-import json
-import uuid
 
-from apetizer.views.httpapi import HttpAPIView
+from apetizer.storage.kvstorage import KVStorage
 
 
 __all__ = ['ActionPipeView',]
-
 
 
 class ActionPipeView(HttpAPIView):
@@ -43,9 +44,9 @@ class ActionPipeView(HttpAPIView):
         'pipe_data':json.dumps({}),
     
     }
-    internal_actions = ['start', 'view', 'end', 'doc']
+    internal_actions = ['start', 'view', 'prev', 'next', 'end', 'doc']
     
-    pipe_table = {}
+    pipe_table = KVStorage()
     '''
     pipe_scenario defines a sequence of field names 
     that has to be filled by the user to complete the pipe action
@@ -183,7 +184,7 @@ class ActionPipeView(HttpAPIView):
         it' meant to be overriden by concerned views
         '''
         # override this method to manage start action custom setup
-        return
+        return True
     
     def process_start(self, request, user_profile, input_data, template_args, **kwargs):
         '''
@@ -244,7 +245,32 @@ class ActionPipeView(HttpAPIView):
         user_data = self.get_actionpipe_data(request)
         
         return self.render(request, template_args, user_data, **kwargs)
+    
+    def process_next(self, request, user_profile, input_data, template_args, **kwargs):
+        '''
+        call this method to be redirected to the next pipe view
+        '''
+        return HttpResponseRedirect(self.get_next_url(self.get_actionpipe_data(request), **kwargs))
+    
+    def process_prev(self, request, user_profile, input_data, template_args, **kwargs):
+        '''
+        call this method to be redirected to the previous pipe view
+        '''
+        return HttpResponseRedirect(self.get_prev_url(self.get_actionpipe_data(request), **kwargs))
+    
+    def process_reset(self, request, user_profile, input_data, template_args, **kwargs):
+        '''
+        call this method to be redirected to the previous pipe view
+        '''
+        return HttpResponseRedirect(self.get_prev_url(self.get_actionpipe_data(request), **kwargs))
+    
+    def process_graph(self, request, user_profile, input_data, template_args, **kwargs):
+    
+        user_data = self.get_actionpipe_data(request)
         
+        return self.render(request, template_args, user_data, **kwargs)
+    
+    
     def process_end(self, request, user_profile, input_data, template_args, **kwargs):
         '''
         the end view is designed as a callback

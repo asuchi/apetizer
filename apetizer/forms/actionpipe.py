@@ -1,19 +1,12 @@
 '''
-Created on 2 févr. 2015
+Created on 2 fevr. 2015
 
 @author: nicolas
 '''
-from django.db import models
-from parsley.decorators import parsleyfy
-
 from apetizer.forms.httpapi import HttpApiForm
+from apetizer.models import AbstractPipeModel
 
 
-class AbstractPipeModel(models.Model):
-    class Meta:
-        abstract = True
-
-@parsleyfy
 class ActionPipeForm(HttpApiForm):
     slug = 'slug'
     title = ''

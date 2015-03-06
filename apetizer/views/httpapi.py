@@ -3,6 +3,12 @@ Created on 24 oct. 2013
 
 @author: rux
 '''
+import json
+import logging
+import os.path
+import re
+import traceback
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
@@ -11,15 +17,12 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
-import json
-import logging
-import os.path
-import re
-import traceback
+
+from pystory.scenario.nodes import ScenarioNode
 
 
-global _http_api_views_by_name
-_http_api_views_by_name = []
+global _apetizer_api_views_by_name
+_apetizer_api_views_by_name = []
 
 logger = logging.getLogger(__name__)
 
@@ -46,15 +49,7 @@ def API_json_parser(obj):
         raise TypeError("Unserializable object %s of type %s" % (obj, type(obj)))
 
 
-
-class HttpAPIView(View):
-    """
-    The default base view for all views implementing a json api interface and a documentation
-    """
-    # restrict methods to post and get only
-    http_method_names = ['get', 'post']
-    
-    __version__ = "0.3"
+class ActionNode(ScenarioNode):
     
     view_name = 'undefined'
     view_title = 'Undefined'
@@ -70,6 +65,16 @@ class HttpAPIView(View):
     actions_forms = {'view':[]}
     action_templates = {}
     
+
+class HttpAPIView(ActionNode, View):
+    """
+    The default base view for all views implementing a json api interface and a documentation
+    """
+    # restrict methods to post and get only
+    apetizer_method_names = ['get', 'post']
+    
+    __version__ = "0.3"
+    
     view_template = 'website.html'
     
     action_forms_autosave = True
@@ -84,7 +89,7 @@ class HttpAPIView(View):
         # initialise the default view behavior here
         
         # register view_name over a global variable
-        _http_api_views_by_name.append(self.view_name)
+        _apetizer_api_views_by_name.append(self.view_name)
         
         super(HttpAPIView, self).__init__(**kwargs)
         
@@ -103,6 +108,14 @@ class HttpAPIView(View):
         url_regexp += '|'.join(cls_actions + cls.internal_actions)
         url_regexp += ')+)*[/|(\.json)]*$'
         
+        return url_regexp
+        
+        url_regexp = '^'
+        url_regexp += path+'(?:/|(\.json))+'
+        url_regexp += '(?P<action>('
+        url_regexp += '|'.join(cls_actions + cls.internal_actions)
+        url_regexp += ')+)*(/|(\.json))*$'
+        print url_regexp
         return url_regexp
         
     def get(self, request, **kwargs):
@@ -143,7 +156,7 @@ class HttpAPIView(View):
         Get a clean referer path to the request object
         """
         # if the user typed the url directly in the browser's address bar
-        referer = request.META.get('HTTP_REFERER')
+        referer = request.META.get('apetizer_REFERER')
         if not referer:
             return default
     
@@ -160,11 +173,16 @@ class HttpAPIView(View):
         """
         Get the default templates args dict context for the user
         """
+        template_args = self.get_context_dict(request, **kwargs)
+        return template_args
+        
+    def get_context_dict(self, request, **kwargs):
         template_args = {}
         template_args['action'] = kwargs.get('action')
         
         return template_args
-    
+        
+        
     def get_input_data(self, request):
         """
         Get a dict of all the inputs merged ( GET < POST|json )
@@ -297,6 +315,8 @@ class HttpAPIView(View):
         template_args = {}
         if request.user.is_authenticated():
             template_args = self.get_user_dict(request, **kwargs)
+        else:
+            template_args = self.get_context_dict(request, **kwargs)
         
         if self.__getattribute__('process_'+action):
             return self.__getattribute__('process_'+action)(request, user_profile, input_data, template_args, **kwargs)
@@ -397,12 +417,12 @@ class HttpAPIView(View):
         if clean_path[-1] == '/':
             clean_path = clean_path[:-1]
         
-        template_args['dashboard_api_base_url'] = clean_path
+        template_args['apetizer_api_base_url'] = clean_path
         
-        template_args['dashboard_api_json_url'] = clean_path+'.json'
-        template_args['dashboard_api_doc_url'] = clean_path+'.doc'
+        template_args['apetizer_api_json_url'] = clean_path+'.json'
+        template_args['apetizer_api_doc_url'] = clean_path+'.doc'
         
-        template_args['dashboard_api_html_url'] = clean_path+'/'
+        template_args['apetizer_api_html_url'] = clean_path+'/'
         
         
         def get_documentation(request, **kwargs):

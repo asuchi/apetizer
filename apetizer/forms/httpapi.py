@@ -4,10 +4,8 @@ Created on 9 sept. 2014
 @author: rux
 '''
 from django.forms.models import ModelForm
-from parsley.decorators import parsleyfy
 
 
-@parsleyfy
 class HttpApiForm(ModelForm):
     """
     Base dashboard form
