@@ -7,10 +7,10 @@ from django.forms.fields import EmailField, CharField
 from django.forms.widgets import TextInput, PasswordInput
 from django.utils.translation import ugettext as _
 
-from apetizer.forms.actionpipe import ActionPipeForm
+from apetizer.forms.httpapi import HttpApiForm
 
 
-class LoginForm(ActionPipeForm):
+class LoginForm(HttpApiForm):
     """ Basic login form """
     slug = 'login'
     
