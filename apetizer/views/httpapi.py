@@ -18,7 +18,6 @@ from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
 
-from pystory.scenario.nodes import ScenarioNode
 
 
 global _apetizer_api_views_by_name
@@ -49,7 +48,7 @@ def API_json_parser(obj):
         raise TypeError("Unserializable object %s of type %s" % (obj, type(obj)))
 
 
-class ActionNode(ScenarioNode):
+class ActionNode():
     
     view_name = 'undefined'
     view_title = 'Undefined'
@@ -110,13 +109,6 @@ class HttpAPIView(ActionNode, View):
         
         return url_regexp
         
-        url_regexp = '^'
-        url_regexp += path+'(?:/|(\.json))+'
-        url_regexp += '(?P<action>('
-        url_regexp += '|'.join(cls_actions + cls.internal_actions)
-        url_regexp += ')+)*(/|(\.json))*$'
-        print url_regexp
-        return url_regexp
         
     def get(self, request, **kwargs):
         """
@@ -141,16 +133,7 @@ class HttpAPIView(ActionNode, View):
         # start preprocessing the request
         return self.pre_process(request, user_profile, input_data, **kwargs)
     
-    def get_user_profile(self, request):
-        """
-        Retreive user profile from the request user
-        Returns a buzzcar.profile.UserProfile
-        
-        This method needs to be overriden
-        """
-        
-        return None
-
+    
     def get_referer_path(self, request, default=None):
         """
         Get a clean referer path to the request object
@@ -168,7 +151,14 @@ class HttpAPIView(ActionNode, View):
         # add the slash at the relative path's view and finished
         referer = u'/' + u'/'.join(referer[1:])
         return referer
-
+    
+    
+    def get_user_profile(self, request):
+        """
+        Retreive user profile from the request user
+        """
+        return None
+    
     def get_user_dict(self, request, **kwargs):
         """
         Get the default templates args dict context for the user
@@ -219,7 +209,9 @@ class HttpAPIView(ActionNode, View):
         return data
     
     def get_action_forms(self, action):
-        
+        """
+        Returns a tuple with the list of forms invovlved
+        """
         forms = tuple()
         
         if action in self.actions_forms:
@@ -237,6 +229,7 @@ class HttpAPIView(ActionNode, View):
         From a tuple of model instances, 
         get the corresponding action forms instances 
         **loaded, validated and saved** with the input_data dict
+        You can save them manually by passing False to save_forms
         """
         if save_forms == None:
             save_forms = self.action_forms_autosave
@@ -281,18 +274,12 @@ class HttpAPIView(ActionNode, View):
      
     def pre_process(self, request, user_profile, input_data, **kwargs):
         """
-        basicly hook before managing the request deeply
+        Hook before processing the request
         
-        check for user eligibility for the request
+        Best place to make user/objects rights management
         """
-        # return documentation corresponding to the api action for staff only
-        if os.path.splitext(request.path)[1] == '.doc':
-            if request.user.is_staff:
-                return self.process_doc(request, user_profile, {}, {}, **kwargs)
-            else:
-                raise Http404
-        else:
-            return self.process(request, user_profile, input_data, **kwargs)
+        
+        return self.process(request, user_profile, input_data, **kwargs)
     
     
     def process(self, request, user_profile, input_data, **kwargs):
@@ -325,26 +312,7 @@ class HttpAPIView(ActionNode, View):
             result_message = ugettext(u'Action Not implemented:'+action)
             result_status = 'error'
             return self.render(request, result_payload, result_message, result_status, **kwargs)
-        
     
-    def render(self, request, template_args, result_payload={}, result_message="OK", result_status=200, **kwargs):
-        """
-        Render either json or html depending on the request
-        """
-        if self.request_as_json(request):
-            response = self.render_json(request, result_payload, result_message, result_status, **kwargs)
-        else:
-            response = self.render_html(request, template_args, result_message, result_status, **kwargs)
-        
-        return response
-    
-    
-    def finish(self, request, response, **kwargs):
-        """
-        This final step provides the ability to lastly manage the response
-        It's mainly usefull to attach tracking cookies
-        """
-        return response
     
     def process_view(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -357,20 +325,27 @@ class HttpAPIView(ActionNode, View):
         return self.render(request, template_args, result_payload, result_message, result_status, **kwargs)
     
     
-    def request_as_json(self, request):
+    def render(self, request, template_args, result_payload={}, result_message="OK", result_status=200, **kwargs):
+        """
+        Render either json or html depending on the request
+        """
+        if self.render_as_json(request):
+            response = self.render_json(request, result_payload, result_message, result_status, **kwargs)
+        else:
+            response = self.render_html(request, template_args, result_message, result_status, **kwargs)
+        
+        return response
+    
+    def render_as_json(self, request):
         """
         Tests wether the view should return json or html rendering
         """
         return os.path.splitext( request.path )[1].lower() == '.json'
+    
         
     def render_html(self, request, template_args, result_message, result_status, **kwargs):
         """
         Final Html rendering witch renders the action view template
-        
-        ## TODO ##
-        
-        If the an action requires a specific template
-        we can introduce a temlates_by_action dict
         """
         template_args['view_name'] = self.view_name
         
@@ -393,7 +368,7 @@ class HttpAPIView(ActionNode, View):
         
     def render_json(self, request, payload, message='ok', status=200, **kwargs):
         """
-        Rendering a json response from message, status and payload
+        Rendering a json response from payload, message and status
         """
         if message is None:
             message = 'OK'
@@ -406,7 +381,14 @@ class HttpAPIView(ActionNode, View):
         
         return HttpResponse(json_string, content_type='application/json')
     
-        
+    
+    def finish(self, request, response, **kwargs):
+        """
+        This final step provides the ability to lastly manage the response
+        It's mainly usefull to attach tracking cookies
+        """
+        return response
+    
     
     def process_doc(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -426,10 +408,10 @@ class HttpAPIView(ActionNode, View):
         
         
         def get_documentation(request, **kwargs):
+            """
+            Return API documentation from action methods docstring and corresponding forms.
+            """
             
-            """
-            Return API documentation from methods docstring.
-            """
             doc_string = '<p><h1 class="documentation-section-title" >' + self.__class__.__name__ + '</h1> '
             doc_string += self.__class__.__version__ + '</p>'
             
