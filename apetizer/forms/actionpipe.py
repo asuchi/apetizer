@@ -13,4 +13,5 @@ class ActionPipeForm(HttpApiForm):
     hidden_fields=tuple()
     
     class Meta:
+        fields = []
         model = AbstractPipeModel

@@ -18,6 +18,7 @@ from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
 
+from apetizer.parsers.json import API_json_parser
 
 
 global _apetizer_api_views_by_name
@@ -25,33 +26,19 @@ _apetizer_api_views_by_name = []
 
 logger = logging.getLogger(__name__)
 
-def API_json_parser(obj):
-    """Default JSON serializer."""
-    import calendar, datetime
-    
-    if isinstance(obj, datetime.date):
-        return str(obj)
-    
-    elif isinstance(obj, datetime.datetime):
-        
-        # TODO
-        # set iso 8601
-        
-        if obj.utcoffset() is not None:
-            obj = obj - obj.utcoffset()
-        millis = int(
-            calendar.timegm(obj.timetuple()) * 1000 +
-            obj.microsecond / 1000
-        )
-        return millis
-    else:
-        raise TypeError("Unserializable object %s of type %s" % (obj, type(obj)))
 
-
-class ActionNode():
+class HttpAPIView(View):
+    """
+    The default base view for all views implementing a json api interface and a documentation
+    """
+    # restrict methods to post and get only
+    apetizer_method_names = ['get', 'post']
     
+    __version__ = "0.3"
+     
     view_name = 'undefined'
     view_title = 'Undefined'
+    view_template = 'website.html'
     
     parent_view = None
     child_views = tuple()
@@ -63,18 +50,6 @@ class ActionNode():
     actions = ['view', 'doc']
     actions_forms = {'view':[]}
     action_templates = {}
-    
-
-class HttpAPIView(ActionNode, View):
-    """
-    The default base view for all views implementing a json api interface and a documentation
-    """
-    # restrict methods to post and get only
-    apetizer_method_names = ['get', 'post']
-    
-    __version__ = "0.3"
-    
-    view_template = 'website.html'
     
     action_forms_autosave = True
     
@@ -108,7 +83,7 @@ class HttpAPIView(ActionNode, View):
         url_regexp += ')+)*[/|(\.json)]*$'
         
         return url_regexp
-        
+    
         
     def get(self, request, **kwargs):
         """

@@ -4,7 +4,7 @@ Created on Feb 9, 2015
 @author: nicolas
 '''
 
-class KVStorage(object):
+class KVStore(object):
     
     data = {}
     

@@ -8,7 +8,6 @@ import copy
 import json
 import uuid
 
-from apetizer.views.httpapi import HttpAPIView
 from django.contrib import messages
 from django.core.cache import cache as action_cache
 from django.core.urlresolvers import reverse
@@ -16,7 +15,8 @@ from django.http import HttpResponseRedirect
 from django.utils.datetime_safe import strftime
 from django.utils.timezone import now
 
-from apetizer.storage.kvstorage import KVStorage
+from apetizer.storages.kvstore import KVStore
+from apetizer.views.httpapi import HttpAPIView
 
 
 __all__ = ['ActionPipeView',]
@@ -46,7 +46,7 @@ class ActionPipeView(HttpAPIView):
     }
     internal_actions = ['start', 'view', 'prev', 'next', 'end', 'doc']
     
-    pipe_table = KVStorage()
+    pipe_table = KVStore()
     '''
     pipe_scenario defines a sequence of field names 
     that has to be filled by the user to complete the pipe action
