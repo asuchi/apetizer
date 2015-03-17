@@ -16,11 +16,13 @@ from django.template.context import RequestContext
 
 from apetizer.forms.front import LoginForm
 from apetizer.views.httpapi import HttpAPIView
+from apetizer.views.actionpipe import ActionPipeView
 
 
-class FrontView(HttpAPIView):
+class FrontView(ActionPipeView):
     
     view_name = "front"
+    pipe_name = "login"
     
     actions = ['home','login']
     
