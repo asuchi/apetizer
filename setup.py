@@ -6,7 +6,6 @@ setup(
     author='Nicolas Danjean',
     author_email='nicolas@biodigitals.com',
     packages=['apetizer',
-              'apetizer.models',
               'apetizer.forms',
               'apetizer.parsers',
               'apetizer.storages',
