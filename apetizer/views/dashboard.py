@@ -29,6 +29,6 @@ class DashboardView(HttpAPIView):
         return HttpAPIView.process_view(self, request, user_profile, input_data, template_args, **kwargs)
     
     def process_logout(self, request, user_profile, input_data, template_args, **kwargs):
-        logout(request.user)
+        logout(request)
         return HttpResponseRedirect('/')
 
