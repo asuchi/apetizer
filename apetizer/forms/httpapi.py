@@ -13,18 +13,16 @@ class HttpApiForm(ModelForm):
     Will automatically add parsley validation.
     """
     is_saved = False
-    def get_instance(self):
-
-        return self.instance
 
     def get_data(self):
-        
+        """
+        Get the form fields data as dict
+        """
         data = {}
         for field_name in self.fields:
             value = self[field_name].value()
-            if value == None:
+            if value is None:
                 value = self._raw_value(field_name)
             data[field_name] = value
 
         return data
-

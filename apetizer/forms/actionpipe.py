@@ -10,8 +10,8 @@ from apetizer.models import AbstractPipeModel
 class ActionPipeForm(HttpApiForm):
     slug = 'slug'
     title = ''
-    hidden_fields=tuple()
-    
+    hidden_fields = tuple()
+
     class Meta:
         fields = []
         model = AbstractPipeModel
