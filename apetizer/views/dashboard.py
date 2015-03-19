@@ -3,7 +3,6 @@ Created on 17 mars 2015
 
 @author: rux
 '''
-
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect

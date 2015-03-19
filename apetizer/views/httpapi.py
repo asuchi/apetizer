@@ -9,6 +9,7 @@ import os.path
 import re
 import traceback
 
+from apetizer.parsers.json import API_json_parser
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
@@ -17,8 +18,6 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
-
-from apetizer.parsers.json import API_json_parser
 
 
 global _apetizer_api_views_by_name
@@ -144,7 +143,7 @@ class HttpAPIView(View):
     def get_context_dict(self, request, **kwargs):
         template_args = {}
         template_args['action'] = kwargs.get('action')
-        
+        template_args['request'] = request
         return template_args
         
         

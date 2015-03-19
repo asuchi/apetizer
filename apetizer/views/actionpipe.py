@@ -22,11 +22,14 @@ from apetizer.views.httpapi import HttpAPIView
 __all__ = ['ActionPipeView',]
 
 
+
 class ActionPipeView(HttpAPIView):
     '''
     base class for an action pipe view 
     '''
     pipe_name = 'undefined'
+    
+    pipe_table = KVStore()
     
     """
     Default action data dict
@@ -134,7 +137,7 @@ class ActionPipeView(HttpAPIView):
             pipe_data['pipe_data'] = json.loads(pipe_data['pipe_data'])
         
         # clean empty fields
-        fields = pipe_data['pipe_data'].keys()
+        fields = list(pipe_data['pipe_data'].keys())
         for field in fields:
             if not pipe_data['pipe_data'][field]:
                 del pipe_data['pipe_data'][field]
@@ -224,7 +227,7 @@ class ActionPipeView(HttpAPIView):
         user_data = self.save_actionpipe_data(request, user_data)
         
         # get to the first field url
-        first_field = self.pipe_scenario.keys()[0]
+        first_field = list(self.pipe_scenario.keys())[0]
         
         # to have the corresponding redirection
         redirect_to = reverse( self.pipe_scenario[first_field].get('class').view_name, kwargs={'action':self.pipe_scenario[first_field].get('action')} )
@@ -468,7 +471,7 @@ class ActionPipeView(HttpAPIView):
             data_dict[k] = pipe_data[k]
         
         # clean empty fields
-        fields = pipe_data['pipe_data'].keys()
+        fields = list(pipe_data['pipe_data'].keys())
         for field in fields:
             if not pipe_data['pipe_data'][field]:
                 del pipe_data['pipe_data'][field]

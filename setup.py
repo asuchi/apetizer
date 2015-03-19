@@ -19,5 +19,6 @@ setup(
     long_description=open('README.md').read(),
     install_requires=[
         "Django >= 1.5",
+        "django-parsley==0.5",
     ],
 )
