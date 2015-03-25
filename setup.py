@@ -1,4 +1,5 @@
 from distutils.core import setup
+import codecs
 
 setup(
     name='Apetizer',
@@ -10,13 +11,13 @@ setup(
               'apetizer.parsers',
               'apetizer.storages',
               'apetizer.views',
-              'apetizer.templatetags', 
+              'apetizer.templatetags',
               'apetizer.test'],
     scripts=[],
     url='http://github.com/biodigitals/apetizer/',
     license='LICENSE.txt',
     description='Django views for http, api and action scenarios.',
-    long_description=open('README.md').read(),
+    long_description=codecs.open('README.md', 'r', encoding='utf-8'),
     install_requires=[
         "Django >= 1.5",
         "django-parsley==0.5",
