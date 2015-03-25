@@ -131,7 +131,7 @@ class ActionPipeView(HttpAPIView):
         pipe_data['user_id'] = user_id
 
         # decompress contained action data
-        if pipe_data['pipe_data']:
+        if isinstance(pipe_data['pipe_data'], str) or isinstance(pipe_data['pipe_data'], unicode):
             pipe_data['pipe_data'] = json.loads(pipe_data['pipe_data'])
 
         # clean empty fields
