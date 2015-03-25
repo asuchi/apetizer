@@ -17,7 +17,7 @@ setup(
     url='http://github.com/biodigitals/apetizer/',
     license='LICENSE.txt',
     description='Django views for http, api and action scenarios.',
-    long_description=codecs.open('README.md', 'r', encoding='utf-8'),
+    long_description=open('readme.txt').read(),
     install_requires=[
         "Django >= 1.5",
         "django-parsley==0.5",
