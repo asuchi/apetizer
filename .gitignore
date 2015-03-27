@@ -1,3 +1,4 @@
 *.pyc
 .project
 .pydevproject
+/Apetizer.egg-info/
