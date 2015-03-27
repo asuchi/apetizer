@@ -126,7 +126,10 @@ class RegisterView(ActionPipeView):
                             if email_user.is_active:
                                 login(request, email_user)
                                 current_user = email_user
-                                return HttpResponseRedirect(reverse('home'))
+                                next_url = request.GET.get('next')
+                                if next_url:
+                                    return HttpResponseRedirect(next_url)
+                                return HttpResponseRedirect('/')
                             else:
                                 # Return a 'disabled account' error message
                                 messages.add_message(request, messages.WARNING,
