@@ -9,6 +9,7 @@ setup(
     packages=['apetizer',
               'apetizer.forms',
               'apetizer.parsers',
+              'apetizer.register',
               'apetizer.storages',
               'apetizer.views',
               'apetizer.templatetags',
