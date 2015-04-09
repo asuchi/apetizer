@@ -76,10 +76,10 @@ class HttpAPIView(View):
             cls_actions.append(a.replace('_', '\_'))
 
         url_regexp = '^'
-        url_regexp += path+'[/|(\.json)]+'
+        url_regexp += path+'(/|(\.json))*'
         url_regexp += '(?P<action>('
         url_regexp += '|'.join(cls_actions + cls.internal_actions)
-        url_regexp += ')+)*[/|(\.json)]*$'
+        url_regexp += ')+)*(/|(\.json))+$'
 
         return url_regexp
 
@@ -327,7 +327,9 @@ class HttpAPIView(View):
         if 'data_view_url' not in template_args:
             try:
                 template_args['data_view_url'] = reverse(self.view_name,
-                                                         kwargs=kwargs)
+                                                         kwargs={'action':'view'})
+                template_args['data_doc_url'] = reverse(self.view_name,
+                                                         kwargs={'action':'doc'})
                 template_args['data_api_url'] = reverse(self.view_name,
                                                         kwargs=kwargs)+'.json'
             except:
