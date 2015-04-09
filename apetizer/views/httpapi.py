@@ -79,7 +79,7 @@ class HttpAPIView(View):
         url_regexp += path+'(/|(\.json))*'
         url_regexp += '(?P<action>('
         url_regexp += '|'.join(cls_actions + cls.internal_actions)
-        url_regexp += ')+)*(/|(\.json))+$'
+        url_regexp += ')+)*(/|(\.json))*$'
 
         return url_regexp
 
