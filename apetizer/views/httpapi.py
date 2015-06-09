@@ -344,11 +344,12 @@ class HttpAPIView(View):
             else:
                 result_status = 500
 
-        return render_to_response(self.action_templates.get(action,
-                                                            self.view_template
-                                                            ),
+        return render_to_response(self.get_template_path(action),
                                   template_args,
                                   context_instance=RequestContext(request))
+
+    def get_template_path(self, action):
+        return self.action_templates.get(action, self.view_template)
 
     def render_json(self, request, payload, message='ok', status=200,
                     **kwargs):
