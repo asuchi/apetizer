@@ -10,7 +10,6 @@ class HttpApiForm(ModelForm):
     """
     Base dashboard form
     All forms in dashboard should inherit from it.
-    Will automatically add parsley validation.
     """
     is_saved = False
 

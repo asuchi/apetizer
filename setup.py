@@ -14,6 +14,7 @@ setup(
               'apetizer.views',
               'apetizer.templatetags',
               'apetizer.test'],
+    package_data={'apetizer': ['apetizer/templates/*']},
     scripts=[],
     url='http://github.com/biodigitals/apetizer/',
     license='LICENSE.txt',
@@ -21,6 +22,5 @@ setup(
     long_description=open('readme.txt').read(),
     install_requires=[
         "Django >= 1.5",
-        "django-parsley==0.5",
     ],
 )
