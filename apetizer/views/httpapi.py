@@ -3,13 +3,13 @@ Created on 24 oct. 2013
 
 @author: rux
 '''
+import inspect
 import json
 import logging
 import os.path
 import re
 import traceback
 
-from apetizer.parsers.json import API_json_parser
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
@@ -18,6 +18,8 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
+
+from apetizer.parsers.json import API_json_parser
 
 
 global _apetizer_api_views_by_name
@@ -47,15 +49,19 @@ class HttpAPIView(View):
     internal_actions = ['view', 'doc']
 
     default_action = 'view'
-
+    
     actions = ['view', 'doc']
     actions_forms = {'view': []}
     action_templates = {}
-
+    
+    class_actions = ['view', 'doc']
+    class_actions_forms = {'view': []}
+    class_action_templates = {}
+    
     action_forms_autosave = True
 
     json_parser = API_json_parser
-
+    
     def __init__(self, **kwargs):
         """
         Constructor. Called in the URLconf; can contain helpful extra
@@ -65,13 +71,28 @@ class HttpAPIView(View):
         # register view_name over a global variable
         _apetizer_api_views_by_name.append(self.view_name)
         super(HttpAPIView, self).__init__(**kwargs)
+        self.__class__.get_actions()
 
+    @classmethod
+    def get_actions(self):
+        class_stack = inspect.getmro(self)[::-1]
+        for base_class in class_stack:
+            if HttpAPIView in inspect.getmro(base_class):
+                for action in base_class.class_actions:
+                    if not action in self.actions:
+                        self.actions.append(action)
+                for action in base_class.class_actions_forms:
+                    self.actions_forms[action] = base_class.class_actions_forms[action]
+                for action in base_class.class_action_templates:
+                    self.action_templates[action] = base_class.class_action_templates[action]
+        return self.actions
+    
     @classmethod
     def get_url_regexp(cls, path=''):
         """
         Returns a multi-format and multi-action url regexp string for this view
         """
-        cls_actions = []
+        cls_actions = cls.get_actions()
         for a in cls.actions:
             cls_actions.append(a.replace('_', '\_'))
 
@@ -397,7 +418,7 @@ class HttpAPIView(View):
             Return API documentation from action
             methods docstring and corresponding forms.
             """
-
+            
             doc_string = '<p><h1 class="documentation-section-title" >' + self.__class__.__name__ + '</h1>'
 
             doc_string += self.__class__.__version__ + '</p>'

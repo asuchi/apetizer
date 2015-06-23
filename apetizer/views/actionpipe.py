@@ -27,7 +27,6 @@ class ActionPipeView(HttpAPIView):
     base class for an action pipe view
     '''
     pipe_name = 'undefined'
-
     pipe_table = KVStore()
 
     """
@@ -46,8 +45,9 @@ class ActionPipeView(HttpAPIView):
         'pipe_data': json.dumps({}),
 
     }
-    internal_actions = ['start', 'view', 'prev', 'next', 'end', 'doc']
-
+    
+    class_actions = ['start', 'view', 'prev', 'next', 'end']
+    
     pipe_table = KVStore()
 
     '''
@@ -58,7 +58,7 @@ class ActionPipeView(HttpAPIView):
     scenario will run until all flaged data elements are filled with something
     '''
     def __init__(self, **kwargs):
-        HttpAPIView.__init__(self, **kwargs)
+        super(ActionPipeView, self).__init__(**kwargs)
         self.pipe_scenario = OrderedDict([('pipe-started',
                                            {'class': self.__class__,
                                             'action': 'start'}
@@ -175,6 +175,7 @@ class ActionPipeView(HttpAPIView):
 
         return reverse(next_view.view_name, kwargs={'action': next_action})
 
+    
     def start_action_pipe(self, request):
         '''
         this method manages start of the pipe
@@ -182,7 +183,7 @@ class ActionPipeView(HttpAPIView):
         '''
         # override this method to manage start action custom setup
         return True
-
+    
     def process_start(self, request, user_profile, input_data, template_args,
                       **kwargs):
         '''
@@ -241,15 +242,7 @@ class ActionPipeView(HttpAPIView):
 
         # flush the request
         return self.finish(request, response, user_data)
-
-    def process_view(self, request, user_profile, input_data, template_args, **kwargs):
-        '''
-        override this method to use same request processing for GET and POST
-        '''
-        user_data = self.get_actionpipe_data(request)
-
-        return self.render(request, template_args, user_data, **kwargs)
-
+    
     def process_next(self, request, user_profile, input_data, template_args, **kwargs):
         '''
         call this method to be redirected to the next pipe view
@@ -295,7 +288,7 @@ class ActionPipeView(HttpAPIView):
 
         # execute the finish action hook
         response = self.finish_action_pipe(request)
-
+        
         # clean action data if we are finishing the actual pipe
         if user_data['pipe'] == self.pipe_name:
             # markup end action time

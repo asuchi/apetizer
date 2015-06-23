@@ -38,11 +38,12 @@ class LoginInfosForm(ActionPipeForm):
     """ Basic form to collect sigining up user's login infos """
     slug = 'login-form'
     title = _("Your login informations")
-
+    
     email = fields.EmailField(label=_(u'Email'),
                               widget=fields.TextInput(attrs={'placeholder':
                                                              _(u'your@email.com')}
                                                       ))
+    
     password = fields.CharField(label=_(u'Password'),
                                 widget=widgets.PasswordInput)
 
@@ -51,7 +52,7 @@ class RegisterInfosForm(ActionPipeForm):
     """ Basic registration form """
     slug = 'personnal-infos-form'
     title = _("Your contact informations")
-
+    
     first_name = fields.CharField(label=_(u'First name'),
                                   widget=fields.TextInput(attrs={'placeholder':
                                                                  _(u'First name')
@@ -62,24 +63,14 @@ class RegisterInfosForm(ActionPipeForm):
                                                                 _(u'Last name')}
                                                          ))
 
-    terms_agreed_p = fields.BooleanField(label=_('Accepts terms and conditions'),
-                                         required=True, initial=True,
-                                         widget=HiddenInput())
-
-    hidden_fields = ['terms_agreed_p', ]
-
 
 class RegisterCompleteForm(ActionPipeForm):
     """ Basic form when asking user to complete his profile """
     slug = 'personnal-infos-form'
-
-    first_name = fields.CharField(label=_(u'First name'),
-                                  widget=fields.TextInput(attrs={'placeholder':
-                                                                _(u'First name')}
-                                                          ))
-    last_name = fields.CharField(label=_(u'Last name'),
-                                 help_text=_(u"Only your last name initial will be public"),
-                                 widget=fields.TextInput(attrs={'placeholder':
-                                                                _(u'Last name')}
-                                                         ))
+    
+    terms_agreed_p = fields.BooleanField(label=_('Accepts terms and conditions'),
+                                         required=True, initial=True,
+                                         )
+    
+    #hidden_fields = ['terms_agreed_p', ]
     
