@@ -41,7 +41,7 @@ class HttpAPIView(View):
 
     view_name = 'undefined'
     view_title = 'Undefined'
-    view_template = 'website.html'
+    view_template = 'base.html'
 
     parent_view = None
     child_views = tuple()
@@ -49,10 +49,6 @@ class HttpAPIView(View):
     internal_actions = ['view', 'doc']
 
     default_action = 'view'
-    
-    actions = ['view', 'doc']
-    actions_forms = {'view': []}
-    action_templates = {}
     
     class_actions = ['view', 'doc']
     class_actions_forms = {'view': []}
@@ -69,39 +65,51 @@ class HttpAPIView(View):
         """
         # initialise the default view behavior here
         # register view_name over a global variable
-        _apetizer_api_views_by_name.append(self.view_name)
         super(HttpAPIView, self).__init__(**kwargs)
-        self.__class__.get_actions()
+        _apetizer_api_views_by_name.append(self.view_name)
+        #self.__class__.get_actions()
 
     @classmethod
-    def get_actions(self):
-        class_stack = inspect.getmro(self)[::-1]
+    def get_actions(cls):
+        class_stack = inspect.getmro(cls)[::-1]
+        
+        cls.actions = ['view', 'doc']
+        cls.actions_forms = {'view': []}
+        cls.action_templates = {}
+        
         for base_class in class_stack:
-            if HttpAPIView in inspect.getmro(base_class):
-                for action in base_class.class_actions:
-                    if not action in self.actions:
-                        self.actions.append(action)
-                for action in base_class.class_actions_forms:
-                    self.actions_forms[action] = base_class.class_actions_forms[action]
-                for action in base_class.class_action_templates:
-                    self.action_templates[action] = base_class.class_action_templates[action]
-        return self.actions
+            check_classes = inspect.getmro(base_class)
+            if base_class != cls and HttpAPIView in check_classes:
+                if 'class_actions' in base_class.__dict__:
+                    for action in base_class.class_actions:
+                        if action not in cls.actions:
+                            cls.actions.append(action)
+                if 'class_actions_forms' in base_class.__dict__:
+                    for action in base_class.class_actions_forms:
+                        cls.actions_forms[action] = base_class.class_actions_forms[action]
+                if 'class_action_templates' in base_class.__dict__:
+                    for action in base_class.class_action_templates:
+                        cls.action_templates[action] = base_class.class_action_templates[action]
+            else:
+                print base_class
+        print 'Checked all ...'
+        
+        return cls.actions
     
     @classmethod
     def get_url_regexp(cls, path=''):
         """
         Returns a multi-format and multi-action url regexp string for this view
         """
-        cls_actions = cls.get_actions()
+        cls.get_actions()
+        cls_actions = []
         for a in cls.actions:
             cls_actions.append(a.replace('_', '\_'))
-
         url_regexp = '^'
         url_regexp += path+'(/|(\.json))*'
         url_regexp += '(?P<action>('
         url_regexp += '|'.join(cls_actions + cls.internal_actions)
         url_regexp += ')+)*(/|(\.json))*$'
-
         return url_regexp
 
     def get(self, request, **kwargs):
