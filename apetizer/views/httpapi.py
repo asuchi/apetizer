@@ -90,10 +90,6 @@ class HttpAPIView(View):
                 if 'class_action_templates' in base_class.__dict__:
                     for action in base_class.class_action_templates:
                         cls.action_templates[action] = base_class.class_action_templates[action]
-            else:
-                print base_class
-        print 'Checked all ...'
-        
         return cls.actions
     
     @classmethod
