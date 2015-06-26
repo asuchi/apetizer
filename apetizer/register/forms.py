@@ -10,6 +10,20 @@ from django.utils.translation import ugettext_lazy as _
 from apetizer.forms.actionpipe import ActionPipeForm
 
 
+class LoginInfosForm(ActionPipeForm):
+    """ Basic form to collect sigining up user's login infos """
+    slug = 'login-form'
+    title = _("Your login informations")
+    
+    email = fields.EmailField(label=_(u'Email'),
+                              widget=fields.TextInput(attrs={'placeholder':
+                                                             _(u'your@email.com')}
+                                                      ))
+    
+    password = fields.CharField(label=_(u'Password'),
+                                widget=widgets.PasswordInput)
+
+
 class RegisterOrLoginForm(ActionPipeForm):
     """ Basic form to get user email and check if we know him """
     slug = 'register-login-form'
@@ -34,23 +48,11 @@ class RegisterLoginForm(ActionPipeForm):
                                 widget=widgets.PasswordInput)
 
 
-class LoginInfosForm(ActionPipeForm):
-    """ Basic form to collect sigining up user's login infos """
-    slug = 'login-form'
-    title = _("Your login informations")
-    
-    email = fields.EmailField(label=_(u'Email'),
-                              widget=fields.TextInput(attrs={'placeholder':
-                                                             _(u'your@email.com')}
-                                                      ))
-    
-    password = fields.CharField(label=_(u'Password'),
-                                widget=widgets.PasswordInput)
 
 
 class RegisterInfosForm(ActionPipeForm):
     """ Basic registration form """
-    slug = 'personnal-infos-form'
+    slug = 'register-infos-form'
     title = _("Your contact informations")
     
     first_name = fields.CharField(label=_(u'First name'),
@@ -63,14 +65,18 @@ class RegisterInfosForm(ActionPipeForm):
                                                                 _(u'Last name')}
                                                          ))
 
+class RegisterAgreeForm(ActionPipeForm):
+    slug = 'register-agree-form'
+    title = _("Agree terms and conditions")
+    
+    terms_agreed = fields.BooleanField(label=_('Accepts terms and conditions'),
+                                         required=True, initial=True,
+                                         )
+
 
 class RegisterCompleteForm(ActionPipeForm):
     """ Basic form when asking user to complete his profile """
-    slug = 'personnal-infos-form'
-    
-    terms_agreed_p = fields.BooleanField(label=_('Accepts terms and conditions'),
-                                         required=True, initial=True,
-                                         )
-    
+    slug = 'register-complete-form'
+        
     #hidden_fields = ['terms_agreed_p', ]
     

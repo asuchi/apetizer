@@ -21,12 +21,13 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from apetizer.register.forms import LoginInfosForm, RegisterInfosForm, \
-    RegisterCompleteForm, RegisterOrLoginForm, RegisterLoginForm
+    RegisterCompleteForm, RegisterOrLoginForm, RegisterLoginForm, \
+    RegisterAgreeForm
 from apetizer.views.actionpipe import ActionPipeView
 
 
 class RegisterView(ActionPipeView):
-
+    
     pipe_name = 'register'
     view_name = 'register'
 
@@ -35,27 +36,32 @@ class RegisterView(ActionPipeView):
     class_actions = ['lost', 'login', 'logout', 'infos', 'agree', 'complete']
 
     class_actions_forms = {'view': (LoginInfosForm,),
-                           'login': (LoginInfosForm,),
+                           'login': (RegisterOrLoginForm,),
                            'infos': (RegisterInfosForm,),
-                           'complete': (LoginInfosForm, RegisterInfosForm, RegisterCompleteForm,)
+                           'agree': (RegisterAgreeForm,),
+                           'complete': (RegisterCompleteForm,)
                            }
 
     class_action_templates = {'login': 'register/login.html',
+                              'agree': 'register/infos.html',
                               'infos': 'register/infos.html',
                               'complete': 'register/complete.html',
                               }
 
+    success_url = '/'
+
     def __init__(self, **kwargs):
         super(RegisterView, self).__init__(**kwargs)
-        self.pipe_scenario = OrderedDict([('first_name',
+        self.pipe_scenario = OrderedDict([
+                                          ('email',
+                                           {'class': self.__class__,
+                                            'action': 'login'}),
+                                          ('first_name',
                                            {'class': self.__class__,
                                             'action': 'infos'}),
                                           ('last_name',
                                            {'class': self.__class__,
                                             'action': 'infos'}),
-                                          ('email',
-                                           {'class': self.__class__,
-                                            'action': 'login'}),
                                           ('terms_agreed',
                                            {'class': self.__class__,
                                             'action': 'agree'}),
@@ -66,13 +72,11 @@ class RegisterView(ActionPipeView):
 
     def process_agree(self, request, user_profile, input_data,
                       template_args, **kwargs):
-        return ActionPipeView.process_view(self, request, user_profile,
-                                           input_data, template_args, **kwargs)
+        return self.process_infos(request, user_profile, input_data, template_args, **kwargs)
 
     def process_lost(self, request, user_profile, input_data,
                      template_args, **kwargs):
-        return ActionPipeView.process_view(self, request, user_profile,
-                                           input_data, template_args, **kwargs)
+        return self.render(request, template_args, **kwargs)
 
     def process_login(self, request, user_profile,
                       input_data, template_args, **kwargs):
@@ -179,7 +183,7 @@ class RegisterView(ActionPipeView):
                        **kwargs):
         logout(request)
         return HttpResponseRedirect(reverse('home'))
-
+    
     """
     Basic view for owner registration.
     This should only be used if user is logged out.
@@ -205,7 +209,7 @@ class RegisterView(ActionPipeView):
 
         # overwrite paswword with encrypted one
         for k in request.POST.keys():
-            if k == 'Zpassword':
+            if k == 'password':
                 # encrypt password as soon as we get it for security
                 action_data['pipe_data'][k] = make_password(request.POST[k])
 
@@ -247,9 +251,13 @@ class RegisterView(ActionPipeView):
                                                         kwargs={'action': 'login'}))
         if all_forms_valid:
             self.save_actionpipe_data(request, action_data)
+
         next_url = self.get_next_url(action_data)
-        if next_url == request.path or request.method.lower() == 'GET'.lower() \
-                or all_forms_valid is False:
+        
+        if next_url == request.path \
+            or request.method.lower() == 'GET'.lower() \
+            or all_forms_valid is False:
+
             if settings.DEBUG:
                 debug_data = {}
                 for key in action_data:
@@ -318,7 +326,11 @@ class RegisterView(ActionPipeView):
         else:
             response = HttpResponseRedirect(next_url)
         return response
-
+    
+    def process_end(self, request, 
+        user_profile, input_data, template_args, **kwargs):
+        return ActionPipeView.process_end(self, request, user_profile, input_data, template_args, **kwargs)
+    
     def finish_action_pipe(self, request):
 
         action_data = self.get_actionpipe_data(request)
@@ -327,7 +339,7 @@ class RegisterView(ActionPipeView):
         profile_data = action_data['pipe_data']
 
         if user.is_authenticated():
-
+            
             # update pipe data with user data
             action_data['pipe_data']['first_name'] = user.first_name
             action_data['pipe_data']['last_name'] = user.last_name
@@ -371,7 +383,7 @@ class RegisterView(ActionPipeView):
         
         # continue actionpipe
         if action_data['pipe'] == self.pipe_name:
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(self.success_url)
         else:
             return HttpResponseRedirect(self.get_next_url(action_data))
 

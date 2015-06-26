@@ -354,7 +354,8 @@ class ActionPipeView(HttpAPIView):
         all_forms_valid = True
         if request.method == 'POST':
             for f in forms:
-                if not f.is_valid():
+                is_valid_form = f.is_valid()
+                if not is_valid_form:
                     if len(f.errors) or len(f.non_field_errors()):
                         # check error field are not in hidden/ignored fields
                         # and gether their errors as request messages
