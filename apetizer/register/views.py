@@ -10,7 +10,7 @@ import string
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -27,7 +27,9 @@ from apetizer.views.actionpipe import ActionPipeView
 
 
 class RegisterView(ActionPipeView):
-    
+    """
+    Login and registration management class
+    """
     pipe_name = 'register'
     view_name = 'register'
 
@@ -35,9 +37,9 @@ class RegisterView(ActionPipeView):
 
     class_actions = ['lost', 'login', 'logout', 'infos', 'agree', 'complete']
 
-    class_actions_forms = {'view': (LoginInfosForm,),
+    class_actions_forms = {'view': tuple(),
                            'login': (RegisterOrLoginForm,),
-                           'infos': (RegisterInfosForm,),
+                           'infos': (RegisterInfosForm, LoginInfosForm),
                            'agree': (RegisterAgreeForm,),
                            'complete': (RegisterCompleteForm,)
                            }
@@ -52,14 +54,16 @@ class RegisterView(ActionPipeView):
 
     def __init__(self, **kwargs):
         super(RegisterView, self).__init__(**kwargs)
-        self.pipe_scenario = OrderedDict([
-                                          ('email',
-                                           {'class': self.__class__,
-                                            'action': 'login'}),
-                                          ('first_name',
+        self.pipe_scenario = OrderedDict([('first_name',
                                            {'class': self.__class__,
                                             'action': 'infos'}),
                                           ('last_name',
+                                           {'class': self.__class__,
+                                            'action': 'infos'}),
+                                          ('email',
+                                           {'class': self.__class__,
+                                            'action': 'infos'}),
+                                          ('password',
                                            {'class': self.__class__,
                                             'action': 'infos'}),
                                           ('terms_agreed',
@@ -70,17 +74,11 @@ class RegisterView(ActionPipeView):
                                             'action': 'end'}),
                                           ])
 
-    def process_agree(self, request, user_profile, input_data,
-                      template_args, **kwargs):
-        return self.process_infos(request, user_profile, input_data, template_args, **kwargs)
-
-    def process_lost(self, request, user_profile, input_data,
-                     template_args, **kwargs):
-        return self.render(request, template_args, **kwargs)
-
+    """
+    Login action
+    """
     def process_login(self, request, user_profile,
                       input_data, template_args, **kwargs):
-        current_user = request.user
         action_data = self.get_actionpipe_data(request)
 
         if 'pipe_data' not in action_data:
@@ -102,7 +100,7 @@ class RegisterView(ActionPipeView):
         template_args['current_pipe'] = action_data['pipe']
 
         # if user is not logged in propose him to login or sign up
-        if not current_user.is_authenticated():
+        if not request.user.is_authenticated():
 
             if 'email' in action_data['pipe_data'] \
                     and action_data['pipe_data']['email']:
@@ -183,29 +181,36 @@ class RegisterView(ActionPipeView):
                        **kwargs):
         logout(request)
         return HttpResponseRedirect(reverse('home'))
-    
+
+    def process_lost(self, request, user_profile, input_data,
+                     template_args, **kwargs):
+        return self.render(request, template_args, **kwargs)
+
+    def get_forms_instances(self, action):
+        return tuple()
+
     """
     Basic view for owner registration.
     This should only be used if user is logged out.
     If user is logged in,
     actionpipe should take him to RegisterProfileCompleteView
     """
-    def process_infos(self, request, user_profile, input_data, template_args,
-                      **kwargs):
-
+    def manage_pipe(self, request, user_profile, input_data, template_args, **kwargs):
+        
+        action = kwargs.get('action', self.default_action)
+        
         action_data = self.get_actionpipe_data(request)
-
+        
         # check if user has logged in inbetween
-        #if request.user.is_authenticated():
-        #    return HttpResponseRedirect(reverse(self.view_name,
-        #                                        kwargs={'action': 'complete'}))
+        if request.user.is_authenticated():
+            return HttpResponseRedirect(reverse(self.view_name, kwargs={'action': 'view'}))
 
         if 'pipe_data' not in action_data:
             action_data['pipe_data'] = {}
 
         # filter posted data and update
         action_data['pipe_data'] = self.update_data_with_post(request, action_data['pipe_data'],
-                                                              self.get_action_forms(kwargs.get('action', 'infos')))
+                                                              self.get_action_forms(action))
 
         # overwrite paswword with encrypted one
         for k in request.POST.keys():
@@ -216,9 +221,9 @@ class RegisterView(ActionPipeView):
         action_data = self.update_actionpipe_data(request, action_data)
 
         # fill forms
-        template_args['action_forms'] = self.get_validated_forms(tuple(),
+        template_args['action_forms'] = self.get_validated_forms(self.get_forms_instances(action),
                                                                  action_data['pipe_data'],
-                                                                 kwargs.get('action', self.default_action),
+                                                                 action,
                                                                  save_forms=False
                                                                  )
 
@@ -238,8 +243,7 @@ class RegisterView(ActionPipeView):
 
                 # we redirect to the user login
                 if request.user.is_authenticated():
-                    return HttpResponseRedirect(reverse(self.view_name, 
-                                                        kwargs={'action': 'complete'}))
+                    return HttpResponseRedirect(reverse(self.view_name, kwargs={'action': 'view'}))
                 else:
                     # set message to the user that we found it's email
                     messages.add_message(request, messages.SUCCESS, 
@@ -247,16 +251,15 @@ class RegisterView(ActionPipeView):
                     # this occurs when the users changes it's email to a know one on the profil info page
                     # so we save the data
                     self.save_actionpipe_data(request, action_data)
-                    return HttpResponseRedirect(reverse(self.view_name, 
-                                                        kwargs={'action': 'login'}))
+                    return HttpResponseRedirect(reverse(self.view_name, kwargs={'action': 'login'}))
         if all_forms_valid:
             self.save_actionpipe_data(request, action_data)
 
         next_url = self.get_next_url(action_data)
-        
+
         if next_url == request.path \
             or request.method.lower() == 'GET'.lower() \
-            or all_forms_valid is False:
+            or not all_forms_valid:
 
             if settings.DEBUG:
                 debug_data = {}
@@ -278,9 +281,17 @@ class RegisterView(ActionPipeView):
                                        user_data=action_data, **kwargs)
         else:
             response = HttpResponseRedirect(next_url)
+
         return response
-
-
+    
+    def process_infos(self, request, user_profile, input_data,
+                      template_args, **kwargs):
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    def process_agree(self, request, user_profile, input_data,
+                      template_args, **kwargs):
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
     """
     View where we ask a logged in user to complete his profile info 
     in order to do the action he is trying to do.
@@ -326,11 +337,7 @@ class RegisterView(ActionPipeView):
         else:
             response = HttpResponseRedirect(next_url)
         return response
-    
-    def process_end(self, request, 
-        user_profile, input_data, template_args, **kwargs):
-        return ActionPipeView.process_end(self, request, user_profile, input_data, template_args, **kwargs)
-    
+
     def finish_action_pipe(self, request):
 
         action_data = self.get_actionpipe_data(request)
@@ -339,7 +346,6 @@ class RegisterView(ActionPipeView):
         profile_data = action_data['pipe_data']
 
         if user.is_authenticated():
-            
             # update pipe data with user data
             action_data['pipe_data']['first_name'] = user.first_name
             action_data['pipe_data']['last_name'] = user.last_name
@@ -362,12 +368,12 @@ class RegisterView(ActionPipeView):
             first_name = profile_data['first_name']
             username = slugify(first_name).replace('-', '')[:25]
             username += '-' + ''.join(random.choice(string.ascii_uppercase+string.digits) for _ in range(4))
-            
-            User.objects.create_user(username,
+
+            get_user_model().objects.create_user(username,
                                      profile_data['email'],
                                      profile_data['password']
                                      )
-    
+
             new_user = authenticate(username=username,
                                     password=profile_data['password'])
             login(request, new_user)
@@ -377,13 +383,13 @@ class RegisterView(ActionPipeView):
             action_data['pipe_data']['user_registered'] = True
         else:
             action_data['pipe_data']['user_registered'] = False
-        
+
         action_data = self.update_actionpipe_data(request, action_data)
         action_data = self.save_actionpipe_data(request, action_data)
-        
+
         # continue actionpipe
         if action_data['pipe'] == self.pipe_name:
-            return HttpResponseRedirect(self.success_url)
+            return HttpResponseRedirect(action_data['origin_url'])
         else:
             return HttpResponseRedirect(self.get_next_url(action_data))
 

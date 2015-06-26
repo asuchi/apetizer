@@ -154,7 +154,7 @@ class ActionPipeView(HttpAPIView):
         returns the next view to display
         '''
         # correct user_data to the view default action pipe if missing
-        if 'pipe' not in user_data:
+        if 'pipe' not in user_data or user_data['pipe'] == 'undefined':
             user_data['pipe'] = self.pipe_name
 
         fields = self.pipe_scenario.keys()
@@ -163,8 +163,10 @@ class ActionPipeView(HttpAPIView):
 
         for field in fields:
             if field not in user_data['pipe_data']:
+                print 'Stop at field:'+field
                 next_view = self.pipe_scenario[field].get('class')
                 next_action = self.pipe_scenario[field].get('action')
+                print 'Next is '+next_action
                 break
 
         if next_view is None:
@@ -354,8 +356,12 @@ class ActionPipeView(HttpAPIView):
         all_forms_valid = True
         if request.method == 'POST':
             for f in forms:
+                #f.full_clean()
                 is_valid_form = f.is_valid()
                 if not is_valid_form:
+                    #all_forms_valid = False
+                    print f.errors
+                    print f.non_field_errors()
                     if len(f.errors) or len(f.non_field_errors()):
                         # check error field are not in hidden/ignored fields
                         # and gether their errors as request messages

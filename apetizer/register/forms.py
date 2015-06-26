@@ -4,7 +4,6 @@ Created on 3 fevr. 2015
 @author: nicolas
 '''
 from django.forms import fields, widgets
-from django.forms.widgets import HiddenInput
 from django.utils.translation import ugettext_lazy as _
 
 from apetizer.forms.actionpipe import ActionPipeForm
@@ -54,7 +53,7 @@ class RegisterInfosForm(ActionPipeForm):
     """ Basic registration form """
     slug = 'register-infos-form'
     title = _("Your contact informations")
-    
+
     first_name = fields.CharField(label=_(u'First name'),
                                   widget=fields.TextInput(attrs={'placeholder':
                                                                  _(u'First name')
@@ -68,7 +67,7 @@ class RegisterInfosForm(ActionPipeForm):
 class RegisterAgreeForm(ActionPipeForm):
     slug = 'register-agree-form'
     title = _("Agree terms and conditions")
-    
+
     terms_agreed = fields.BooleanField(label=_('Accepts terms and conditions'),
                                          required=True, initial=True,
                                          )
@@ -77,6 +76,5 @@ class RegisterAgreeForm(ActionPipeForm):
 class RegisterCompleteForm(ActionPipeForm):
     """ Basic form when asking user to complete his profile """
     slug = 'register-complete-form'
-        
-    #hidden_fields = ['terms_agreed_p', ]
-    
+
+
