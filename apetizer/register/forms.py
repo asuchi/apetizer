@@ -72,9 +72,3 @@ class RegisterAgreeForm(ActionPipeForm):
                                          required=True, initial=True,
                                          )
 
-
-class RegisterCompleteForm(ActionPipeForm):
-    """ Basic form when asking user to complete his profile """
-    slug = 'register-complete-form'
-
-

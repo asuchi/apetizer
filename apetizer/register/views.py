@@ -21,8 +21,8 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from apetizer.register.forms import LoginInfosForm, RegisterInfosForm, \
-    RegisterCompleteForm, RegisterOrLoginForm, RegisterLoginForm, \
-    RegisterAgreeForm
+    RegisterAgreeForm, RegisterOrLoginForm, RegisterLoginForm
+    
 from apetizer.views.actionpipe import ActionPipeView
 
 
@@ -35,18 +35,17 @@ class RegisterView(ActionPipeView):
 
     view_template = 'register/view.html'
 
-    class_actions = ['lost', 'login', 'logout', 'infos', 'agree', 'complete']
+    class_actions = ['lost', 'login', 'logout', 'register', 'agree', 'complete']
 
     class_actions_forms = {'view': tuple(),
                            'login': (RegisterOrLoginForm,),
-                           'infos': (RegisterInfosForm, LoginInfosForm),
+                           'register': (RegisterInfosForm, LoginInfosForm),
                            'agree': (RegisterAgreeForm,),
-                           'complete': (RegisterCompleteForm,)
                            }
 
     class_action_templates = {'login': 'register/login.html',
-                              'agree': 'register/infos.html',
-                              'infos': 'register/infos.html',
+                              'agree': 'register/agree.html',
+                              'register': 'register/register.html',
                               'complete': 'register/complete.html',
                               }
 
@@ -56,16 +55,16 @@ class RegisterView(ActionPipeView):
         super(RegisterView, self).__init__(**kwargs)
         self.pipe_scenario = OrderedDict([('first_name',
                                            {'class': self.__class__,
-                                            'action': 'infos'}),
+                                            'action': 'register'}),
                                           ('last_name',
                                            {'class': self.__class__,
-                                            'action': 'infos'}),
+                                            'action': 'register'}),
                                           ('email',
                                            {'class': self.__class__,
-                                            'action': 'infos'}),
+                                            'action': 'register'}),
                                           ('password',
                                            {'class': self.__class__,
-                                            'action': 'infos'}),
+                                            'action': 'register'}),
                                           ('terms_agreed',
                                            {'class': self.__class__,
                                             'action': 'agree'}),
@@ -145,7 +144,7 @@ class RegisterView(ActionPipeView):
                     # we continue straight to subscribe
                     response = HttpResponseRedirect(reverse(self.view_name,
                                                             kwargs={'action':
-                                                                    'infos'}
+                                                                    'register'}
                                                             )
                                                     )
 
@@ -284,7 +283,7 @@ class RegisterView(ActionPipeView):
 
         return response
     
-    def process_infos(self, request, user_profile, input_data,
+    def process_register(self, request, user_profile, input_data,
                       template_args, **kwargs):
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
     

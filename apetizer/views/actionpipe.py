@@ -163,10 +163,8 @@ class ActionPipeView(HttpAPIView):
 
         for field in fields:
             if field not in user_data['pipe_data']:
-                print 'Stop at field:'+field
                 next_view = self.pipe_scenario[field].get('class')
                 next_action = self.pipe_scenario[field].get('action')
-                print 'Next is '+next_action
                 break
 
         if next_view is None:
@@ -174,7 +172,7 @@ class ActionPipeView(HttpAPIView):
             # redirect to last view of the actionpipe
             next_view = self.pipe_scenario[field].get('class')
             next_action = self.pipe_scenario[field].get('action')
-
+        
         return reverse(next_view.view_name, kwargs={'action': next_action})
 
     
@@ -278,16 +276,24 @@ class ActionPipeView(HttpAPIView):
         but in the get method
         '''
         # test if session exists
-        session_key = request.session.session_key
-        if session_key is None:
-            # handle a redirect to the current page in order to have the session inited
-            return HttpResponseRedirect(reverse(self.view_name,
-                                                kwargs={'action': kwargs.get('action',self.default_action)}
-                                                ))
-
+        #session_key = request.session.session_key
+        #if session_key is None:
+            # handle a redirect to the current page 
+            # in order to have the session inited
+            # this happens when landing
+        #    return HttpResponseRedirect(reverse(self.view_name,
+        #                                        kwargs={'action': kwargs.get('action',self.default_action)}
+        #                                        ))
+        
         #
         user_data = self.get_actionpipe_data(request)
-
+        
+        # figure out if next_url is current
+        next_url = self.get_next_url(user_data)
+        print next_url
+        if next_url != request.path:
+            return HttpResponseRedirect(next_url)
+        
         # execute the finish action hook
         response = self.finish_action_pipe(request)
         
