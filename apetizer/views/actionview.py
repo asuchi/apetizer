@@ -27,6 +27,7 @@ _apetizer_api_views_by_name = []
 
 logger = logging.getLogger(__name__)
 
+#TODO extract action logic only in this view
 
 class ActionView(View):
     """

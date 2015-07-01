@@ -79,7 +79,7 @@ class RegisterView(ActionPipeView):
     def process_login(self, request, user_profile,
                       input_data, template_args, **kwargs):
         action_data = self.get_actionpipe_data(request)
-
+        current_user = request.user
         if 'pipe_data' not in action_data:
             action_data['pipe_data'] = {}
 
