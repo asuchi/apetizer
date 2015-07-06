@@ -3,19 +3,20 @@ Created on 3 fevr. 2015
 
 @author: nicolas
 '''
-from django.forms import fields, widgets
+from django.forms import fields, widgets, Textarea, TextInput
 from django.utils.translation import ugettext_lazy as _
 
 from apetizer.forms.actionpipe import ActionPipeForm
+from django.forms.widgets import HiddenInput
 
 
-class LoginInfosForm(ActionPipeForm):
+class LoginForm(ActionPipeForm):
     """ Basic form to collect sigining up user's login infos """
     slug = 'login-form'
     title = _("Your login informations")
     
     email = fields.EmailField(label=_(u'Email'),
-                              widget=fields.TextInput(attrs={'placeholder':
+                              widget=TextInput(attrs={'placeholder':
                                                              _(u'your@email.com')}
                                                       ))
     
@@ -28,7 +29,7 @@ class RegisterOrLoginForm(ActionPipeForm):
     slug = 'register-login-form'
 
     email = fields.EmailField(label=_('Your email address'),
-                              widget=fields.TextInput(attrs={'placeholder':
+                              widget=TextInput(attrs={'placeholder':
                                                              _(u'your@email.com')}
                                                       ))
 
@@ -38,7 +39,7 @@ class RegisterLoginForm(ActionPipeForm):
     slug = 'register-login-form'
 
     email = fields.EmailField(label=_('Your email address'),
-                              widget=fields.TextInput(attrs={'placeholder':
+                              widget=TextInput(attrs={'placeholder':
                                                              _(u'your@email.com')
                                                              }
                                                       ))
@@ -49,20 +50,22 @@ class RegisterLoginForm(ActionPipeForm):
 
 
 
-class RegisterInfosForm(ActionPipeForm):
+class RegisterForm(ActionPipeForm):
     """ Basic registration form """
     slug = 'register-infos-form'
     title = _("Your contact informations")
 
     first_name = fields.CharField(label=_(u'First name'),
-                                  widget=fields.TextInput(attrs={'placeholder':
+                                  widget=TextInput(attrs={'placeholder':
                                                                  _(u'First name')
                                                                  }
                                                           ))
     last_name = fields.CharField(label=_(u'Last name'),
-                                 widget=fields.TextInput(attrs={'placeholder':
+                                 widget=TextInput(attrs={'placeholder':
                                                                 _(u'Last name')}
                                                          ))
+
+
 
 class RegisterAgreeForm(ActionPipeForm):
     slug = 'register-agree-form'
@@ -71,4 +74,36 @@ class RegisterAgreeForm(ActionPipeForm):
     terms_agreed = fields.BooleanField(label=_('Accepts terms and conditions'),
                                          required=True, initial=True,
                                          )
+
+class RegisterContactForm(ActionPipeForm):
+    slug = 'register-agree-form'
+    title = _("Agree terms and conditions")
+    
+    objet = fields.CharField(label=_(u'Objet'),
+                                 widget=TextInput(attrs={'placeholder':
+                                                                _(u'what about ?')}
+                                                         ))
+    
+    message = fields.CharField(label=_(u'Message'),
+                                 widget=Textarea(attrs={'placeholder':
+                                                                _(u'Message')}
+                                                         ))
+
+
+class RegisterSubscribeForm(ActionPipeForm):
+    slug = 'register-subscribe-form'
+    title = _("Subscribe to newsletter")
+    
+    email = fields.EmailField(label=_('Your email address'),
+                              widget=TextInput(attrs={'placeholder':
+                                                         _(u'your@email.com')
+                                                         }
+                                                      ))
+    
+#    subscribe = fields.BooleanField(label=_('Yes, Keep me informed !'),
+#                                         required=True, initial=True, widget=HiddenInput()
+#                                         )
+
+
+
 

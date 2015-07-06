@@ -20,9 +20,9 @@ from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 
-from apetizer.register.forms import LoginInfosForm, RegisterInfosForm, \
-    RegisterAgreeForm, RegisterOrLoginForm, RegisterLoginForm
-    
+from apetizer.register.forms import LoginForm, RegisterForm, \
+    RegisterAgreeForm, RegisterOrLoginForm, RegisterLoginForm, \
+    RegisterContactForm, RegisterSubscribeForm
 from apetizer.views.actionpipe import ActionPipeView
 
 
@@ -35,18 +35,21 @@ class RegisterView(ActionPipeView):
 
     view_template = 'register/view.html'
 
-    class_actions = ['lost', 'login', 'logout', 'register', 'agree', 'complete']
+    class_actions = ['lost', 'login', 'logout', 'register', 'agree', 'contact', 'subscribe']
 
     class_actions_forms = {'view': tuple(),
-                           'login': (RegisterOrLoginForm,),
-                           'register': (RegisterInfosForm, LoginInfosForm),
+                           'login': (LoginForm,),
+                           'register': (RegisterForm, LoginForm),
                            'agree': (RegisterAgreeForm,),
+                           'contact': (RegisterContactForm,),
+                           'subscribe': (RegisterSubscribeForm,),
                            }
 
     class_action_templates = {'login': 'register/login.html',
                               'agree': 'register/agree.html',
                               'register': 'register/register.html',
-                              'complete': 'register/complete.html',
+                              'contact': 'register/contact.html',
+                              'subscribe': 'register/subscribe.html',
                               }
 
     success_url = '/'
@@ -283,6 +286,7 @@ class RegisterView(ActionPipeView):
 
         return response
     
+    
     def process_register(self, request, user_profile, input_data,
                       template_args, **kwargs):
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
@@ -291,6 +295,14 @@ class RegisterView(ActionPipeView):
                       template_args, **kwargs):
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
     
+    def process_subscribe(self, request, user_profile, input_data,
+                      template_args, **kwargs):
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    def process_contact(self, request, user_profile, input_data,
+                      template_args, **kwargs):
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
     """
     View where we ask a logged in user to complete his profile info 
     in order to do the action he is trying to do.

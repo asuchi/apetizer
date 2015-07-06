@@ -17,6 +17,7 @@ from django.utils.timezone import now
 
 from apetizer.storages.kvstore import KVStore
 from apetizer.views.httpapi import HttpAPIView
+from django.core.exceptions import ValidationError
 
 
 __all__ = ['ActionPipeView', ]
@@ -362,12 +363,10 @@ class ActionPipeView(HttpAPIView):
         all_forms_valid = True
         if request.method == 'POST':
             for f in forms:
-                #f.full_clean()
+                f.full_clean()
                 is_valid_form = f.is_valid()
                 if not is_valid_form:
                     #all_forms_valid = False
-                    print f.errors
-                    print f.non_field_errors()
                     if len(f.errors) or len(f.non_field_errors()):
                         # check error field are not in hidden/ignored fields
                         # and gether their errors as request messages
@@ -380,7 +379,16 @@ class ActionPipeView(HttpAPIView):
                         for message in f.non_field_errors():
                             messages.error(request, message)
                             all_forms_valid = False
-
+                    else:
+                        for field in f.fields:
+                            try:
+                                f.fields[field].run_validators(f[field].value())
+                            except ValidationError as e:
+                                error_message = u'<b>%s</b> %s' % (f[field].label, e.messages )
+                                messages.error(request, error_message)
+                                all_forms_valid = False
+                                f.errors[field] = e.messages[0]
+                                
         return all_forms_valid
 
     def filter_data_with_forms(self, data, forms):
