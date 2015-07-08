@@ -35,7 +35,7 @@ class RegisterView(ActionPipeView):
 
     view_template = 'register/view.html'
 
-    class_actions = ['lost', 'login', 'logout', 'register', 'agree', 'contact', 'subscribe']
+    class_actions = ['lost', 'login', 'logout', 'register', 'agree', 'contact', 'subscribe', 'profile']
 
     class_actions_forms = {'view': tuple(),
                            'login': (LoginForm,),
@@ -43,6 +43,7 @@ class RegisterView(ActionPipeView):
                            'agree': (RegisterAgreeForm,),
                            'contact': (RegisterContactForm,),
                            'subscribe': (RegisterSubscribeForm,),
+                           'profile': (RegisterForm, LoginForm, RegisterAgreeForm, RegisterSubscribeForm, RegisterContactForm),
                            }
 
     class_action_templates = {'login': 'register/login.html',
@@ -71,6 +72,9 @@ class RegisterView(ActionPipeView):
                                           ('terms_agreed',
                                            {'class': self.__class__,
                                             'action': 'agree'}),
+                                          ('subscribe',
+                                           {'class': self.__class__,
+                                            'action': 'subscribe'}),
                                           ('user_registred',
                                            {'class': self.__class__,
                                             'action': 'end'}),
@@ -302,6 +306,14 @@ class RegisterView(ActionPipeView):
     def process_contact(self, request, user_profile, input_data,
                       template_args, **kwargs):
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    def process_profile(self, request, user_profile, input_data,
+                      template_args, **kwargs):
+        return self.render(request, template_args, **kwargs)
+        
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+
 
     """
     View where we ask a logged in user to complete his profile info 
@@ -309,6 +321,7 @@ class RegisterView(ActionPipeView):
     """
     def process_complete(self, request, user_profile, input_data, 
                          template_args, **kwargs):
+        
         # check if user is not authenticated and should register or login first
         if not request.user.is_authenticated():
             return HttpResponseRedirect(reverse(self.view_name, kwargs={'action':'login'}))

@@ -73,8 +73,8 @@ class HttpAPIView(View):
     def get_actions(cls):
         class_stack = inspect.getmro(cls)[::-1]
         
-        cls.actions = ['view', 'doc']
-        cls.actions_forms = {'view': []}
+        cls.actions = cls.class_actions
+        cls.actions_forms = {}
         cls.action_templates = {}
         
         for base_class in class_stack:
@@ -90,6 +90,13 @@ class HttpAPIView(View):
                 if 'class_action_templates' in base_class.__dict__:
                     for action in base_class.class_action_templates:
                         cls.action_templates[action] = base_class.class_action_templates[action]
+        
+        if 'class_actions_forms' in cls.__dict__:
+            cls.actions_forms.update(cls.class_actions_forms)
+        
+        if 'class_action_templates' in cls.__dict__:
+            cls.action_templates.update(cls.class_action_templates)
+        
         return cls.actions
     
     @classmethod

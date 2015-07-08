@@ -100,9 +100,8 @@ class RegisterSubscribeForm(ActionPipeForm):
                                                          }
                                                       ))
     
-#    subscribe = fields.BooleanField(label=_('Yes, Keep me informed !'),
-#                                         required=True, initial=True, widget=HiddenInput()
-#                                         )
+    subscribe = fields.BooleanField(label=_('Yes, Keep me informed !'),
+                                    required=True, initial=True)
 
 
 
