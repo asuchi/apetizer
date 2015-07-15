@@ -1,6 +1,5 @@
-{% extends 'website.html' %}
-{% load i18n  %}
-
+{% extends 'base.html' %}
+{% load i18n %}
 
 {% block extra-styles %}
     {{ block.super }}
@@ -13,10 +12,6 @@
        {% autoescape off %}
            {{ content }}
        {% endautoescape %}
-       </div>
-       <div class="documentation-content" >
-           <h3>Default request:</h3>
-           <iframe width="100%" height="320" src="{{ data_api_url }}" ></iframe>
        </div>
    </div>
 {% endblock %}
