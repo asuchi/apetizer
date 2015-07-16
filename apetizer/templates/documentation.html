@@ -7,11 +7,17 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
     <div class="documentation-container" >
        <div class="documentation-content" >
        {% autoescape off %}
            {{ content }}
        {% endautoescape %}
        </div>
+       <div class="documentation-content" >
+           <h3>Default request:</h3>
+           <iframe width="100%" height="320" src="{{ data_api_url }}" ></iframe>
+       </div>
    </div>
+</div>
 {% endblock %}
