@@ -9,7 +9,6 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-
 class AbstractPipeModel(models.Model):
     """
     An abstract base model for forms without model
@@ -20,10 +19,7 @@ class AbstractPipeModel(models.Model):
 
 class AuditedModel(models.Model):
     '''
-    Abstract Model that adds in audit / UID fields.
-    
-    Note that since this is abstract the UID is not globally unique; it is unique
-    only for the concrete model where it is used (and on any children)
+    An abstract model to add creation and modification values
     '''
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='%(class)s_creator')
     created_date = models.DateTimeField(_('created on'), editable=False)
