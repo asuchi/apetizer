@@ -16,10 +16,7 @@ from django.forms.models import model_to_dict
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.translation import ugettext
 from django.views.generic.base import View
-
-from apetizer.parsers.json import API_json_parser
 
 
 global _apetizer_api_views_by_name
