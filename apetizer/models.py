@@ -3,10 +3,8 @@ Created on Feb 11, 2015
 
 @author: nicolas
 '''
-from content.fields import UIDField
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.timezone import now
 
@@ -26,10 +24,9 @@ class AuditedModel(models.Model):
     Note that since this is abstract the UID is not globally unique; it is unique
     only for the concrete model where it is used (and on any children)
     '''
-    uid = UIDField(_('uid'), auto=True)
-    created_by = models.ForeignKey(settings.get('AUTH_USER_MODEL', User), blank=True, null=True, related_name='%(class)s_creator')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='%(class)s_creator')
     created_date = models.DateTimeField(_('created on'), editable=False)
-    modified_by = models.ForeignKey(settings.get('AUTH_USER_MODEL', User), blank=True, null=True, related_name='%(class)s_modifier')
+    modified_by = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, related_name='%(class)s_modifier')
     modified_date = models.DateTimeField(_('modified on'), editable=False)
     
     class Meta:
