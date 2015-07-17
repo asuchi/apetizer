@@ -2,6 +2,20 @@
 {% load i18n sekizai_tags %}
 
 {% block content %}
+    {% if not request.is_ajax and messages %}
+    <ul id="system-messages" class="messages alert-top-right-notification">
+        {% for message in messages %}
+            {% if not debug or 'debug' not in message.tags %}
+                <li class="alert {% if message.tags %}{{ message.tags }}{% endif %} alert-block fade in" >
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    <div>
+                        <p>{{ message|safe }}</p>
+                    </div>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
     <div class="apetizer-form-page clearfix">
         {% block apetizer-form-content %}
         <div class="apetizer-form-body clearfix">

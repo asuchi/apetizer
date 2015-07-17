@@ -3,6 +3,8 @@ Created on 24 oct. 2013
 
 @author: rux
 '''
+from apetizer.forms import ActionModelForm, ActionPipeForm
+from apetizer.parsers.json import API_json_parser
 import inspect
 import json
 import logging
@@ -18,8 +20,6 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
-
-from apetizer.parsers.json import API_json_parser
 
 
 global _apetizer_api_views_by_name
@@ -54,7 +54,7 @@ class HttpAPIView(View):
     class_actions_forms = {'view': []}
     class_action_templates = {}
     
-    action_forms_autosave = True
+    action_forms_autosave = False
 
     json_parser = API_json_parser
     
@@ -199,7 +199,13 @@ class HttpAPIView(View):
             del data['csrfmiddlewaretoken']
 
         return data
-
+    
+    def get_forms_instances(self, action):
+        """
+        Override this method to retreive instance for action
+        """
+        return tuple()
+    
     def get_forms_data(self, *forms):
         """
         Get a data dictionnary of the provided forms instances fields data
@@ -225,7 +231,7 @@ class HttpAPIView(View):
             forms += (form_class,)
 
         return forms
-
+    
     def get_validated_forms(self, form_models, input_data, action,
                             save_forms=None):
         """
@@ -242,11 +248,12 @@ class HttpAPIView(View):
             aforms = self.actions_forms[action]
         else:
             aforms = []
-
-        for form_class in aforms:
-            if form_models:
+            
+        if form_models:
+            for form_class in aforms:
                 for model_instance in form_models:
-                    if isinstance(model_instance, form_class.Meta.model):
+                    if issubclass(form_class, ActionModelForm) and \
+                        isinstance(model_instance, form_class.Meta.model):
                         if len(input_data.keys()):
                             # prepare full updated dict
                             # with model and input data
@@ -264,13 +271,15 @@ class HttpAPIView(View):
                         else:
                             form_instance = form_class(instance=model_instance)
                         forms += (form_instance,)
-            else:
-                form_instance = form_class(instance=form_class.Meta.model(),
-                                           initial=input_data)
+        
+        for form_class in aforms:
+            if issubclass(form_class, ActionPipeForm):
+                form_instance = form_class(data=input_data)
                 if save_forms and form_instance.has_changed() \
                         and form_instance.is_valid():
                     form_instance.save()
                 forms += (form_instance,)
+        
         return forms
 
     def pre_process(self, request, user_profile, input_data, **kwargs):

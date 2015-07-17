@@ -18,6 +18,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.datetime_safe import strftime
 from django.utils.timezone import now
+from django.forms.models import ModelForm
 
 
 __all__ = ['ActionPipeView', ]
@@ -34,17 +35,14 @@ class ActionPipeView(HttpAPIView):
     Default action data dict
     """
     pipe_data_model = {
-
         # hash_key
         'akey': 'default',
         # range key
         'user_id': 'guest',
-
         'pipe_start_time': '',
         'origin_url': '',
         'pipe': 'undefined',
         'pipe_data': json.dumps({}),
-
     }
     
     class_actions = ['start', 'view', 'prev', 'next', 'end']
@@ -92,7 +90,7 @@ class ActionPipeView(HttpAPIView):
         This is mainly a shortcut to the pipe util
         """
         akey, user_id = self.get_session_user_keys(request)
-
+        
         # init default data dict
         pipe_data = self.get_default_pipe_data(request, akey, user_id)
         
@@ -105,9 +103,11 @@ class ActionPipeView(HttpAPIView):
             if cache_data is None:
                 action_cache.set(self.get_action_cache_key(akey, user_id),
                                  pipe_data)
-        
+                
         if cache_data and 'pipe' in cache_data and cache_data['pipe'] == self.pipe_name:
             pipe_data.update(cache_data)
+        
+        pipe_data['pipe_activity_time'] = strftime(now(), '%s')
         
         pipe_data['akey'] = akey
         pipe_data['user_id'] = user_id
@@ -121,7 +121,7 @@ class ActionPipeView(HttpAPIView):
         for field in fields:
             if not pipe_data['pipe_data'][field]:
                 del pipe_data['pipe_data'][field]
-
+        
         return pipe_data
 
     def get_default_pipe_data(self, request, akey, user_id):
@@ -193,7 +193,12 @@ class ActionPipeView(HttpAPIView):
         """
         # get actual user data
         kwargs['pipe'] = self.get_actionpipe_data(request)
-        return self.finish(request, self.process(request, user_profile, input_data, **kwargs), **kwargs)
+        
+        response = self.process(request, user_profile, input_data, **kwargs)
+        
+        kwargs['pipe'] = self.get_actionpipe_data(request)
+        
+        return self.finish(request, response, user_data=kwargs['pipe'], **kwargs)
     
     def process_start(self, request, user_profile, input_data, template_args,
                       **kwargs):
@@ -213,29 +218,13 @@ class ActionPipeView(HttpAPIView):
         # override action with this new one
         user_data['pipe'] = self.pipe_name
         user_data['origin_url'] = self.get_referer_path(request)
-
-        # filter get/post params
-        request_data = {}
-        if request.method.lower() == 'get':
-            request_data = self.update_data_with_get(request,
-                                                     user_data['pipe_data']
-                                                     )
-        elif request.method.lower() == 'post':
-            request_data = self.update_data_with_post(request,
-                                                      user_data['pipe_data']
-                                                      )
-
-        # update actionpipe data
-        for k in request_data:
-            if k in self.pipe_scenario.keys():
-                user_data['pipe_data'][k] = request_data[k]
-
+        
         # save
         user_data = self.save_actionpipe_data(request, user_data)
-
+        
         # get to the first field url
         first_field = list(self.pipe_scenario.keys())[0]
-
+        
         # to have the corresponding redirection
         redirect_to = reverse(self.pipe_scenario[first_field].get('class').view_name,
                               kwargs={'action': self.pipe_scenario[first_field].get('action')}
@@ -288,10 +277,7 @@ class ActionPipeView(HttpAPIView):
         #
         user_data = kwargs.get('pipe')
         
-        # figure out if next_url is current
-        next_url = self.get_next_url(user_data)
-        if next_url != request.path:
-            return HttpResponseRedirect(next_url)
+        
         
         # execute the finish action hook
         response = self.finish_action_pipe(request)
@@ -310,37 +296,24 @@ class ActionPipeView(HttpAPIView):
 
         return response
     
-    def get_forms_instances(self, action):
-        return tuple()
-    
     def manage_pipe(self, request, user_profile, input_data, template_args, **kwargs):
         
         action = kwargs.get('action', self.default_action)
         action_data = kwargs.get('pipe')
         
-        # filter posted data and update
-        action_data['pipe_data'] = self.update_data_with_get(request, action_data['pipe_data'],
-                                                              self.get_action_forms(action))
-        action_data['pipe_data'] = self.update_data_with_post(request, action_data['pipe_data'],
-                                                              self.get_action_forms(action))
-
-        action_data = self.update_actionpipe_data(request, action_data)
-        
-        # fill forms
-        template_args['action_forms'] = self.get_validated_forms(self.get_forms_instances(action),
-                                                                 action_data['pipe_data'],
-                                                                 action,
-                                                                 save_forms=False
-                                                                 )
+        action_forms = self.get_validated_forms(self.get_forms_instances(action),
+                                 action_data['pipe_data'],
+                                 action,
+                                 save_forms=False
+                                 )
         
         # check for form validity
-        if self.validate_action_forms(request, template_args['action_forms']):
+        if self.validate_action_forms(request, action_forms):
             self.save_actionpipe_data(request, action_data)
-            
             next_url = self.get_next_url(action_data)
-            
             if next_url == request.path \
                 or request.method.lower() == 'GET'.lower():
+                
                 if settings.DEBUG:
                     debug_data = {}
                     for key in action_data:
@@ -361,6 +334,13 @@ class ActionPipeView(HttpAPIView):
         this method manages end of the pipe
         it' meant to be overriden by concerned views
         '''
+        # figure out if next_url is current
+        next_url = self.get_next_url(user_data)
+        if next_url != request.path:
+            return HttpResponseRedirect(next_url)
+        
+        # do the final stuff ...
+        
         # override this method to manage correct end setup per end action view
         response = HttpResponseRedirect(user_data['origin_url'])
         return response
@@ -388,10 +368,10 @@ class ActionPipeView(HttpAPIView):
         # accessing directly the view without an action started
         # we set the default action to the view name
         if user_data['pipe'] == 'undefined':
-            user_data['pipe'] = self.pipe_name
-            if not 'pipe_data' in user_data:
-                user_data['pipe_data'] = {}
-            self.update_actionpipe_data(request, user_data)
+            #user_data['pipe'] = self.pipe_name
+            #if not 'pipe_data' in user_data:
+            #    user_data['pipe_data'] = {}
+            self.update_actionpipe_data(request, user_data['pipe_data'])
 
         if override:
             next_url = self.get_next_url(user_data)
@@ -410,7 +390,7 @@ class ActionPipeView(HttpAPIView):
         all_forms_valid = True
         if request.method == 'POST':
             for f in forms:
-                f.full_clean()
+                #f.full_clean()
                 is_valid_form = f.is_valid()
                 if not is_valid_form:
                     #all_forms_valid = False
@@ -418,10 +398,9 @@ class ActionPipeView(HttpAPIView):
                         # check error field are not in hidden/ignored fields
                         # and gether their errors as request messages
                         for field in f.errors:
-                            if field not in f.hidden_fields:
-                                all_forms_valid = False
-                                error_message = u'<b>%s</b> %s' % (f[field].label, f.errors[field])
-                                messages.error(request, error_message)
+                            all_forms_valid = False
+                            error_message = u'<b>%s</b> %s' % (f[field].label, f.errors[field])
+                            messages.error(request, error_message)
 
                         for message in f.non_field_errors():
                             messages.error(request, message)
@@ -435,75 +414,11 @@ class ActionPipeView(HttpAPIView):
                                 messages.error(request, error_message)
                                 all_forms_valid = False
                                 f.errors[field] = e.messages[0]
-                                
+        
         return all_forms_valid
 
-    def filter_data_with_forms(self, data, forms):
-        '''
-        filters a dict by values names as
-        the fields in the form classes provided
-        also check for oversized values
-        '''
-        data_dict = {}
 
-        form_keys = []
-
-        for form_class in forms:
-            form = form_class()
-            for field_name in form.fields:
-                if field_name not in form_keys:
-                    form_keys.append(field_name)
-
-        for k in data.keys():
-            # check if key in form_keys
-            if k in form_keys:
-                data_dict[k] = data[k]
-
-        return data_dict
-
-    def update_data_with_post(self, request, data, forms=None):
-        """
-        Update data dict with request post value
-        and filter by form if provided
-        """
-        # prepare incomming data
-        if forms is None:
-            clean_data = request.POST
-        else:
-            clean_data = self.filter_data_with_forms(request.POST, forms)
-
-        # update the dict
-        for k in clean_data.keys():
-            # check for oversized post value
-            if k not in ('login_password', 'csrfmiddlewaretoken') \
-                    and len(clean_data[k]) < 4096:
-
-                data[k] = clean_data[k]
-
-        return data
-
-    def update_data_with_get(self, request, data, forms=None):
-        """
-        Update data dict with request get value
-        and filter by form if provided
-        """
-        # prepare incomming data
-        if forms is None:
-            clean_data = request.GET
-        else:
-            clean_data = self.filter_data_with_forms(request.GET, forms)
-
-        # update the dict
-        for k in clean_data.keys():
-            # check for oversized post value
-            if k not in ('login_password', 'csrfmiddlewaretoken') \
-                    and len(clean_data[k]) < 4096:
-                data[k] = clean_data[k]
-
-        return data
-
-    def update_actionpipe_data(self, request, pipe_data, akey=None,
-                               user_id=None):
+    def update_actionpipe_data(self, request, data, akey=None, user_id=None):
         """
         Update the actionpipe data with provided dict
         Ensures clean and freshness of the pipe_data dict
@@ -518,20 +433,23 @@ class ActionPipeView(HttpAPIView):
             data_dict = self.pipe_table.get_latest(akey)
             if data_dict is None:
                 data_dict = self.get_default_pipe_data(request, akey, user_id)
-
+        
+        # decompress contained action data
+        if isinstance(data_dict['pipe_data'], str):
+            data_dict['pipe_data'] = json.loads(data_dict['pipe_data'])
+        
         # update dict with new values
-        for k in pipe_data:
-            data_dict[k] = pipe_data[k]
-
+        for k in data:
+            data_dict['pipe_data'][k] = data[k]
+        
         # clean empty fields
-        if pipe_data['pipe_data'].keys():
-            fields = list(pipe_data['pipe_data'].keys())
-            for field in fields:
-                if not pipe_data['pipe_data'][field]:
-                    del pipe_data['pipe_data'][field]
+        fields = list(data_dict['pipe_data'].keys())
+        for field in fields:
+            if not data_dict['pipe_data'][field]:
+                del data_dict['pipe_data'][field]
 
         # ensure json normalize
-        pipe_data['pipe_data'] = json.loads(json.dumps(data_dict['pipe_data']))
+        data_dict['pipe_data'] = json.loads(json.dumps(data_dict['pipe_data']))
 
         return data_dict
 
@@ -547,7 +465,7 @@ class ActionPipeView(HttpAPIView):
             akey, user_id = self.get_session_user_keys(request)
 
         # update the data dict with fresh data as a base
-        data_dict = self.update_actionpipe_data(request, data_dict, akey=akey,
+        data_dict = self.update_actionpipe_data(request, data_dict['pipe_data'], akey=akey,
                                                 user_id=user_id)
 
         # compress

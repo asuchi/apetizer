@@ -259,6 +259,7 @@ class ActionView(View):
                         and form_instance.is_valid():
                     form_instance.save()
                 forms += (form_instance,)
+        
         return forms
 
     def pre_process(self, request, user_profile, input_data, **kwargs):
