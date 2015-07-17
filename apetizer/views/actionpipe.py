@@ -68,37 +68,20 @@ class ActionPipeView(HttpAPIView):
                                             'action': 'finish'}
                                            )])
 
-    def get_default_pipe_data(self, akey, user_id):
-        """
-        Get a default action data dict
-        """
-        pipe_data = copy.deepcopy(self.pipe_data_model)
-
-        pipe_data['akey'] = akey
-        pipe_data['user_id'] = user_id
-
-        pipe_data['pipe_start_time'] = strftime(now(),
-                                                '%Y-%m-%d-%H-%M')
-
-        pipe_data['pipe_data'] = {}
-
-        return pipe_data
-
     def get_session_user_keys(self, request):
         """
         Get actionpipe data container key
         Generates a new one if missing cookie
         """
-        akey = request.COOKIES.get('akey', None)
-
-        if akey is None:
-            akey = str(uuid.uuid4())
-
+        akey = request.COOKIES.get('akey', str(uuid.uuid4()))
         if request.user.is_authenticated():
             user_id = str(request.user.id)
         else:
             user_id = 'guest'
-
+        
+        # TODO
+        # verify session key is correct
+        
         return akey, user_id
 
     def get_actionpipe_data(self, request):
@@ -110,26 +93,24 @@ class ActionPipeView(HttpAPIView):
         akey, user_id = self.get_session_user_keys(request)
 
         # init default data dict
-        pipe_data = self.get_default_pipe_data(akey, user_id)
-
+        pipe_data = self.get_default_pipe_data(request, akey, user_id)
+        
         # check for data in memcached
         cache_data = action_cache.get(self.get_action_cache_key(akey, user_id))
-
         if cache_data is None:
             # check for data on dynamodb
             cache_data = self.pipe_table.get_latest(akey)
-
             # save to cache
             if cache_data is None:
                 action_cache.set(self.get_action_cache_key(akey, user_id),
                                  pipe_data)
-
-        if cache_data:
+        
+        if cache_data and cache_data['pipe'] == self.pipe_name:
             pipe_data.update(cache_data)
-
+        
         pipe_data['akey'] = akey
         pipe_data['user_id'] = user_id
-
+        
         # decompress contained action data
         if isinstance(pipe_data['pipe_data'], str):
             pipe_data['pipe_data'] = json.loads(pipe_data['pipe_data'])
@@ -141,6 +122,26 @@ class ActionPipeView(HttpAPIView):
                 del pipe_data['pipe_data'][field]
 
         return pipe_data
+
+    def get_default_pipe_data(self, request, akey, user_id):
+        """
+        Get a default action data dict
+        """
+        pipe_data = copy.deepcopy(self.pipe_data_model)
+
+        pipe_data['pipe'] = self.pipe_name
+
+        pipe_data['akey'] = akey
+        pipe_data['user_id'] = user_id
+
+        pipe_data['origin_url'] = self.get_referer_path(request)
+        pipe_data['pipe_start_time'] = strftime(now(),
+                                                '%Y-%m-%d-%H-%M')
+
+        # start new pipe
+        pipe_data['pipe_data'] = {}
+        return pipe_data
+
 
     def get_action_cache_key(self, key, krange):
         """
@@ -184,6 +185,15 @@ class ActionPipeView(HttpAPIView):
         # override this method to manage start action custom setup
         return True
     
+    def pre_process(self, request, user_profile, input_data, **kwargs):
+        """
+        Hook before processing the request
+        Best place to make user/objects rights management
+        """
+        # get actual user data
+        kwargs['pipe'] = self.get_actionpipe_data(request)
+        return self.finish(request, self.process(request, user_profile, input_data, **kwargs), **kwargs)
+    
     def process_start(self, request, user_profile, input_data, template_args,
                       **kwargs):
         '''
@@ -191,17 +201,13 @@ class ActionPipeView(HttpAPIView):
         set's initial values gathered by request get or post
         only fields that exists in the actionpipe configuration are allowed
         '''
-
-        # test if session exists
-        akey, user_id = self.get_session_user_keys(request)
-
-        # get actual user data
-        user_data = self.get_actionpipe_data(request)
-
+        user_data = kwargs.get('pipe')
+        
         # check for an existing action
         if user_data['pipe'] != self.pipe_name:
             # set default data
-            user_data = self.get_default_pipe_data(akey, user_id)
+            akey, user_id = self.get_session_user_keys(request)
+            user_data = self.get_default_pipe_data(request, akey, user_id)
 
         # override action with this new one
         user_data['pipe'] = self.pipe_name
@@ -239,33 +245,29 @@ class ActionPipeView(HttpAPIView):
             redirect_to += '?previous=' + request.GET.get('previous')
 
         response = HttpResponseRedirect(redirect_to)
-
-        # flush the request
-        return self.finish(request, response, user_data)
+        return response
     
     def process_next(self, request, user_profile, input_data, template_args, **kwargs):
         '''
         call this method to be redirected to the next pipe view
         '''
-        return HttpResponseRedirect(self.get_next_url(self.get_actionpipe_data(request), **kwargs))
+        return HttpResponseRedirect(self.get_next_url(kwargs.get('pipe'), **kwargs))
 
     def process_prev(self, request, user_profile, input_data, template_args, **kwargs):
         '''
         call this method to be redirected to the previous pipe view
         '''
-        return HttpResponseRedirect(self.get_prev_url(self.get_actionpipe_data(request), **kwargs))
+        return HttpResponseRedirect(self.get_prev_url(kwargs.get('pipe'), **kwargs))
 
     def process_reset(self, request, user_profile, input_data, template_args, **kwargs):
         '''
         call this method to be redirected to the previous pipe view
         '''
-        return HttpResponseRedirect(self.get_prev_url(self.get_actionpipe_data(request), **kwargs))
+        return HttpResponseRedirect(self.get_prev_url(kwargs.get('pipe'), **kwargs))
 
     def process_graph(self, request,
                       user_profile, input_data, template_args, **kwargs):
-
-        user_data = self.get_actionpipe_data(request)
-        return self.render(request, template_args, user_data, **kwargs)
+        return self.render(request, template_args, kwargs.get('pipe'), **kwargs)
 
     def process_end(self, request,
                     user_profile, input_data, template_args, **kwargs):
@@ -286,11 +288,10 @@ class ActionPipeView(HttpAPIView):
         #                                        ))
         
         #
-        user_data = self.get_actionpipe_data(request)
+        user_data = kwargs.get('pipe')
         
         # figure out if next_url is current
         next_url = self.get_next_url(user_data)
-        print next_url
         if next_url != request.path:
             return HttpResponseRedirect(next_url)
         
@@ -327,7 +328,9 @@ class ActionPipeView(HttpAPIView):
         If not, it manages redirect to the correct view
         Else, it redirects to the corresponding action end
         '''
-
+        if user_data == None:
+            user_data = kwargs.get('pipe')
+        
         # set cooky for pipeline tracking
         # we need to have an extra cookie
         # in order to maintain data across different auhtentication
@@ -342,10 +345,11 @@ class ActionPipeView(HttpAPIView):
         # we set the default action to the view name
         if user_data['pipe'] == 'undefined':
             user_data['pipe'] = self.pipe_name
+            if not 'pipe_data' in user_data:
+                user_data['pipe_data'] = {}
             self.update_actionpipe_data(request, user_data)
 
         if override:
-
             next_url = self.get_next_url(user_data)
             if next_url != request.path:
                 return response
@@ -469,17 +473,18 @@ class ActionPipeView(HttpAPIView):
         if data_dict is None:
             data_dict = self.pipe_table.get_latest(akey)
             if data_dict is None:
-                data_dict = self.get_default_pipe_data(akey, user_id)
+                data_dict = self.get_default_pipe_data(request, akey, user_id)
 
         # update dict with new values
         for k in pipe_data:
             data_dict[k] = pipe_data[k]
 
         # clean empty fields
-        fields = list(pipe_data['pipe_data'].keys())
-        for field in fields:
-            if not pipe_data['pipe_data'][field]:
-                del pipe_data['pipe_data'][field]
+        if pipe_data['pipe_data'].keys():
+            fields = list(pipe_data['pipe_data'].keys())
+            for field in fields:
+                if not pipe_data['pipe_data'][field]:
+                    del pipe_data['pipe_data'][field]
 
         # ensure json normalize
         pipe_data['pipe_data'] = json.loads(json.dumps(data_dict['pipe_data']))

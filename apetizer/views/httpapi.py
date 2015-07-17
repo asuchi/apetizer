@@ -276,7 +276,6 @@ class HttpAPIView(View):
     def pre_process(self, request, user_profile, input_data, **kwargs):
         """
         Hook before processing the request
-
         Best place to make user/objects rights management
         """
         return self.process(request, user_profile, input_data, **kwargs)
@@ -302,13 +301,14 @@ class HttpAPIView(View):
             template_args = self.get_user_dict(request, **kwargs)
         else:
             template_args = self.get_context_dict(request, **kwargs)
-
+        
         if self.__getattribute__('process_'+action):
-            return self.__getattribute__('process_'+action)(request,
+            response = self.__getattribute__('process_'+action)(request,
                                                             user_profile, 
                                                             input_data,
                                                             template_args,
                                                             **kwargs)
+            return self.finish(request, response, **kwargs)
         else:
             result_payload = input_data
             result_message = ugettext(u'Action Not implemented:'+action)
