@@ -10,6 +10,7 @@ import copy
 import json
 import uuid
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache as action_cache
 from django.core.exceptions import ValidationError
@@ -105,7 +106,7 @@ class ActionPipeView(HttpAPIView):
                 action_cache.set(self.get_action_cache_key(akey, user_id),
                                  pipe_data)
         
-        if cache_data and cache_data['pipe'] == self.pipe_name:
+        if cache_data and 'pipe' in cache_data and cache_data['pipe'] == self.pipe_name:
             pipe_data.update(cache_data)
         
         pipe_data['akey'] = akey
@@ -264,11 +265,8 @@ class ActionPipeView(HttpAPIView):
         call this method to be redirected to the previous pipe view
         '''
         return HttpResponseRedirect(self.get_prev_url(kwargs.get('pipe'), **kwargs))
-
-    def process_graph(self, request,
-                      user_profile, input_data, template_args, **kwargs):
-        return self.render(request, template_args, kwargs.get('pipe'), **kwargs)
-
+    
+    
     def process_end(self, request,
                     user_profile, input_data, template_args, **kwargs):
         '''
@@ -311,7 +309,53 @@ class ActionPipeView(HttpAPIView):
             response.delete_cookie('akey')
 
         return response
+    
+    def get_forms_instances(self, action):
+        return tuple()
+    
+    def manage_pipe(self, request, user_profile, input_data, template_args, **kwargs):
+        
+        action = kwargs.get('action', self.default_action)
+        action_data = kwargs.get('pipe')
+        
+        # filter posted data and update
+        action_data['pipe_data'] = self.update_data_with_get(request, action_data['pipe_data'],
+                                                              self.get_action_forms(action))
+        action_data['pipe_data'] = self.update_data_with_post(request, action_data['pipe_data'],
+                                                              self.get_action_forms(action))
 
+        action_data = self.update_actionpipe_data(request, action_data)
+        
+        # fill forms
+        template_args['action_forms'] = self.get_validated_forms(self.get_forms_instances(action),
+                                                                 action_data['pipe_data'],
+                                                                 action,
+                                                                 save_forms=False
+                                                                 )
+        
+        # check for form validity
+        if self.validate_action_forms(request, template_args['action_forms']):
+            self.save_actionpipe_data(request, action_data)
+            
+            next_url = self.get_next_url(action_data)
+            
+            if next_url == request.path \
+                or request.method.lower() == 'GET'.lower():
+                if settings.DEBUG:
+                    debug_data = {}
+                    for key in action_data:
+                        debug_data[key] = str(action_data[key])
+                    template_args['debug_data'] = json.dumps(debug_data)
+                    response = self.render(request, template_args, action_data, **kwargs)
+                else:
+                    response = self.render(request, template_args, {}, **kwargs)
+            else:
+                response = HttpResponseRedirect(next_url)
+        else:
+            response = self.render(request, template_args, {}, **kwargs)
+        
+        return response
+    
     def finish_action_pipe(self, request, user_data):
         '''
         this method manages end of the pipe
