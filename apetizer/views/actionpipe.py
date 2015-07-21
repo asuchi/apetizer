@@ -82,7 +82,7 @@ class ActionPipeView(HttpAPIView):
         # verify session key is correct
         
         return akey, user_id
-
+        
     def get_actionpipe_data(self, request):
         """
         Get the request/session associated current actionpipe data
@@ -150,7 +150,7 @@ class ActionPipeView(HttpAPIView):
         """
         return 'ap-'+str(key)
 
-    def get_next_url(self, user_data):
+    def get_next_url(self, user_data, **kwargs):
         '''
         Given pipe action data,
         returns the next view to display
@@ -175,7 +175,12 @@ class ActionPipeView(HttpAPIView):
             next_view = self.pipe_scenario[field].get('class')
             next_action = self.pipe_scenario[field].get('action')
         
-        return reverse(next_view.view_name, kwargs={'action': next_action})
+        reverse_kwargs = {'action': next_action}
+        
+        for key in kwargs.get('reverse_keys'):
+            reverse_kwargs[key] = kwargs[key]
+        
+        return reverse(next_view.view_name, kwargs=reverse_kwargs)
 
     
     def start_action_pipe(self, request):
@@ -280,7 +285,7 @@ class ActionPipeView(HttpAPIView):
         
         
         # execute the finish action hook
-        response = self.finish_action_pipe(request)
+        response = self.finish_action_pipe(request, **kwargs)
         
         # clean action data if we are finishing the actual pipe
         if user_data['pipe'] == self.pipe_name:
@@ -310,7 +315,7 @@ class ActionPipeView(HttpAPIView):
         # check for form validity
         if self.validate_action_forms(request, action_forms):
             self.save_actionpipe_data(request, action_data)
-            next_url = self.get_next_url(action_data)
+            next_url = self.get_next_url(action_data, **kwargs)
             if next_url == request.path \
                 or request.method.lower() == 'GET'.lower():
                 
@@ -329,13 +334,13 @@ class ActionPipeView(HttpAPIView):
         
         return response
     
-    def finish_action_pipe(self, request, user_data):
+    def finish_action_pipe(self, request, user_data, **kwargs):
         '''
         this method manages end of the pipe
         it' meant to be overriden by concerned views
         '''
         # figure out if next_url is current
-        next_url = self.get_next_url(user_data)
+        next_url = self.get_next_url(user_data, **kwargs)
         if next_url != request.path:
             return HttpResponseRedirect(next_url)
         
@@ -374,7 +379,7 @@ class ActionPipeView(HttpAPIView):
             self.update_actionpipe_data(request, user_data['pipe_data'])
 
         if override:
-            next_url = self.get_next_url(user_data)
+            next_url = self.get_next_url(user_data, **kwargs)
             if next_url != request.path:
                 return response
             else:

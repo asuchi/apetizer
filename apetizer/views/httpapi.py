@@ -119,10 +119,15 @@ class HttpAPIView(View):
         """
         Manage a GET request
         """
+        reverse_keys = []
+        for key in kwargs:
+            reverse_keys.append(key)
+        kwargs['reverse_keys'] = reverse_keys
+        
         # get user profile object
-        user_profile = self.get_user_profile(request)
+        user_profile = self.get_user_profile(request, **kwargs)
         # parse input data
-        input_data = self.get_input_data(request)
+        input_data = self.get_input_data(request, **kwargs)
         # start preprocessing the request
         return self.pre_process(request, user_profile, input_data, **kwargs)
 
@@ -130,10 +135,15 @@ class HttpAPIView(View):
         """
         Manage a POST request
         """
+        reverse_keys = []
+        for key in kwargs:
+            reverse_keys.append(key)
+        kwargs['reverse_keys'] = reverse_keys
+        
         # get user profile object
-        user_profile = self.get_user_profile(request)
+        user_profile = self.get_user_profile(request, **kwargs)
         # parse input data
-        input_data = self.get_input_data(request)
+        input_data = self.get_input_data(request, **kwargs)
         # start preprocessing the request
         return self.pre_process(request, user_profile, input_data, **kwargs)
 
@@ -155,7 +165,7 @@ class HttpAPIView(View):
         referer = u'/' + u'/'.join(referer[1:])
         return referer
 
-    def get_user_profile(self, request):
+    def get_user_profile(self, request, **kwargs):
         """
         Retreive user profile from the request user
         """
@@ -174,7 +184,7 @@ class HttpAPIView(View):
         template_args['request'] = request
         return template_args
 
-    def get_input_data(self, request):
+    def get_input_data(self, request, **kwargs):
         """
         Get a dict of all the inputs merged ( GET < POST|json )
 
@@ -303,6 +313,7 @@ class HttpAPIView(View):
             action = self.default_action
             kwargs['action'] = action
         elif action not in self.actions + self.internal_actions:
+            logger.debug('Missing action '+action)
             raise Http404
 
         template_args = {}
