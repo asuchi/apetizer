@@ -149,7 +149,9 @@ class ActionPipeView(HttpAPIView):
         Get a correct cache key for action data
         """
         return 'ap-'+str(key)
-
+    
+    
+    
     def get_next_url(self, user_data, **kwargs):
         '''
         Given pipe action data,
@@ -175,13 +177,8 @@ class ActionPipeView(HttpAPIView):
             next_view = self.pipe_scenario[field].get('class')
             next_action = self.pipe_scenario[field].get('action')
         
-        reverse_kwargs = {'action': next_action}
-        
-        for key in kwargs.get('reverse_keys'):
-            reverse_kwargs[key] = kwargs[key]
-        
-        return reverse(next_view.view_name, kwargs=reverse_kwargs)
-
+        return self.get_reversed_action(next_view, next_action, kwargs)
+    
     
     def start_action_pipe(self, request):
         '''

@@ -378,12 +378,9 @@ class HttpAPIView(View):
 
         if 'data_view_url' not in template_args:
             try:
-                template_args['data_view_url'] = reverse(self.view_name,
-                                                         kwargs={'action':'view'})
-                template_args['data_doc_url'] = reverse(self.view_name,
-                                                         kwargs={'action':'doc'})
-                template_args['data_api_url'] = reverse(self.view_name,
-                                                        kwargs=kwargs)+'.json'
+                template_args['data_view_url'] = self.get_reversed_action(self.view_name, 'view', kwargs)
+                template_args['data_doc_url'] = self.get_reversed_action(self.view_name, 'doc', kwargs)
+                template_args['data_api_url'] = self.get_reversed_action(self.view_name, kwargs.get('action'), kwargs)+'.json'
             except:
                 if settings.DEBUG:
                     traceback.print_exc()
@@ -399,10 +396,27 @@ class HttpAPIView(View):
         return render_to_response(self.get_template_path(action),
                                   template_args,
                                   context_instance=RequestContext(request))
-
+    
     def get_template_path(self, action):
         return self.action_templates.get(action, self.view_template)
+    
+    
+    def get_reversed_action(self, view, action, kwargs):
+        """
+        from a view class and action,
+        reverses the action url concidering url parameters in kwargs
+        kwargs['reverse_keys'] = ['key',]
+        kwargs[key] = value
+        """
+        reverse_kwargs = {}
+        for key in kwargs.get('reverse_keys'):
+            reverse_kwargs[key] = kwargs[key]
+        # override action
+        reverse_kwargs['action'] = action
+        
+        return reverse(view.view_name, kwargs=reverse_kwargs)
 
+    
     def render_json(self, request, payload, message='ok', status=200,
                     **kwargs):
         """
