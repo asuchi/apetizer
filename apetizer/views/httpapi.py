@@ -401,7 +401,7 @@ class HttpAPIView(View):
         return self.action_templates.get(action, self.view_template)
     
     
-    def get_reversed_action(self, view, action, kwargs):
+    def get_reversed_action(self, view_name, action, kwargs):
         """
         from a view class and action,
         reverses the action url concidering url parameters in kwargs
@@ -414,7 +414,7 @@ class HttpAPIView(View):
         # override action
         reverse_kwargs['action'] = action
         
-        return reverse(view.view_name, kwargs=reverse_kwargs)
+        return reverse(view_name, kwargs=reverse_kwargs)
 
     
     def render_json(self, request, payload, message='ok', status=200,
