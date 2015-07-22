@@ -177,7 +177,7 @@ class ActionPipeView(HttpAPIView):
             next_view = self.pipe_scenario[field].get('class')
             next_action = self.pipe_scenario[field].get('action')
         
-        return self.get_reversed_action(next_view, next_action, kwargs)
+        return self.get_reversed_action(next_view.view_name, next_action, kwargs)
     
     
     def start_action_pipe(self, request):
