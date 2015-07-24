@@ -6,7 +6,28 @@ Created on 2 fevr. 2015
 from django.forms.models import ModelForm
 from django.forms.forms import Form
 
-class ActionPipeForm(Form):
+
+class FormControlMixin(object):
+    def set_form_control_class(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs['class'] = 'form-control'
+
+
+class BaseForm(FormControlMixin, Form):
+
+    def __init__(self, *args, **kwargs):
+        super(BaseForm, self).__init__(*args, **kwargs)
+        self.set_form_control_class()
+
+
+class BaseModelForm(FormControlMixin, ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(BaseModelForm, self).__init__(*args, **kwargs)
+        self.set_form_control_class()
+
+
+class ActionPipeForm(BaseForm):
     slug = 'slug'
     title = ''
     hidden_fields = tuple()
@@ -25,7 +46,7 @@ class ActionPipeForm(Form):
         return data
 
 
-class ActionModelForm(ModelForm):
+class ActionModelForm(BaseModelForm):
     """
     Base dashboard form
     All forms in dashboard should inherit from it.
