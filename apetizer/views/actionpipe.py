@@ -383,6 +383,21 @@ class ActionPipeView(HttpAPIView):
                 return HttpResponseRedirect(next_url)
 
         return response
+            
+    def get_final_url(self, action_data):
+        """
+        get a final url for the pipe action
+        """
+        final_url = None
+        
+        if action_data['origin_url']:
+            final_url = action_data['origin_url']
+        
+        if final_url == None:
+            final_url = '/'
+        
+        return final_url
+
 
     def validate_action_forms(self, request, forms):
         '''

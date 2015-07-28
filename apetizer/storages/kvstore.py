@@ -22,7 +22,10 @@ class KVStore(object):
             if range_key == None:
                 return self.data[hash_key]
             else:
-                return self.data[hash_key][range_key]
+                if range_key in self.data[hash_key]:
+                    return self.data[hash_key][range_key]
+                else:
+                    return self.data[hash_key]
         else:
             return None
 
