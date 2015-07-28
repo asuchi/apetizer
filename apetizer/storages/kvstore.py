@@ -17,9 +17,12 @@ class KVStore(object):
         self.data[hash_key][range_key] = data
         return
 
-    def get_latest(self, hash_key):
+    def get_latest(self, hash_key, range_key=None):
         if hash_key in self.data:
-            return self.data[hash_key]
+            if range_key == None:
+                return self.data[hash_key]
+            else:
+                return self.data[hash_key][range_key]
         else:
             return None
 

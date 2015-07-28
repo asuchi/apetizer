@@ -98,7 +98,7 @@ class ActionPipeView(HttpAPIView):
         cache_data = action_cache.get(self.get_action_cache_key(akey, user_id))
         if cache_data is None:
             # check for data on dynamodb
-            cache_data = self.pipe_table.get_latest(akey)
+            cache_data = self.pipe_table.get_latest(akey, user_id)
             # save to cache
             if cache_data is None:
                 action_cache.set(self.get_action_cache_key(akey, user_id),
@@ -432,7 +432,7 @@ class ActionPipeView(HttpAPIView):
         # to avoid race conditions
         data_dict = action_cache.get(self.get_action_cache_key(akey, user_id))
         if data_dict is None:
-            data_dict = self.pipe_table.get_latest(akey)
+            data_dict = self.pipe_table.get_latest(akey, user_id)
             if data_dict is None:
                 data_dict = self.get_default_pipe_data(request, akey, user_id)
         
