@@ -28,8 +28,9 @@ class BaseModelForm(FormControlMixin, ModelForm):
 
 
 class ActionPipeForm(BaseForm):
-    slug = 'slug'
-    title = ''
+    _slug = 'slug'
+    _title = 'slug'
+    
     hidden_fields = tuple()
     
     def get_data(self):
