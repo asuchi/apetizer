@@ -261,6 +261,30 @@ class ActionView(View):
                 forms += (form_instance,)
         
         return forms
+    
+    
+    def manage_pipe_data(self, request, template_args, **kwargs):
+        
+        action = kwargs.get('action', self.default_action)
+        action_data = kwargs.get('pipe')
+        
+        action_forms = self.get_validated_forms(self.get_forms_instances(action, kwargs),
+                                 action_data['pipe_data'],
+                                 action)
+        
+        template_args['action_forms'] = action_forms
+        
+        # check for form validity
+        if self.validate_action_forms(request, action_forms):
+            self.save_actionpipe_data(request, action_data)
+            template_args['action_saved'] = True
+        else:
+            template_args['action_saved'] = False
+        
+        template_args['action_next_url'] = self.get_next_url(action_data, **kwargs)
+        
+        return template_args
+
 
     def pre_process(self, request, user_profile, input_data, **kwargs):
         """

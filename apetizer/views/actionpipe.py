@@ -72,7 +72,7 @@ class ActionPipeView(HttpAPIView):
         Get actionpipe data container key
         Generates a new one if missing cookie
         """
-        akey = request.COOKIES.get('akey', str(uuid.uuid4()))
+        akey = request.COOKIES.get('akey', self.get_new_session_user_key())
         if request.user.is_authenticated():
             user_id = str(request.user.id)
         else:
@@ -82,7 +82,10 @@ class ActionPipeView(HttpAPIView):
         # verify session key is correct
         
         return akey, user_id
-        
+    
+    def get_new_session_user_key(self):
+        return str(uuid.uuid4())
+    
     def get_actionpipe_data(self, request):
         """
         Get the request/session associated current actionpipe data
@@ -303,10 +306,10 @@ class ActionPipeView(HttpAPIView):
         action = kwargs.get('action', self.default_action)
         action_data = kwargs.get('pipe')
         
-        action_forms = self.get_validated_forms(self.get_forms_instances(action),
+        action_forms = self.get_validated_forms(self.get_forms_instances(action,
+                                                                         kwargs),
                                  action_data['pipe_data'],
-                                 action,
-                                 save_forms=False
+                                 action
                                  )
         
         # check for form validity
@@ -355,7 +358,7 @@ class ActionPipeView(HttpAPIView):
         Else, it redirects to the corresponding action end
         '''
         if user_data == None:
-            user_data = kwargs.get('pipe')
+            user_data = kwargs.get('pipe', {})
         
         # set cooky for pipeline tracking
         # we need to have an extra cookie
@@ -369,7 +372,7 @@ class ActionPipeView(HttpAPIView):
         # when it's a new user
         # accessing directly the view without an action started
         # we set the default action to the view name
-        if user_data['pipe'] == 'undefined':
+        if 'pipe' in user_data and user_data['pipe'] == 'undefined':
             #user_data['pipe'] = self.pipe_name
             #if not 'pipe_data' in user_data:
             #    user_data['pipe_data'] = {}

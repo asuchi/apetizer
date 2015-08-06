@@ -14,10 +14,12 @@
            {{ content }}
        {% endautoescape %}
        </div>
+       {% comment %}
        <div class="documentation-content" >
            <h3>Default request:</h3>
            <iframe width="100%" height="320" src="{{ data_api_url }}" ></iframe>
        </div>
+       {% endcomment %}
    </div>
 </div>
 {% endblock %}

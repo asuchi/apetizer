@@ -210,7 +210,7 @@ class HttpAPIView(View):
 
         return data
     
-    def get_forms_instances(self, action):
+    def get_forms_instances(self, action, kwargs):
         """
         Override this method to retreive instance for action
         """
@@ -278,6 +278,7 @@ class HttpAPIView(View):
                                     form_instance.full_clean()
                                     form_instance.save()
                                     form_instance.is_saved = True
+                                    print 'Form saved'
                         else:
                             form_instance = form_class(instance=model_instance)
                         forms += (form_instance,)
@@ -463,20 +464,31 @@ class HttpAPIView(View):
             Return API documentation from action
             methods docstring and corresponding forms.
             """
-            
-            doc_string = '<p><h1 class="documentation-section-title" >' + self.__class__.__name__ + '</h1>'
+            import inspect
 
+            def get_class_that_defined_method(meth):
+                for cls in inspect.getmro(meth.im_class):
+                    if meth.__name__ in cls.__dict__: 
+                        return cls
+                return None
+            doc_string = '<p class="" ><h2 class="ui header" >' + self.__class__.__name__ + '</h2>'
             doc_string += self.__class__.__version__ + '</p>'
-
             if self.__class__.__doc__:
-                doc_string += '<h2>' + self.__class__.__doc__.replace('\n', '<br />') + '</h2>'
+                doc_string += '<p class="ui sub header">' + self.__class__.__doc__.replace('\n', '<br />') + '</p>'
 
-            doc_string += '<h3 class="documentation-section-title">Actions</h3>'
-
-            for action in self.actions:
-                doc_string += '<div class="documentation-action">'
-                doc_string += '<p>'
-                doc_string += '<b>'+action+' :</b>'
+            #doc_string += '<h3 class="documentation-section-title">Actions</h3>'
+            doc_actions = self.actions
+            doc_actions.sort()
+            for action in doc_actions:
+                doc_string += '<div class="ui segment">'
+                doc_string += '<div class="ui header" >'                
+                doc_string += action
+                doc_string += '<div class="sub header" >'
+                doc_string += get_class_that_defined_method(getattr(self, 'process_' + action)).__name__
+                doc_string += '</div>'
+                doc_string += '</div>'
+                
+                doc_string += '</p>'
                 if hasattr(self, 'process_' + action):
                     docstring = getattr(self, 'process_' + action).__doc__
                     if docstring:
@@ -487,7 +499,7 @@ class HttpAPIView(View):
 
                 if action in self.actions_forms and len(self.actions_forms[action]):
 
-                    doc_string += '<h3 class="documentation-section-title">Forms</h3>'
+                    #doc_string += '<h3 class="documentation-section-title">Forms</h3>'
 
                     for form in self.actions_forms[action]:
                         doc_string += '<div class="documentation-form" >'
