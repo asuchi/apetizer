@@ -14,7 +14,7 @@ import traceback
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.forms.models import model_to_dict
+from django.forms.models import model_to_dict, ModelForm
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
@@ -288,7 +288,8 @@ class HttpAPIView(View):
                 form_instance = form_class(data=input_data)
                 if save_forms and form_instance.has_changed() \
                         and form_instance.is_valid():
-                    form_instance.save()
+                    if issubclass(form_class, ModelForm):
+                        form_instance.save()
                 forms += (form_instance,)
         
         return forms
