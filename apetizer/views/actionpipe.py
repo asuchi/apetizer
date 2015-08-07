@@ -198,11 +198,9 @@ class ActionPipeView(HttpAPIView):
         """
         # get actual user data
         kwargs['pipe'] = self.get_actionpipe_data(request)
-        
-        response = self.process(request, user_profile, input_data, **kwargs)
-        
+        response = super(ActionPipeView, self).pre_process(request, user_profile, input_data, **kwargs)
         kwargs['pipe'] = self.get_actionpipe_data(request)
-        
+
         return self.finish(request, response, user_data=kwargs['pipe'], **kwargs)
     
     def process_start(self, request, user_profile, input_data, template_args,
