@@ -72,20 +72,26 @@ class ActionPipeView(HttpAPIView):
         Get actionpipe data container key
         Generates a new one if missing cookie
         """
-        akey = request.COOKIES.get('akey', self.get_new_session_user_key())
+        akey = request.COOKIES.get('akey', None)
+        if not akey:
+            if request.session.has_key('akey'):
+                akey = request.session['akey']
+            if not akey:
+                # generate a new one
+                akey = self.get_new_session_user_key()
         if request.user.is_authenticated():
             user_id = str(request.user.id)
         else:
             user_id = 'guest'
-        
+
         # TODO
         # verify session key is correct
-        
+        request.session['akey'] = akey
         return akey, user_id
-    
+
     def get_new_session_user_key(self):
         return str(uuid.uuid4())
-    
+
     def get_actionpipe_data(self, request):
         """
         Get the request/session associated current actionpipe data
