@@ -49,15 +49,15 @@ class HttpAPIView(View):
     internal_actions = ['view', 'doc']
 
     default_action = 'view'
-    
+ 
     class_actions = ['view', 'doc']
     class_actions_forms = {'view': []}
     class_action_templates = {}
-    
+
     action_forms_autosave = False
 
     json_parser = API_json_parser
-    
+
     def __init__(self, **kwargs):
         """
         Constructor. Called in the URLconf; can contain helpful extra
@@ -67,16 +67,16 @@ class HttpAPIView(View):
         # register view_name over a global variable
         super(HttpAPIView, self).__init__(**kwargs)
         _apetizer_api_views_by_name.append(self.view_name)
-        #self.__class__.get_actions()
+        self.__class__.get_actions()
 
     @classmethod
     def get_actions(cls):
         class_stack = inspect.getmro(cls)[::-1]
-        
+
         cls.actions = cls.class_actions
         cls.actions_forms = {}
         cls.action_templates = {}
-        
+
         for base_class in class_stack:
             check_classes = inspect.getmro(base_class)
             if base_class != cls and HttpAPIView in check_classes:
@@ -311,10 +311,11 @@ class HttpAPIView(View):
         Any response returned by the action is accepted
         """
         action = kwargs.get('action', None)
-        if action is None:
+        if action is None or not action:
             action = self.default_action
             kwargs['action'] = action
-        elif action not in self.actions + self.internal_actions:
+        
+        elif not action in self.actions + self.internal_actions:
             logger.debug('Missing action '+action)
             raise Http404
 
@@ -323,7 +324,7 @@ class HttpAPIView(View):
             template_args = self.get_user_dict(request, **kwargs)
         else:
             template_args = self.get_context_dict(request, **kwargs)
-        
+
         if self.__getattribute__('process_'+action):
             response = self.__getattribute__('process_'+action)(request,
                                                             user_profile, 

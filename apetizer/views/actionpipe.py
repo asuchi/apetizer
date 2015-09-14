@@ -130,7 +130,7 @@ class ActionPipeView(HttpAPIView):
         for field in fields:
             if not pipe_data['pipe_data'][field]:
                 del pipe_data['pipe_data'][field]
-        
+
         return pipe_data
 
     def get_default_pipe_data(self, request, akey, user_id):
@@ -183,12 +183,13 @@ class ActionPipeView(HttpAPIView):
         if next_view is None:
             # if all fields are completed,
             # redirect to last view of the actionpipe
-            next_view = self.pipe_scenario[field].get('class')
-            next_action = self.pipe_scenario[field].get('action')
-        
+            if user_data['origin_url']:
+                return user_data['origin_url']
+            else:
+                return self.get_reversed_action(self.view_name, 'view', kwargs)
+
         return self.get_reversed_action(next_view.view_name, next_action, kwargs)
-    
-    
+
     def start_action_pipe(self, request):
         '''
         this method manages start of the pipe
