@@ -269,8 +269,8 @@ class ActionView(View):
         action_data = kwargs.get('pipe')
         
         action_forms = self.get_validated_forms(self.get_forms_instances(action, kwargs),
-                                 action_data['pipe_data'],
-                                 action)
+                                                action_data['pipe_data'],
+                                                action, files=request.FILES)
         
         template_args['action_forms'] = action_forms
         
@@ -323,8 +323,7 @@ class ActionView(View):
                                                             template_args,
                                                             **kwargs)
         else:
-            return self.render(request, result_payload, result_message,
-                               result_status, **kwargs)
+            raise Http404
 
     def process_view(self, request, user_profile, input_data, template_args,
                      **kwargs):

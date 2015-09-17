@@ -203,7 +203,9 @@ class HttpAPIView(View):
             data.update(json.loads(request.body))
         else:
             data.update(request.POST.dict())
-
+        
+        
+        
         # remove csrftoken
         if 'csrfmiddlewaretoken' in data:
             del data['csrfmiddlewaretoken']
@@ -243,7 +245,7 @@ class HttpAPIView(View):
         return forms
     
     def get_validated_forms(self, form_models, input_data, action,
-                            save_forms=None):
+                            save_forms=None, files=None):
         """
         From a tuple of model instances,
         get the corresponding action forms instances
@@ -252,7 +254,8 @@ class HttpAPIView(View):
         """
         if save_forms is None:
             save_forms = self.action_forms_autosave
-
+        if files is None:
+            files = {}
         forms = tuple()
         if action in self.actions_forms:
             aforms = self.actions_forms[action]
@@ -272,7 +275,7 @@ class HttpAPIView(View):
 
                             # assign to form and save if changed and valid
                             form_instance = form_class(instance=model_instance,
-                                                       data=form_data)
+                                                       data=form_data, files=files)
                             if save_forms and form_instance.has_changed():
                                 if form_instance.is_valid():
                                     form_instance.full_clean()
@@ -331,7 +334,7 @@ class HttpAPIView(View):
                                                             input_data,
                                                             template_args,
                                                             **kwargs)
-            return self.finish(request, response, **kwargs)
+            return response
         else:
             result_payload = input_data
             result_message = ugettext(u'Action Not implemented:'+action)

@@ -44,11 +44,9 @@ class ActionPipeView(HttpAPIView):
         'pipe': 'undefined',
         'pipe_data': json.dumps({}),
     }
-    
-    class_actions = ['start', 'view', 'prev', 'next', 'end']
-    
+    class_actions = ['view', 'prev', 'next', 'reset']
     pipe_table = KVStore()
-
+    pipe_scenario = OrderedDict([])
     '''
     pipe_scenario defines a sequence of field names
     that has to be filled by the user to complete the pipe action
@@ -57,25 +55,27 @@ class ActionPipeView(HttpAPIView):
     scenario will run until all flaged data elements are filled with something
     '''
     def __init__(self, **kwargs):
-        super(ActionPipeView, self).__init__(**kwargs)
-        self.pipe_scenario = OrderedDict([('pipe-started',
-                                           {'class': self.__class__,
-                                            'action': 'start'}
-                                           ),
-                                          ('pipe-finished',
-                                           {'class': self.__class__,
-                                            'action': 'finish'}
-                                           )])
+        return super(ActionPipeView, self).__init__(**kwargs)
+
+        #self.pipe_scenario = OrderedDict([('pipe-started',
+        #                                   {'class': self.__class__,
+        #                                    'action': 'start'}
+        #                                   ),
+        #                                  ('pipe-finished',
+        #                                   {'class': self.__class__,
+        #                                    'action': 'finish'}
+        #                                   )])
 
     def get_session_user_keys(self, request):
         """
         Get actionpipe data container key
         Generates a new one if missing cookie
         """
-        akey = request.COOKIES.get('akey', None)
+        akey = None
+        if request.session.has_key('akey'):
+            akey = request.session['akey']
         if not akey:
-            if request.session.has_key('akey'):
-                akey = request.session['akey']
+            akey = request.COOKIES.get('akey', None)
             if not akey:
                 # generate a new one
                 akey = self.get_new_session_user_key()
@@ -190,13 +190,9 @@ class ActionPipeView(HttpAPIView):
 
         return self.get_reversed_action(next_view.view_name, next_action, kwargs)
 
-    def start_action_pipe(self, request):
-        '''
-        this method manages start of the pipe
-        it' meant to be overriden by concerned views
-        '''
-        # override this method to manage start action custom setup
-        return True
+    def get_prev_url(self, user_data, **kwargs):
+        # TODO
+        raise NotImplemented('Coming next !')
     
     def pre_process(self, request, user_profile, input_data, **kwargs):
         """
@@ -206,46 +202,7 @@ class ActionPipeView(HttpAPIView):
         # get actual user data
         kwargs['pipe'] = self.get_actionpipe_data(request)
         response = super(ActionPipeView, self).pre_process(request, user_profile, input_data, **kwargs)
-        kwargs['pipe'] = self.get_actionpipe_data(request)
-
-        return self.finish(request, response, user_data=kwargs['pipe'], **kwargs)
-    
-    def process_start(self, request, user_profile, input_data, template_args,
-                      **kwargs):
-        '''
-        main processing of the start action
-        set's initial values gathered by request get or post
-        only fields that exists in the actionpipe configuration are allowed
-        '''
-        user_data = kwargs.get('pipe')
-        
-        # check for an existing action
-        if user_data['pipe'] != self.pipe_name:
-            # set default data
-            akey, user_id = self.get_session_user_keys(request)
-            user_data = self.get_default_pipe_data(request, akey, user_id)
-
-        # override action with this new one
-        user_data['pipe'] = self.pipe_name
-        user_data['origin_url'] = self.get_referer_path(request)
-        
-        # save
-        user_data = self.save_actionpipe_data(request, user_data)
-        
-        # get to the first field url
-        first_field = list(self.pipe_scenario.keys())[0]
-        
-        # to have the corresponding redirection
-        redirect_to = reverse(self.pipe_scenario[first_field].get('class').view_name,
-                              kwargs={'action': self.pipe_scenario[first_field].get('action')}
-                              )
-
-        # add previous parameter for google analytics tracking
-        if request.method.lower() == 'get' and request.GET.get('previous'):
-            redirect_to += '?previous=' + request.GET.get('previous')
-
-        response = HttpResponseRedirect(redirect_to)
-        return response
+        return self.finish(request, response, **kwargs)
     
     def process_next(self, request, user_profile, input_data, template_args, **kwargs):
         '''
@@ -259,52 +216,30 @@ class ActionPipeView(HttpAPIView):
         '''
         return HttpResponseRedirect(self.get_prev_url(kwargs.get('pipe'), **kwargs))
 
+
     def process_reset(self, request, user_profile, input_data, template_args, **kwargs):
         '''
         call this method to be redirected to the previous pipe view
         '''
-        return HttpResponseRedirect(self.get_prev_url(kwargs.get('pipe'), **kwargs))
-    
-    
-    def process_end(self, request,
-                    user_profile, input_data, template_args, **kwargs):
-        '''
-        the end view is designed as a callback
-        it's is meant to be called only by a get request
-        so the logic is not implement in the process method
-        but in the get method
-        '''
-        # test if session exists
-        #session_key = request.session.session_key
-        #if session_key is None:
-            # handle a redirect to the current page 
-            # in order to have the session inited
-            # this happens when landing
-        #    return HttpResponseRedirect(reverse(self.view_name,
-        #                                        kwargs={'action': kwargs.get('action',self.default_action)}
-        #                                        ))
-        
-        #
         user_data = kwargs.get('pipe')
         
-        
-        
-        # execute the finish action hook
-        response = self.finish_action_pipe(request, **kwargs)
-        
         # clean action data if we are finishing the actual pipe
-        if user_data['pipe'] == self.pipe_name:
+        #if user_data['pipe'] == self.pipe_name:
             # markup end action time
-            user_data['action_end_time'] = strftime(now(),
-                                                    '%Y-%m-%d-%H-%M')
+        user_data['action_end_time'] = strftime(now(),
+                                                '%Y-%m-%d-%H-%M')
 
-            user_data = self.update_actionpipe_data(request, user_data)
-            user_data = self.save_actionpipe_data(request, user_data)
-
-            # removing current akey cookie will rotate the key
-            response.delete_cookie('akey')
-
-        return response
+        user_data = self.update_actionpipe_data(request, user_data)
+        user_data = self.save_actionpipe_data(request, user_data)
+        
+        # rotate session akey
+        request.session['akey'] = self.get_new_session_user_key()
+        self.save_actionpipe_data(request, self.get_default_pipe_data(request, request.session['akey'], 'guest'))
+        # removing current akey cookie will rotate the key
+        return HttpResponseRedirect(self.get_reversed_action(self.view_name, self.default_action, kwargs))
+        #else:
+        #    return self.ren
+    
     
     def manage_pipe(self, request, user_profile, input_data, template_args, **kwargs):
         
@@ -314,7 +249,7 @@ class ActionPipeView(HttpAPIView):
         action_forms = self.get_validated_forms(self.get_forms_instances(action,
                                                                          kwargs),
                                  action_data['pipe_data'],
-                                 action
+                                 action, files=request.FILES
                                  )
         
         # check for form validity
@@ -339,6 +274,7 @@ class ActionPipeView(HttpAPIView):
         
         return response
     
+    # deprecated
     def finish_action_pipe(self, request, user_data, **kwargs):
         '''
         this method manages end of the pipe
@@ -355,22 +291,22 @@ class ActionPipeView(HttpAPIView):
         response = HttpResponseRedirect(user_data['origin_url'])
         return response
 
-    def finish(self, request,
-               response, user_data=None, override=False, **kwargs):
+    def finish(self, request, response, **kwargs):
         '''
         Tests if the action required data have been all gathered
         If not, it manages redirect to the correct view
         Else, it redirects to the corresponding action end
         '''
-        if user_data == None:
-            user_data = kwargs.get('pipe', {})
-        
+        #if pipe == None:
+        #    user_data = kwargs.get('pipe', {})
+        user_data = self.get_actionpipe_data(request)
+
         # set cooky for pipeline tracking
         # we need to have an extra cookie
         # in order to maintain data across different auhtentication
         if 'akey' in user_data:
             response.set_cookie('akey', user_data['akey'])
-
+        
         if request.method == 'GET':
             return response
 
@@ -383,15 +319,9 @@ class ActionPipeView(HttpAPIView):
             #    user_data['pipe_data'] = {}
             self.update_actionpipe_data(request, user_data['pipe_data'])
 
-        if override:
-            next_url = self.get_next_url(user_data, **kwargs)
-            if next_url != request.path:
-                return response
-            else:
-                return HttpResponseRedirect(next_url)
-
         return response
-            
+    
+    # deprecated
     def get_final_url(self, action_data):
         """
         get a final url for the pipe action
@@ -439,9 +369,8 @@ class ActionPipeView(HttpAPIView):
                                 messages.error(request, error_message)
                                 all_forms_valid = False
                                 f.errors[field] = e.messages[0]
-        
-        return all_forms_valid
 
+        return all_forms_valid
 
     def update_actionpipe_data(self, request, data, akey=None, user_id=None):
         """
@@ -486,8 +415,11 @@ class ActionPipeView(HttpAPIView):
         you should not try to save data another way
         because of cache handling
         '''
-        if akey is None or user_id is None:
-            akey, user_id = self.get_session_user_keys(request)
+        if akey is None:
+            if 'akey' in data_dict and data_dict['akey']:
+                akey = data_dict['akey']
+            else:
+                akey, user_id = self.get_session_user_keys(request)
 
         # update the data dict with fresh data as a base
         data_dict = self.update_actionpipe_data(request, data_dict['pipe_data'], akey=akey,
