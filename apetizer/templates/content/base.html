@@ -1,0 +1,143 @@
+{% extends 'apetizer/base.html' %}
+{% load static content_tags content_ui_tags thumbnail momentjs moderate_tags markdown_deux_tags %}
+
+{% block page_message %}
+{% endblock %}
+
+{% block page_article %}
+    <div id="masthead" class="ui masthead vertical segment" >
+        
+        {% block page_head %}
+        <div class="ui container">
+            {% content_breadcrumb currentNode %}
+            
+            <div class="introduction">
+                <h1 class="ui header">{{ currentNode.title }}</h1>
+               
+                <div class="ui secondary pointing top menu">
+                    {% if action != 'view' or currentNode.published == False %}
+                    <a class="icon item" href="view/" ><i class="icon eye"></i></a>
+                    <a class="icon item" href="translate/" ><i class="icon edit"></i></a>
+                    <a class="icon item" href="publish/" ><i class="icon book"></i></a>
+                    <a class="icon item" href="code/" ><i class="icon code"></i></a>
+                    
+                    <a class="icon item right" href="timing/" ><i class="icon clock"></i></a>
+                    <a class="icon item" href="location/" ><i class="icon map"></i></a>
+                    <a class="icon item" href="image/" ><i class="icon picture"></i></a>
+                    {% else %}
+                    <a class="ui button icon item right" href="translate/" ><i class="icon edit"></i></a>
+                    {% endif %}
+                </div>
+                
+                {% block page_messages %}
+                <div class="ui list">
+                {% for message in messages %}
+                    {% if not debug or 'debug' not in message.tags %}
+                        <div class="ui warning message">
+                          <i class="close icon"></i>
+                          <div class="header">
+                            {{ message.title }}
+                          </div>
+                          {{ message|safe }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+                {% endblock %}
+                
+                {% block body %}
+                <div class="ui item" >
+                    {% if not currentNode.description %}
+                        <a class="ui small label" href="translate/" >Completer la description ...</a>
+                    {% else %}
+                        <div class="ui header">{{ currentNode.description|markdown }}</div>
+                    {% endif %}
+                </div>
+                {% endblock %}
+                
+            </div>
+            <div class="advertisement attached top right">
+                
+                <a class="ui medium image" href="{{ currentNode.get_url }}image/" >
+                {% if currentNode.image %}
+                    <img src="{{ currentNode.image.url }}" />
+                {% else %}
+                    <img src="{% static 'components/semantic/dist/assets/images/image-16by9.png' %}" />
+                {% endif %}
+                </a>
+                
+                <div class="ui items" >
+                    {% for node in paginator.object_list %}
+                        {% if node.behavior == 'file' %}
+                        <div class="ui mini spaced image" >
+                            <img src="{% thumbnail ufile.file 64x64 %}" />
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <div class="ui hidden divider"></div>
+                <div class="ui items" >
+                <div class="ui right item">
+                    <a class="ui tiny label" href="related/" ><i class="icon lab"></i> <label>Lien externe</label></a>
+                    {% if not currentNode.related_url %}
+                    <a class="ui circular label" href="related/" title="Ajouter" >+</a>
+                    {% endif %}
+                </div>
+                {% if action != 'view' %}
+                {% endif %}
+                {% if currentNode.related_url %}
+                <div class="ui tiny item">
+                    <a href="{{ currentNode.related_url }}"  target="_blank" >{{ currentNode.related_url|truncatechars:"128" }}</a>
+                </div>
+                {% else %}
+                
+                {% endif %}
+                </div>
+            </div>
+
+        </div>
+        {% endblock page_head %}
+        {% if not currentNode.published or action != 'view' %}
+        <div class="ui sixteen wide column" style="margin-top:2em;opacity:0.7">
+            <div class="ui secondary pointing bottom menu full width">
+                <a class="icon item" href="index/" ><i class="icon arrow up"></i></a>
+                <a class="icon item" href="view/" ><i class="icon book"></i></a>
+                <a class="icon item" href="timeline/" ><i class="icon calendar"></i></a>
+                <a class="icon item" href="map/" ><i class="icon globe"></i></a>
+                <div class="label item right" >{{ action }}</div>
+                <a class="icon item right" href="code/" ><i class="icon code"></i></a>
+                <a class="icon item" href="{{ currentNode.get_uid_url }}directory/" ><i class="icon sitemap"></i></a>
+                <a class="icon item" href="program/" ><i class="icon cogs"></i></a>
+                <a class="icon item right" href="next/" ><i class="icon arrow right"></i></a>
+            </div>
+        </div>
+        {% else %}
+        <div class="ui hidden divider" ></div>
+        {% endif %}
+    </div>
+
+    <div class="ui main stackable internally divided padded grid">      
+        
+        
+        <div class="row">
+        {% block page_container %}
+        {% block content %}
+            {% if nodes|length %}
+            <div class="ui horizontal list">
+                <a class="ui item " href="add/?order=-1#top" title="Ajouter"><i class="ui icon add"></i> Inserer un article</a>
+                <a class="ui item " href="upload/?order=-1#top" title="Ajouter"><i class="ui icon upload"></i> Inserer des fichier</a>
+            </div>
+            {% if request.GET.order == '-1' %}
+                {% if action == 'add' %}
+                    <div class="ui segment">{% include 'content/tags/form.html' %}</div>
+                {% elif action == 'upload' %}
+                    <div class="ui segment">{% include 'ui/tags/upload.html' %}</div>
+                {% endif %}
+            {% endif %}
+            {% endif %}
+        {% endblock %}
+        {% endblock page_container %}
+        </div>
+    </div>
+{% endblock page_article %}

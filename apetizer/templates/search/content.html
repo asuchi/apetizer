@@ -1,0 +1,34 @@
+{% load i18n content_tags %}
+
+{% if user_data.search_path == 'france' %}
+<div class="drilldown-content" >		
+	{% content_item request.path %}
+</div>
+<div class="drilldown-content">
+	{% drilldown_france_top_towns %}
+</div>
+{% else %}
+	{% comment %}
+	{% if item %}
+	<div class="drilldown-content">
+		{% content_item item.get_url %}
+	</div>
+	{% endif %}
+	{% endcomment %}
+	
+	{% if top_admin3_list %}
+	<div class="drilldown-content">
+		<h3>{% trans "Top admin3s " %}</h3>
+		<ul class="top-vehicle-list clearfix" >
+		{% for pa in top_admin3_list %}
+			<li class="top-vehicle-tile clearfix">
+				<a href="{{ pa.vehicle.get_absolute_url }}" class="reserve-link">
+					<div class="fulldiv-image" style="width:100%;height:140px;background-image:url({{ pa.vehicle.get_visual }})" ></div>
+					<span><strong>{{ pa.vehicle.model }}</strong> - {{ pa.vehicle.year }}</span>
+				</a>
+			</li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+{% endif %}

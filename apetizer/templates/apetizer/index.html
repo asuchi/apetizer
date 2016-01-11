@@ -1,0 +1,367 @@
+{% extends 'apetizer/base.html' %}<!DOCTYPE html>
+{% load markdown_deux_tags content_tags i18n leaflet_tags %}
+
+{% block extra-styles %}
+{{ block.super }}
+  <style type="text/css">
+
+    .hidden.menu {
+      display: none;
+    }
+    .decor-top{
+        position:relative;
+        height:0px;
+        top:-40px;
+        width:100%;
+    }
+    .decor-bottom{
+        position:relative;
+        height:0px;
+        top:0px;
+        width:100%;
+        z-index:1;
+    }
+    
+    .decor-top svg {
+        fill:white;
+        height:40px;
+    }
+    .decor-bottom svg {
+        fill:white;
+        height:40px;
+       
+    }
+    
+    .masthead.segment {
+      padding: 1em 0em 9em 0em;
+    }
+    .masthead .logo.item img {
+      margin-right: 1em;
+    }
+    .masthead .ui.menu .ui.button {
+      margin-left: 0.5em;
+    }
+    .masthead h1.ui.header {
+      margin-top: 2em;
+      margin-bottom: 0em;
+      font-size: 4em;
+      font-weight: normal;
+    }
+    .masthead h2 {
+      font-size: 1.7em;
+      font-weight: normal;
+    }
+
+    .ui.vertical.stripe {
+      padding: 8em 0em;
+    }
+    .ui.vertical.stripe h3 {
+      font-size: 2em;
+    }
+    .ui.vertical.stripe .button + h3,
+    .ui.vertical.stripe p + h3 {
+      margin-top: 3em;
+    }
+    .ui.vertical.stripe .floated.image {
+      clear: both;
+    }
+    .ui.vertical.stripe p {
+      font-size: 1.33em;
+    }
+    .ui.vertical.stripe .horizontal.divider {
+      margin: 3em 0em;
+    }
+
+    .quote.stripe.segment {
+      padding: 0em;
+    }
+    .quote.stripe.segment .grid .column {
+      padding-top: 5em;
+      padding-bottom: 5em;
+    }
+
+    .footer.segment {
+      padding: 5em 0em;
+    }
+
+    .secondary.pointing.menu .toc.item {
+      display: none;
+    }
+
+    @media only screen and (max-width: 700px) {
+      .ui.fixed.menu {
+        display: none !important;
+      }
+      .secondary.pointing.menu .item,
+      .secondary.pointing.menu .menu {
+        display: none;
+      }
+      .secondary.pointing.menu .toc.item {
+        display: block;
+      }
+      .masthead.segment {
+        min-height: 350px;
+      }
+      .masthead h1.ui.header {
+        font-size: 2em;
+        margin-top: 1.5em;
+      }
+      .masthead h2 {
+        margin-top: 0.5em;
+        font-size: 1.5em;
+      }
+    }
+
+    #content-map{
+        height:100%;
+    }
+</style>
+{% leaflet_css %}
+
+{% endblock %}
+
+{% block page_body %}
+<!-- Following Menu -->
+<div class="ui large top fixed hidden menu">
+  <div class="ui container">
+    <a class="active item">Accueil</a>
+    <div class="right menu">
+      <div class="item">
+        <a class="ui button" href="login/" >Log in</a>
+      </div>
+      <div class="item">
+        <a class="ui primary button" href="register/" >Sign Up</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar Menu -->
+<div class="ui vertical inverted sidebar menu">
+  <a class="active item">Home</a>
+  <a class="item">Work</a>
+  <a class="item">Company</a>
+  <a class="item">Careers</a>
+  <a href="login/" class="item">Login</a>
+  <a href="register/" class="item">Signup</a>
+</div>
+
+
+<!-- Page Contents -->
+<div class="pusher">
+  <div class="ui inverted vertical masthead center aligned segment">
+     
+    <div style="position:absolute;
+                top:0px;left:0px;
+                width:100%;height:100%;
+                opacity:0.2;
+                z-index:0;
+                background-repeat:none;
+                background-size:cover;
+                background-position:center center;
+                background-image:url('{{ currentNode.get_image.url }}')">
+    {% if currentNode.geosjon  %}
+    {% leaflet_map "content-map" callback="window.map_init_basic" %}
+    {% endif %}
+    </div>
+    <div class="ui container" style="z-index:1">
+      <div class="ui large secondary inverted pointing menu">
+        <a class="toc item">
+          <i class="sidebar icon"></i>
+        </a>
+        <a href="{{ currentNode.get_root.get_url }}" class="{% if not currentNode.parent %}active{% endif %} item">{{ currentNode.get_root.label }}</a>
+        {% if currentNode.parent %}
+            <a href="{{ currentNode.parent.get_url }}" class="item"><i class="left arrow icon"></i></a>
+            <a href="{{ currentNode.parent.get_url }}view/" class="active item"> {{ currentNode.label }} </a>
+
+        {% endif %}
+        <div class="right item">
+          <a href="{{ user_profile.get_url }}profile/" class="ui inverted button">{{ user_profile.get_full_name }}</a>
+        </div>
+      </div>
+    </div>
+    <div class="ui text container" style="position:relative;z-index:1" >
+    {% block body %}
+      <h1 class="ui inverted header">
+        {{ currentNode.title }}
+      </h1>
+      <h2>{{ currentNode.description|markdown }}</h2>
+      <a class="ui huge primary button" href="next/" >Visiter <i class="right arrow icon"></i></a>
+    {% endblock %}
+    </div>
+  </div>
+  <div class="decor-top" >      
+    <svg height="100%" preserveAspectRatio="none" version="1.1" viewBox="0 0 100 100" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 100 L100 0 L100 100" stroke-width="0" background-color="#ffffff"></path>
+    </svg>
+  </div>
+
+  <div class="ui vertical stripe segment">
+    <div class="ui middle aligned stackable grid container">
+      <div class="row">
+        <div class="thirteen wide column">
+            {% content_render currentNode.content %}
+        </div>
+      </div>
+      <div class="row">
+          {% for node in current_page.object_list %}
+        <div class="eight wide column">
+              <h3 class="ui header">{{ node.title }}</h3>
+              <p>{{ node.description }}</p>
+                <a href="{{ node.get_url }}" >{{ node.label }} - {{ node.title }}</a></br>
+        </div>
+          {% endfor %}
+          {% for node in current_page.object_list %}
+        <div class="six wide right floated column">
+              {% if node.image %}
+              <a class="ui item" href="{{ node.get_url }}">
+                <img src="{{ node.get_image.url }}" class="ui large bordered rounded image">
+              </a>
+              {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="row">
+        <div class="center aligned column">
+          <a class="ui huge button" href="view/" >En savoir plus ...</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% comment %}
+  <div class="ui vertical stripe quote segment">
+    <div class="ui equal width stackable internally celled grid">
+      <div class="center aligned row">
+        <div class="column">
+          <h3>{{ currentNode.get_contributors|length }} contributeurs</h3>
+          <p>{{ currentNode.get_visitors|length }} visiteurs</p>
+        </div>
+        <div class="column">
+          <h3>{{ currentNode.get_descendants_count }} articles</h3>
+          <p>{{ currentNode.words }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endcomment %}
+  <div class="ui vertical stripe segment">
+    <div class="ui text container">
+        {% for node in projects %}
+            <h4 class="ui horizontal header divider">
+                <a href="#">{{ node.label }}</a>
+              </h4>
+              <h3 class="ui header">{{ node.title }}</h3>
+              <p>{{ node.description }}</p>
+              <a "ui large button" href="{{ node.get_url }}" >{{ node.label }} - {{ node.title }}</a></br>
+          {% endfor %}
+    </div>
+  </div>
+
+  <div class="decor-bottom" >
+    <svg height="100%" preserveAspectRatio="none" version="1.1" viewBox="0 0 100 100" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 0 L100 100 L100 0" stroke-width="0" background-color="#ffffff"></path>
+    </svg>
+  </div>
+
+  <div class="ui inverted vertical footer segment">
+    <div class="ui container">
+      <div class="ui stackable inverted divided equal height stackable grid">
+        <div class="three wide column">
+          <h4 class="ui inverted header">About</h4>
+          <div class="ui inverted link list">
+            <a href="contact/" class="item">Contact</a>
+          </div>
+        </div>
+        <div class="three wide column">
+          <h4 class="ui inverted header">Services</h4>
+          <div class="ui inverted link list">
+            <a href="{{ documentation_url }}" class="item">Documentation</a>
+          </div>
+        </div>
+        <div class="seven wide column">
+          <h4 class="ui inverted header">Footer Header</h4>
+          <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+<script src="/static/components/semantic/dist/assets/library/jquery.min.js"></script>
+<script src="/static/components/semantic/dist/components/visibility.js"></script>
+<script src="/static/components/semantic/dist/components/sidebar.js"></script>
+<script src="/static/components/semantic/dist/components/transition.js"></script>
+
+{% block extra-scripts %}
+{{ block.super }}
+<script>
+$(document)
+  .ready(function() {
+
+    // fix menu when passed
+    $('.masthead')
+      .visibility({
+        once: false,
+        onBottomPassed: function() {
+          $('.fixed.menu').transition('fade in');
+        },
+        onBottomPassedReverse: function() {
+          $('.fixed.menu').transition('fade out');
+        }
+      })
+    ;
+
+    // create sidebar and attach to menu open
+    $('.ui.sidebar')
+      .sidebar('attach events', '.toc.item')
+    ;
+
+  })
+;
+</script>
+
+{% if currentNode.behavior == 'Zmap' and currentNode.geosjon or currentNode.latitude or currentNode.longitude %}
+
+{% leaflet_js %}
+
+<script type="text/javascript">
+    
+    {% autoescape off %}
+    function map_init_basic(map, options) {
+        
+        {% with items=currentNode.get_descendants %}
+        
+        var items = new L.LayerGroup();
+        
+        {% if currentNode.geosjon %}
+            L.geoJson({{item.geosjon}}).addTo(map);
+        {% endif %}
+        {% for item in items %}
+           {% if item.geosjon %}
+            L.geoJson({{item.geosjon}}).addTo(map);
+            {% endif %}
+        {% endfor %}
+        
+        {% if items|length or currentNode.geosjon %}
+            items.addTo(map);
+            map.fitBounds(items.getBounds());
+        {% endif %}
+        {% endwith %}
+        
+        map.dragging.disable();
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.boxZoom.disable();
+        map.keyboard.disable();
+        if (map.tap) map.tap.disable();
+        document.getElementById('content-map').style.cursor='default';
+    }
+    {% endautoescape %}
+    
+</script>
+ {% endif %}
+ 
+{% endblock %}

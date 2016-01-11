@@ -1,0 +1,34 @@
+{% load i18n search_tags drilldown_tags %}
+
+<div class="ui form">
+    <h4 class="ui dividing header">Rechercher</h4>
+    <div class="fields">
+        <div class="eight wide field" >
+            {% for field in search_keyword_form %}
+                {{ field.label_tag }}
+                {{ field }}
+            {% endfor %}
+        </div>
+        <div class="eight wide field" >
+        	{% for field in search_input_form %}
+      	    	{{ field.label_tag }}
+      	    	{{ field }}
+    	    {% endfor %}
+    	    {% for filter_field in search_form %}
+    		    {{ filter_field }}
+    		{% endfor %}
+    		<p></p>
+        </div>
+    </div>
+    
+    <div>
+    KP :
+        {{ search_input_form.search_input.value|drilldown_key_label:'slug' }} ({{ search_input_form.search_input.value|drilldown_key_count:'slug' }})
+    GPS :
+        {{ search_form.search_lat.value }}
+        {{ search_form.search_lng.value }}
+    RADIUS :
+        {{ search_form.search_radius.value }}
+    </div>
+    
+</div>

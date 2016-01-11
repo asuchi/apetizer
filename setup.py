@@ -1,17 +1,23 @@
 from distutils.core import setup
-import codecs
+
 
 setup(
     name='Apetizer',
-    version='0.3.1',
+    version='0.5',
     author='Nicolas Danjean',
     author_email='nicolas@biodigitals.com',
     packages=['apetizer',
+              'apetizer.dispatchers',
+              'apetizer.forms',
+              'apetizer.middleware',
               'apetizer.parsers',
               'apetizer.storages',
-              'apetizer.views',
               'apetizer.templatetags',
-              'apetizer.test'],
+              'apetizer.test',
+              'apetizer.utils',
+              'apetizer.views',
+              'apetizer.workers',
+              ],
     package_data={'apetizer': ['apetizer/templates/*']},
     scripts=[],
     url='http://github.com/biodigitals/apetizer/',

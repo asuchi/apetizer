@@ -1,0 +1,16 @@
+<form method="POST" action="{% url reservation_search %}">
+	{% csrf_token %}
+	<input type="hidden" name="start_date" value="{{ start_date}}" />
+	<input type="hidden" name="start_hour" value="{{ start_hour }}" />
+	<input type="hidden" name="end_date" value="{{ end_date }}" />
+	<input type="hidden" name="end_hour" value="{{ end_hour }}" />
+	
+	<input type="hidden" name="estimated_distance" value="{{ estimated_distance }}" />
+	
+	<input type="hidden" name="search_lat" value="{{ search_lat }}" />
+	<input type="hidden" name="search_lng" value="{{ search_lng }}" />
+	<input type="hidden" name="search_radius" value="{{ search_radius }}" />
+	
+	<input type="submit" class="flat-btn {{ btn_color }}" value="{{ title }}" />
+</form>
+

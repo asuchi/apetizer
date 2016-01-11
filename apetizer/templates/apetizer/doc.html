@@ -1,0 +1,17 @@
+{% extends 'content/base.html' %}
+{% load i18n %}
+
+{% block extra-styles %}
+    {{ block.super }}
+    <link href="{{ STATIC_URL }}css/documentation.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block page_article %}
+<div class="ui container">
+   <div class="ui segment" >
+       {% autoescape off %}
+           {{ content }}
+       {% endautoescape %}   
+   </div>
+</div>
+{% endblock %}

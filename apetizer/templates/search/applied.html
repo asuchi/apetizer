@@ -1,0 +1,14 @@
+{% load i18n search_tags %}
+
+<div class="ui form">
+    <h4>{% trans "Filter results "%}({{ applied_filters|length }})</h4>
+    {% for filter in applied_filters %}
+        {% if filter.value %}
+	    {% ifchanged filter.label  %}<label>{{ filter.label }}</label>{% endifchanged %}
+        <div class="field" data-fvalue="{{ filter.default|escape }}" data-fname="{{ filter.key|escape }}" >
+    	    <div class="ui label full width">{{ filter.value|escape }} <i class="icon delete"></i></div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+<div class="ui hidden divider"></div>

@@ -1,0 +1,85 @@
+{% extends "content/page.html" %}
+{% load i18n leaflet_tags %}
+
+{% block page_article %}
+<div class="ui">
+{% leaflet_map "content-map" callback="window.map_init_basic" %}
+</div>
+<div class="ui hidden divider"></div>
+{{ block.super }}
+{% endblock %}
+
+{% block extra-styles %}
+{{ block.super }}
+<style>
+    #content-map{
+        height:480px;
+    }
+</style>
+{% leaflet_css %}
+{% endblock %}
+
+{% block extra-scripts %}
+{{ block.super }}
+{% leaflet_js %}
+<script type="text/javascript">
+{% autoescape off %}
+function map_init_basic(map, options) {
+
+    var items = new L.LayerGroup();
+    {% with items=currentNode.get_descendants %}
+    {% for item in items %}
+       {% if item.geosjon %}
+        L.geoJson({{item.geosjon}}).addTo(map);
+        {% endif %}
+    {% endfor %}
+    
+    var group = new L.featureGroup([
+    {% for item in items %}
+        {% if item.latitude and item.longitude %}
+            L.marker([{{ item.latitude|stringformat:'.6f' }}, {{ item.longitude|stringformat:'.6f' }}]),
+        {% endif %}
+    {% endfor %}
+    ]);
+    group.addTo(map);
+    items.addTo(map);
+    
+    map.fitBounds(group.getBounds());
+    //map.fitBounds(items.getBounds());
+    {% endwith %}
+    
+    map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.scrollWheelZoom.disable();
+    map.boxZoom.disable();
+    map.keyboard.disable();
+    if (map.tap) map.tap.disable();
+    document.getElementById('content-map').style.cursor='default';
+}
+{% endautoescape %}
+
+</script>
+{% endblock %}
+
+<script type="text/javascript">
+    function map_init_basic(map, options) {
+        var group = new L.featureGroup([
+        {% if currentNode.is_leaf_node %}
+            {% if item.latitude and item.longitude %}
+                L.marker([{{ currentNode.latitude|stringformat:'.6f' }}, {{ currentNode.longitude|stringformat:'.6f' }}]),
+            {% else %}
+                //L.marker([45.764, 4.8357]),
+            {% endif %}
+        {% else %}
+            {% for item in currentNode.get_descendants %}
+                {% if item.latitude and item.longitude %}
+                    L.marker([{{ item.latitude|stringformat:'.6f' }}, {{ item.longitude|stringformat:'.6f' }}]),
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        ]);
+        group.addTo(map);
+        map.fitBounds(group.getBounds());
+    }
+</script>

@@ -1,9 +1,96 @@
 # Apetizer
 
-# WIP
+## concepts
 
-# LIC
+Visitor
+Visitor <- Translation
+Visitor <- Translation <- Moderation
+Visitor <- Translation <- Moderation <- Item
+Visitor <- Translation <- Moderation <- Item <- Media
+Visitor <- Translation <- Moderation <- Item <- Todo
+Visitor <- Translation <- Moderation <- Item <- Event
+Visitor <- Translation <- Moderation <- Item <- Template
 
-Use same code logic to write views, json api and scenarios.
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">Apetizer</span> de <a xmlns:cc="http://creativecommons.org/ns#" href="http://github.com/biodigitals/apetizer/" property="cc:attributionName" rel="cc:attributionURL">Nicolas Danjean</a> est mis à disposition selon les termes de la <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">licence Creative Commons Attribution 4.0 International</a>.<br />Les autorisations au-delà du champ de cette licence peuvent être obtenues à <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.biodigitals.com" rel="cc:morePermissions">http://www.biodigitals.com</a>.
+## use
+
+## install
+
+### Installation
+
+Install python 2.7, virtualenv, libpython2.7-dev & postgresql-devel (libpq-dev in Debian/Ubuntu)
+
+In the directory where you have cloned the repo,
+create a virtualenv to collect python packages
+
+    
+    virtualenv --no-site-packages .
+
+Enter the virtualenv context
+
+
+    source bin/activate
+
+Install the required packages
+
+
+    pip install -r requirements.txt
+
+
+Create the database:
+
+
+    python manage.py migrate
+
+
+Create a superuser:
+
+
+    python manage.py createsuperuser
+
+
+Run the server localy:
+
+    python manage.py runserver
+
+
+# contribute
+
+## fork and get well
+
+what you don't learn in a closed source company context
+
+it's a mater of organisation ... organisation like company, but also like organising your stuff
+
+get it, enhance it, pull it back ...
+
+this looks like very simple ... but how to explain this concept to the untechnical peoples ?
+we are not all masters of git ...
+we are not all used to github tools
+
+our purpose to help you so
+
+you have the power to make changes,
+to this,
+to their,
+to our !
+
+so here are the easiest ways to help !
+
+-> edit file in github
+-> pull the request 
+
+i think this is why we don't see much people explaining this
+nobody told me or explained me how to do ... i had to figure it out by myself
+
+
+creating a pull request from your fork
+
+
+## make it yours
+
+propose your changes back to the community
+
+creating a pull request from your fork
+
+## do it yourself

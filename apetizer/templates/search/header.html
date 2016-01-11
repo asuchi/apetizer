@@ -1,0 +1,5 @@
+{% load i18n content_tags %}
+<nav id="breadcrumb" style="margin-left:-20px;margin-right: -20px;">
+    {% block breadcrumb %}{% content_breadcrumb currentNode %}{% endblock breadcrumb %}
+</nav>
+<h1>{{ page_title_snippet }}</h1>

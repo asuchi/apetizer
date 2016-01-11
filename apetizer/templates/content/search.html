@@ -1,0 +1,22 @@
+{% extends "content/page.html" %}
+{% load i18n content_tags content_ui_tags %}
+
+{% block page_head %}
+<div class="ui container" >
+{% if nodes|length > 0 %}
+    <div>{{ nodes|length }} {% trans "results" %}</div>
+{% else %}
+    <div>{% trans "No result found in content" %}</div>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block search_form %}
+<form class="ui form form-search" action="" method="get" rol="form" >
+  	<div class="ui action input form-group" >
+    	<input class="form-control" name="keyword" type="text" placeholder="{% trans "Keyword" %} ..." value="{{ keyword }}" />
+    	<input type="submit" class="ui icon search button" value="Go"/>
+    </div>
+</form>
+
+{% endblock %}

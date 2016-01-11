@@ -1,0 +1,23 @@
+{% extends 'register/base.html' %}
+
+{% block page_article %}
+<div class="ui fluid container full height">
+    {% if DEBUG  %}
+    <div class="ui segment" >Jeton: {{ user_profile.get_token }}</div>
+    {% endif %}
+    <div class="ui segment">
+        <p>Entrez votre clef pour valider cette session.</p>
+        <p>Par cette action je valide que je ne suis pas une machine.</p>
+        <hr />
+        {% include 'register/tags/form.html' %}
+        {% if DEBUG  %}
+        <p><a href="">Demander un nouveau code</a></p>
+        {% endif %}
+    </div>
+</div>
+<div>
+{% for unvalidated in nodes %}
+
+{% endfor %}
+</div>
+{% endblock %}

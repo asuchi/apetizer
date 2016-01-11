@@ -1,0 +1,109 @@
+{% extends "apetizer/base.html" %}
+{% load i18n content_tags search_tags drilldown_tags %}
+
+{% block metadata-description %}{% blocktrans with town=town %}Rent your peers car near you at {{ town }}. car with 7, 8
+    or 9 seats, trucks, sports car or luxury car. Rent your neighbors car depending on your needs.
+{% endblocktrans %}{% endblock metadata-description %}
+{% block metadata-keywords %}{{ town }},
+    {% trans "Buzzcar, car rental, peer to peer, driver, rent my car, Citycar, Sedan, Compact, SUV" %}{% endblock metadata-keywords %}
+
+{% block title %}{{ page_title_snippet }}{% endblock title %}
+
+{% block page-breadcrumb %}
+{% endblock page-breadcrumb %}
+
+{% block page-header %}
+    {{ page_header_snippet }}
+{% endblock page-header %}
+
+{% block content %}
+{% block page-content %}
+
+    <form id="search-form" action="search/" method="POST" style="margin:0px;" class="ui divided grid">
+
+        {% csrf_token %}
+        
+        <div class="row">
+            
+            <div id="search-banner" class="ui twelve wide column">
+                {{ search_banner_snippet }}
+            </div>
+            
+            <div class="ui four wide column form">
+                
+                <div class="field search-sort-field clearfix">
+                    {{ sort_form.search_sort_by.label_tag }}
+                    {{ sort_form.search_sort_by }}
+                </div>
+                
+                <div class="field" >
+                  <button type="submit" class="ui button" >{% trans "Search" %}</button>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="row" >
+        
+            <div id="search-results" class="ui twelve wide column" data-tab="{{ tab }}" >
+
+                <div id="search-category-view" class="tab-pane {% if tab == 'tree' %}active{% endif %} clearfix">
+                    <div id="drilldown-content">
+                        {% block drilldown-content %}
+                            {{ page_content_snippet }}
+                        {% endblock %}
+                    </div>
+                </div>
+                
+                <div id="search-list"
+                     class="tab-pane {% if not tab or tab == 'list' %}active{% endif %} clearfix">
+                    <div id="search-results-selection">
+                        {% block search-results %}
+                            {{ car_selection_snippet }}
+                        {% endblock search-results %}
+                    </div>
+                </div>
+                
+                <div class="ui segment search-tree">
+                    <div id="search-results-drilldown">
+                        {% block category-results %}
+                            {{ drilldown_selection_snippet }}
+                        {% endblock category-results %}
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="search-sidebar" class="ui four wide column">
+
+                <div id="search-filters" class="ui form">
+
+                    <input type="hidden" id="id_latitude" name="latitude"
+                           value="{{ address.latitude|stringformat:'10f' }}"/>
+                    <input type="hidden" id="id_longitude" name="longitude"
+                           value="{{ address.longitude|stringformat:'10f' }}"/>
+
+                    <div id="search-filters-applied" class="clearfix" >
+                        {% if filters_applied_snippet %}
+                            {{ filters_applied_snippet }}
+                        {% else %}
+                            {% search_filters_applied %}
+                        {% endif %}
+                    </div>
+                    
+                    {% if search_filters_snippet %}
+                        {{ search_filters_snippet }}
+                    {% else %}
+                        {% search_filters %}
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+{% endblock page-content %}
+{% endblock %}
+
+

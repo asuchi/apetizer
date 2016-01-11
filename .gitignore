@@ -4,3 +4,7 @@
 /Apetizer.egg-info/
 .DS_STORE
 .settings
+/media/
+/bin/
+/include/
+/lib/

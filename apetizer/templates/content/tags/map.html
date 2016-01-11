@@ -1,0 +1,49 @@
+{% load content_tags %}
+
+
+<div class="item-map-topics-header clearfix" >
+	<nav id="help-content-topics" >
+		<ul >
+		    {% recursetree map %}
+				{% if not node.redirect and node.is_leaf_node %}
+		      		<li class="pull-left" style="width:18%" >
+			        	{% if node == currentNode %}
+			        		<span class="icon-caret-right" ></span>
+			        	{% endif %}
+			            <a href="{{ node.get_url }}" >{{ node.label }}</a>
+			        </li>
+			     {% endif %}
+		    {% endrecursetree %}
+		</ul>
+	</nav>
+</div>
+	
+<div class="clearfix" >
+	
+	<ul class="item-map-topics clearfix" >
+	{% recursetree map %}
+		{% if node.parent == item and not node.redirect and node.is_visible %}
+			<li >
+		        {% if node.is_leaf_node %}
+		        	<a href="{{ node.get_url }}" >{{ node.label }}</a>
+		    	{% else %}
+		    		<i class="icon-chevron-right"></i>
+			    	<a href="{{ node.get_url }}" >{{ node.label }}</a>
+		    		<ul class="branch" >
+		        		{{ children }}
+		        	</ul>
+			     {% endif %}
+	        </li>
+        {% else %}
+        	{% if not node.redirect and children %}
+		        <div class="item-page-element pull-left clearfix" >
+					<h3><a href="{{ node.get_url }}" >{{ node.label }}</a></h3>
+					<ul>
+			        	{{ children }}
+			        </ul>
+			    </div>
+			{% endif %}
+        {% endif %}
+    {% endrecursetree %}
+	</ul>
+</div>

@@ -1,0 +1,44 @@
+{% load content_tags content_ui_tags %}
+   <div class="content-item {% if has_permission %}frontendadmin-item-zone{% endif %} clearfix" >
+   	  
+   	  {% with item_translation=item.get_translation %}
+ 		  	  
+ 		  	  <a class="anchor" name="{{ item.slug }}" id="{{ item.slug }}" title="{{ item.title }}" style="display:none;" ></a>
+	 	  	  
+	 	  	  {% if has_permission and is_ok %}
+		  		  <div class="frontendadmin-item-toolbar">
+	  		  		{% content_change_link item_translation "Translate" %}
+	  				{% content_change_link item_translation.model "Change" %}
+		 			{% content_delete_link item_translation.model "Delete" %}
+			 	  </div>
+			  {% endif %}
+			  {% if has_permission %}
+			  <div class="frontendadmin-item-editable" id="item-{{ item.id }}" contenteditable="true" onfocus="editBloc( 'item-{{ item.id }}' )" >	 
+		  	  {% endif %}
+		  	  
+		  	  {% autoescape off %}
+			  {% content_render item.content %}
+			  {% endautoescape %}
+	
+		      {% if has_permission %}
+		      </div>
+		      <div id="item-{{ item.id }}-toolbar" class="frontendadmin-item-body-toolbar" style="display:none" >
+		  		<form id="item-{{ item.id }}-form" style="display:none" action="{{ item_translation.related.get_url }}code/" >
+		  			{% csrf_token %}
+		  			<input type="hidden" id="{{ item_translation.id }}_slug" name="slug" value="{{ item_translation.slug }}" />
+		  			<input type="hidden" id="{{ item_translation.id }}_label" name="label" value="{{ item_translation.label }}" />
+		  			<input type="hidden" id="{{ item_translation.id }}_title" name="title" value="{{ item_translation.title }}" />
+		  			<input type="hidden" id="{{ item_translation.id }}_description" name="description" value="{{ item_translation.description }}" />
+		  			<input type="hidden" id="{{ item_translation.id }}_content" name="content" value="{{ item_translation.content }}" />
+		  		</form >
+		  		<div class="clearfix">		  		    
+    		  		<button class="pull-right" onclick="saveBloc('item-{{ item.id }}', '{{ item_translation.id }}')" >Save</button>
+    		  		<button class="pull-right" onclick="cancelBloc('item-{{ item.id }}', '{{ item_translation.id }}')" >Cancel</button>
+    		  		<button id="item-{{ item.id }}-code-btn" onclick="codeBloc('item-{{ item.id }}', '{{ item_translation.id }}')" >Code</button>
+		  		</div>
+			  </div>
+		      {% endif %}
+		      
+	 {% endwith %}
+	 
+ </div>

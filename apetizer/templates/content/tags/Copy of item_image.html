@@ -1,0 +1,21 @@
+{% load i18n thumbnail %}
+
+
+<div class="fulldiv-image" style="
+{% if image_item and image_item.image and image_item.image.file %}
+	background-image:url('{% thumbnail image_item.image.file image_item_size crop=smart %}');
+{% else %}
+{% endif %}width:{{ image_item_width }}px;height:{{ image_item_height }}px;" 
+{% if user.is_authenticated %}
+	data-selector="media" 
+	data-selector-id="{{ image_item.id }}" 
+	data-selector-field="image" 
+	data-selector-value="{{ image_item.image.id }}"
+{%endif %}" >
+<img {% if image_item and image_item.image and image_item.image.file %}
+		src="{% thumbnail image_item.image.file image_item_size crop=smart %}" 
+	{% else %}
+		src=""
+	{% endif %}
+		style="display:none" />
+</div>

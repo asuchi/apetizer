@@ -1,0 +1,60 @@
+{% load i18n search_tags %}
+{% load url from future %}
+<div class="page" >
+	<input type="hidden" name="page" id="id_page" value="1" />
+	{% if not paginator.count %}
+		<div class="clearfix" >
+   			<div id="search-result-list-count" class="search-result-count"></div>
+		</div>
+	{% else %}
+		
+		<div class="clearfix" >
+	   		{% if search_max_results = paginator.count %}
+				<div id="search-result-list-count" class="search-result-count">{% blocktrans with current_page.start_index as start_result_index and current_page.end_index as end_result_index and paginator.count as total_results and search_distance_str as search_distance %}Results {{ start_result_index }} to {{ end_result_index }} of more than {{ total_results }} within {{ search_distance }}{% endblocktrans %}</div>
+		    {% else %}
+		        <div id="search-result-list-count" class="search-result-count">{% blocktrans with current_page.start_index as start_result_index and current_page.end_index as end_result_index and paginator.count as total_results and search_distance_str as search_distance %}Results {{ start_result_index }} to {{ end_result_index }} of {{ total_results }} within {{ search_distance }}{% endblocktrans %}</div>
+		    {% endif %}
+	    </div>
+
+		<div id="ui container">
+		{% with nodes=current_page.object_list %}
+          {% include 'content/published_page.html' %}
+	    {% endwith %}
+		</div>
+		
+		{% if paginator.num_pages > 1 %}
+		<div id="search-results-pagination" class="search-results-footer" >
+			{% if paginator.num_pages > 10 and current_page.number == 10 %}
+				<p>{% trans "Precise your search by reducing search radius or adding filters to see more results." %}</p>
+			{% endif %}
+	        <ol class="ui pagination menu">
+	            {% if current_page.has_previous %}
+	            <li class="item">
+	            	<a href="{{ dd_request_path|get_paginator_page_url:current_page.previous_page_number }}" data-page="{{ current_page.previous_page_number }}"><i class="icon-caret-left"></i>&nbsp;&nbsp;{% trans "Previous" %}</a>
+	            </li>
+            	{% endif %}
+				
+	            {% for page in paginator.page_range %}
+	            {% if forloop.counter <= 10 %}
+	            <li class="item {% if current_page.number == page %}active{% endif %}">
+	            	<a href="{{ dd_request_path|get_paginator_page_url:page }}" data-page="{{ page }}">{{ page }}</a>
+	            </li>
+	        	{% endif %}
+	            {% endfor %}
+				
+	            <li class="item">
+	            	{% if current_page.has_next %}
+	            	<a href="{{ dd_request_path|get_paginator_page_url:current_page.next_page_number }}" data-page="{{ current_page.next_page_number }}">{% trans "Next" %}&nbsp;&nbsp;<i class="icon-caret-right"></i></a>
+	            	{% else %}
+	            	<span>{% trans "Next" %}&nbsp;&nbsp;<i class="icon-caret-right"></i></span>
+	            	{% endif %}
+	        	</li>
+	        </ol>
+		</div>
+		{% endif %}
+	{% endif %}
+</div>
+
+{% autoescape off %}
+<script id="map-points" type="application/json" >{{ json_data }}</script>
+{% endautoescape %}

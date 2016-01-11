@@ -1,0 +1,12 @@
+{% extends "register/base.html" %}
+{% load i18n %}
+
+{% block registration-content %}
+	<div style="text-align:center">
+		<a href="{% url "register" action="start" %}" >Register</a> | 
+		<a href="{% url "register" action="login" %}" >Login</a>
+	</div>
+{% endblock %}
+
+{% block action-pipe-js %}
+{% endblock %}

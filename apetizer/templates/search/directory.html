@@ -1,0 +1,15 @@
+{% extends 'content/page.html' %}
+
+{% block content %}
+
+<div>
+{% if keyword.items|length %}
+{% for key, value in keyword.items %}
+  <a href="/{{ key|directory_key_url }}"  ><label>{{ key|drilldown_key_label:'keyword' }} <span>({{ key|drilldown_key_count:'keyword' }})</span>
+</label></a>{% endfor %}
+{% endif %}
+</div>
+
+{{ block.super }}
+
+{% endblock %}

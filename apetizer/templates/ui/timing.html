@@ -1,0 +1,93 @@
+{% extends "ui/change.html" %}
+{% load static %}
+
+{% block extra-styles %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" media="all" href="{% static 'components/datetimerangepicker/daterangepicker.css' %}" />
+<style>
+.daterangepicker_start_input{display:none;}
+.daterangepicker_end_input{display:none;}
+.ranges{float:none;}
+</style>
+{% endblock %}
+
+https://github.com/BreadMaker/semantic-ui-daterangepicker
+
+{% block extra-scripts %}
+{{ block.super }}
+<script type="text/javascript" src="{% static 'components/datetimerangepicker/daterangepicker.js' %}"></script>
+<script type="text/javascript" >
+$(document).ready(function(){
+    
+    $('#id_start').daterangepicker({
+        timePicker: true,
+        timePicker24Hour: true,
+        //timePickerIncrement: 30,
+        singleDatePicker: true,
+        showDropdowns: true,
+        showWeekNumbers: true,
+        showDropdowns: true,
+        opens: "left",
+        drops: "down",
+        format: 'YYYY-MM-DD hh:mm:ss',
+        locale: {
+        },
+        "startDate": "{{ currentNode.start|date:"Y-m-d H:i:s" }}",
+        function(start, end, label) {
+            $('#id_start').val(start.format('YYYY-MM-DD hh:mm:ss'));
+        },
+    });
+    $('#id_end').daterangepicker({
+        timePicker: true,
+        timePicker24Hour: true,
+        //timePickerIncrement: 30,
+        singleDatePicker: true,
+        showDropdowns: true,
+        showWeekNumbers: true,
+        showDropdowns: true,
+        opens: "left",
+        drops: "down",
+        autoApply: true,
+        format: 'YYYY-MM-DD hh:mm:ss',
+        locale: {
+        },
+        "startDate": "{{ currentNode.end|date:"Y-m-d H:i:s" }}",
+        function(start, end, label) {
+            //$('#id_end').val(start.format('YYYY-MM-DD hh:mm'));
+        },
+    });
+    
+    $('#datetimerange').daterangepicker({
+        "timePicker": true,
+        timePicker24Hour: true,
+        "timePickerIncrement": 30,
+        singleDatePicker: true,
+        showDropdowns: true,
+        "showWeekNumbers": true,
+        "showDropdowns": true,
+        "opens": "right",
+        "drops": "down",
+        "locale": {
+            "format": "YYYY/MM/DD hh:mm",
+            "separator": " - ",
+            "applyLabel": "Valider",
+            "cancelLabel": "Annuler",
+            "firstDay": 1
+        },
+        {% if currentNode.start %}
+        "startDate": "{{ currentNode.start|date:"Y/m/d H:i" }}",
+        {% endif %}
+        {% if currentNode.end %}
+        "endDate": "{{ currentNode.end|date:"Y/m/d H:i" }}",
+        {% endif %}
+        }, function(start, end, label) {
+            $('#id_start').val(start.format('YYYY-MM-DD hh:mm'));
+            $('#id_end').val(end.format('YYYY-MM-DD hh:mm'));
+            
+          console.log("New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')");
+        });
+    
+    //$('#datetimerange').val()
+});
+</script>
+{% endblock %}

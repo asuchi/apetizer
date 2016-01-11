@@ -1,0 +1,11 @@
+{% load i18n content_ui_tags %}
+
+{% if has_permission %}
+	<div class="frontendadmin-item-toolbar" >
+		{% for translation in node.get_translations %}
+			{% content_change_link translation translation.language.code %}
+		{% endfor %}
+		{% content_change_link node "Edit" %}
+		{% content_delete_link translation.model "Delete" %}
+	</div>
+{% endif %}

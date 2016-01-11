@@ -1,0 +1,9 @@
+{% load i18n thumbnail content_tags %}
+
+{% if item.image %}
+	{% content_item_image item.image item_width item_height %}
+{% endif %}
+
+{% for media in item.medias.all %}
+	{% content_item_image item.image item_width item_height %}
+{% endfor %}

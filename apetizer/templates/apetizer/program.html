@@ -1,0 +1,86 @@
+{% extends 'content/page.html' %}
+
+{% block extra-scripts %}
+{{ block.super }}
+<script src="/static/components/handsontable/handsontable.full.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+var container = document.getElementById('program_table');
+var data = [
+      ['', 'Kia', 'Nissan', 'Toyota', 'Honda'],
+      ['2014', 10, 11, 12, 13],
+      ['2015', 20, 11, 14, 13],
+      ['2016', 30, 15, 12, 13]
+    ];
+var hot = new Handsontable(container, {
+  data: data,
+  minSpareRows: 1,
+  rowHeaders: true,
+  colHeaders: true,
+  contextMenu: false,
+  
+  manualColumnResize: true,
+  manualRowResize: true,
+  
+  colWidths: [47,0,0,200,500],
+  rowHeights: [47,0,47],
+  
+});});
+</script>
+{% endblock %}
+
+{% block extra-styles %}
+{{ block.super }}
+<link rel="stylesheet" media="screen" href="/static/components/handsontable/handsontable.full.min.css">
+{% endblock %}
+
+{% block page_container %}
+<div class="ui sixteen wide column" style="position:relative;">
+        <div id="program_table" style="position:relative;overflow:hidden;background:black;height:300px;width:100%" ></div>
+    <div class="ui segment" >
+        {% for key, table in tables %}
+            <a href="program/?table={{forloop.count}}" class="ui button" >{{ key }}</a>
+        {% endfor %}
+    </div>
+</div>
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="ui vertical segments">
+    
+    
+        {% comment %}
+    <div class="ui segment" style="position:relative; width:100%; min-height:300px;">
+        <table cols="{{table.0|length}}" rows="{{table|length}}" border="1" width="100%" style="" >
+        {% for key, table in tables %}
+            {% for row in table %}
+                <tr>
+                {% for col in row %}
+                    <td>{{col}}</td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        </table>
+    </div>
+        {% endcomment %}
+    
+    <div class="ui segment">
+        {% include 'apetizer/tags/action_forms.html' %}
+    </div>
+    
+    <div class="ui segment">
+        <a href="download/" class="ui button" >download</a>
+        <a href="file/" class="ui button" >upload (replace)</a>
+        <a href="" class="ui button" >merge (update)</a>
+        <a href="" class="ui button" >execute</a>
+    </div>
+    
+</div>
+{{ block.super }}
+{% endblock %}
+
+{% block side_content %}
+
+{% endblock %}

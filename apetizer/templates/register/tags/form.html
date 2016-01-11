@@ -1,0 +1,65 @@
+{% load i18n %}
+
+<div class="ui row">
+    <div class="registration-page col-md-8 col-md-push-2 clearfix">
+        {% block registration-content %}
+        <div class="registration-body clearfix">
+            <div class="action-pipe-body-loader loader" style="display:none;">
+                <i class="icon-refresh icon-spin"></i>
+            </div>
+            <form id="action-form" class="ui form" action="{{ action }}/" method="POST"
+                  {% if action_component %}data-action-component="{{ action_component }}" {% endif %}data-parsley-validate="true"
+                  data-parsley-ui-enabled="true" data-parsley-focus="first">
+                {% csrf_token %}
+                
+                {% block registration-form-head %}
+                {% endblock %}
+                
+                {% block registration-form-before %}
+                {% endblock registration-form-before %}
+                
+                {% block registration-form-content %}
+                    {% for action_form in action_forms %}
+                        <div {% if action_form.slug %}id="{{ action_form.slug }}"{% endif %}
+                             class="ui segment">
+                            {% if action_form.title %}
+                                <h3>{{ action_form.title }}</h3>
+                            {% endif %}
+                            {% if action_form.description %}
+                                <p>{{ action_form.description }}</p>
+                            {% endif %}
+
+                            {% for field in action_form %}
+                                <div id="{{ field.name }}"
+                                     class="ui labeled fluid input">
+                                    {% if not field.name in action_form.hidden_fields %}
+                                        <label class="ui label" >{{ field.label }}</label>
+                                    {% endif %}
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <p>{{ field.help_text|safe }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% endblock registration-form-content %}
+                
+                {% block registration-form-foot %}
+                {% endblock registration-form-foot %}
+                <div class="ui hidden divider"></div>
+                <div class="ui item">
+                    {% block registration-form-button-bar %}
+                        <input type="submit" id="send-action-button" class="ui button" value="{% trans "Envoyer" %}" >
+                    {% endblock %}
+                </div>
+            </form>
+            {% block registration-extra-foot %}
+            {% endblock %}
+        </div>
+        {% block registration-sidebar %}
+        {% endblock %}
+        
+        {% endblock %}
+    </div>
+</div>

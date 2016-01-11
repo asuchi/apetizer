@@ -1,0 +1,198 @@
+{% load i18n content_tags drilldown_tags %}
+
+<div class="ui form">
+    
+    <div id="start-datetime-field" class="field" >
+        {{ user_input_form.start_date.label_tag }}
+        {{ user_input_form.start_date }}
+        {{ user_input_form.start_hour }}
+    </div>
+
+    <div id="end-datetime-field" class="field" >
+        {{ user_input_form.end_date.label_tag }}
+        {{ user_input_form.end_date }}
+        {{ user_input_form.end_hour }}
+    </div>
+
+    <div class="field">
+        {{ sort_form.search_display_unavailable.label_tag }}
+        {{ sort_form.search_display_unavailable }}
+    </div>
+    
+    <div class="field">
+        {{ search_form.search_radius.label_tag }}
+        {{ search_form.search_radius }}
+    </div>
+    
+	<div class="accordion clearfix" id="search-filters-accordion" >
+		
+		<div class="accordion-group full-width">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{search_form.slug}}" title="{{search_form.title}}" >
+		        <span class="clearfix">{{search_form.title}}<i class="icon-caret-down pull-right" ></i><span class="search-radius-display pull-right">{{ pretty_search_radius }}</span></span>
+		      </a>
+		    </div>
+		    <div id="{{search_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div id="search-radius-map" style="margin:0px 10px;height:20px;background:gray;"></div>
+				<div class="search-filters-fields clearfix" >
+				  <div class="search-filter-field clearfix" >
+				  	<div id="search-radius-slider" class="dragdealer" >
+				  		<div class="round-pointer handle"></div>
+				  	</div>
+				  </div>
+				</div>
+			   </div>
+		    </div>
+		</div>
+		
+		<div class="accordion-group full-width">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{type_form.slug}}" title="{{type_form.title}}" >
+		        {{type_form.title}}
+			    <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{type_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields clearfix" >
+				{% for filter_field in type_form %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				    <label class="css-label" for="id_{{ filter_field.name }}" >{{ filter_field.label }}</label>
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+		
+		<div class="accordion-group">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{capacity_form.slug}}" title="{{capacity_form.title}}" >
+		        {{capacity_form.title}}
+		        <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{capacity_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields-selectors clearfix" >
+				{% for filter_field in capacity_form %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+		
+		<div class="accordion-group">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{equipement_form.slug}}" title="{{equipement_form.title}}" >
+		        {{equipement_form.title}}
+		        <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{equipement_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields clearfix" >
+				{% for filter_field in equipement_form %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				    <label class="css-label" for="id_{{ filter_field.name }}" >{{ filter_field.label }}</label>
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+		
+		{% for fform in search_filter_forms %}
+		<div class="accordion-group">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{ fform.slug }}" title="{{ fform.title }}" >
+		        {{ fform.title }}
+		        <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{ fform.slug }}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields clearfix" >
+				{% for filter_field in fform %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				    <label class="css-label" for="id_{{ filter_field.name }}" >{{ filter_field.label }}</label>
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+		{% endfor %}
+		
+		<div class="accordion-group">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{age_form.slug}}" title="{{age_form.title}}" >
+		        {{age_form.title}}
+			    <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{age_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields-selectors clearfix" >
+				{% for filter_field in age_form %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+		
+		<div class="accordion-group">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{brand_form.slug}}" title="{{brand_form.title}}" >
+		        {{brand_form.title}}
+		        <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{brand_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields-selectors clearfix" >
+				{% for filter_field in brand_form %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+		
+		<div class="accordion-group">
+		    <div class="accordion-heading clearfix">
+		      <a class="accordion-toggle futura opened" data-toggle="collapse" href="#{{delivery_form.slug}}" title="{{delivery_form.title}}" >
+		        {{delivery_form.title}}
+		        <i class="icon-caret-down pull-right" ></i>
+		      </a>
+		    </div>
+		    <div id="{{delivery_form.slug}}" class="accordion-body collapse in">
+		      <div class="accordion-inner">
+		      	<div class="search-filters-fields clearfix" >
+				{% for filter_field in delivery_form %}
+				  <div class="search-filter-field clearfix" >
+				    {{ filter_field }}
+				    <label class="css-label" for="id_{{ filter_field.name }}" >{{ filter_field.label }}</label>
+				  </div>
+				{% endfor %}
+				</div>
+		      </div>
+		    </div>
+		</div>
+	</div>
+
+</div>
+
+	

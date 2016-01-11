@@ -1,0 +1,11 @@
+{% load i18n %}
+{% if has_permission %}
+{% comment %}
+ <a class="frontendadmin frontendadmin_add btn" href="{{ add_link }}?next={{ next_link }}{% for k,v in defaults.items %}&{{k}}={{v|urlencode}}{% endfor %}">
+    <span class="icon-add" ></span>{% if label %}{{ label }}{% else %}{% trans "Add" %}{% endif %}
+ </a>
+ {% endcomment %}
+ <a class="button" href="{{ add_link }}">
+    <span class="icon add" ></span>{% if label %}{{ label }}{% else %}{% trans "Add" %}{% endif %}
+ </a>
+{% endif %}

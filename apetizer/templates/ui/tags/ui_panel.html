@@ -1,0 +1,29 @@
+
+{% block ui %}
+ <div class="ui sidebar large right fixed menu vertical inverted overlay visible" style="top:72px;width:35%;min-width:240px;" >
+    <a href="" class="item right" ><i class="icon close" ></i>Close</a>
+    {% for language in languages %}
+    {% endfor %}
+    
+    {% block ui-head %}
+        <div class="ui top attached tabular menu inverted">
+            <a class="icon item" href="translate/" ><i class="icon list"></i></a>
+            <a class="icon item" href="image/" ><i class="icon picture"></i></a>
+            <a class="icon item" href="timing/" ><i class="icon time"></i></a>
+            <a class="icon item" href="change/" ><i class="icon cogs"></i></a>
+            <a class="icon item" href="location/" ><i class="icon map"></i></a>
+            <a class="icon item" href="code/" ><i class="icon code"></i></a>
+        </div>
+    {% endblock %}
+
+<div class="ui item inverted segment">
+{% block ui-form %}
+{% endblock %}
+<div class="item">
+</div>
+</div>
+
+{% block ui-foot %}
+{% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% load i18n %}
+{% if has_permission %}
+<a class="frontendadmin frontendadmin_delete btn btn-mini" href="{{ delete_link }}?next={{ next_link }}">
+        <span class="fa fa-remove" ></span>
+        {% comment %}{% if label %}{{ label }}{% endif %}{% endcomment %}
+</a>
+{% endif %}

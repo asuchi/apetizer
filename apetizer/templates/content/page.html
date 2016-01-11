@@ -1,0 +1,235 @@
+{% extends 'content/base.html' %}
+{% load content_tags momentjs thumbnail markdown_deux_tags moderate_tags %}
+
+{% block body %}
+{% if currentNode.get_hash == user_profile.get_hash %}
+    {% with proposals=currentNode.get_proposals %}
+    {% if proposals|length %}
+    <div class="ui segment">
+    {% for proposal in proposals %}
+        <div class="ui warning message item" >
+            <div class="ui floated right menu">
+                <a href="{{ proposal.related.get_url }}reject/?token={{ proposal.id }}" class="ui item button">Rejeter</a>
+                <a href="{{ proposal.related.get_url }}accept/?token={{ proposal.id }}" class="ui item button">Accepter</a>
+            </div>
+            <div class="header">{{ proposal.subject }}, {{ proposal.message }}, </div>
+            <div class="content">{{ proposal.data }}</div>
+            <div class="extra">
+                <div class="ui date" >
+                  <a href="{{ proposal.visitor.get_url }}" >{{ proposal.get_full_name }}</a>, 
+                  {% moment_from_now proposal.modified_date %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+{% endif %}
+{{ block.super }}
+{% endblock %}
+
+{% block page_container %}
+<div class="ui eleven wide column">
+    
+    {% block content %}
+    <div class="ui vertical segment">
+    {% if action == 'view' %}
+        {% autoescape off %}
+        {% content_render currentNode.content %}
+        {% endautoescape %}
+    {% endif %}
+    </div>
+    {% if currentNode.published == True or currentNode.is_leaf_node %}
+    {% endif %}
+    {% if currentNode.published == True %}
+        {% if action != 'view' %}
+        {{ block.super }}
+        {% endif %}
+        {% include 'content/published_page.html' %}
+    {% else %}
+        {{ block.super }}
+        {% include 'content/ui_page.html' %}
+    {% endif %}
+    
+    {% endblock content %}
+    
+    
+    <div class="ui hidden divider"></div>
+    <div class="ui item">
+        {% include 'moderate/tags/comments.html' %}
+        {% include 'moderate/tags/comment_form.html' %}
+    </div>
+    
+</div>
+
+<div class="ui five wide column">
+    
+    {% if currentNode.data %}
+        {% if DEBUG %}
+        {% if action == 'data' %}
+        {% include 'apetizer/tags/action_forms.html' %}
+        {% else %}
+        {{ currentNode.data }}
+        {% endif %}
+        {% endif %}
+    {% endif %}
+    
+    {% if nodes|length %}
+    <div class="ui dividing item" >
+        <h4 class="ui header">{{ nodes.0.parent.title }}</h4>
+        <div class="ui vertical folowing accordion text menu">
+            {% if nodes|length > 100 %}
+                {% for node in nodes %}
+                    {% ifchanged node.label %}
+                    <a class="active title">
+                        <i class="chevron icon"></i> <b>{{ node.label }}</b>
+                    </a>
+                    {% endifchanged %}
+                {% endfor %}
+            
+            {% else %}
+            {% for node in nodes %}
+            {% if not node.is_leaf_node and node.label != node.title %}
+            <div class="active item">
+                {% ifchanged node.label %}
+                <a class="active title">
+                    <i class="dropdown icon"></i> <b>{{ node.label }}</b>
+                </a>
+                {% endifchanged %}
+                <div class="content">
+                    {% if node.has_children %}
+                        <a class="" href="{{ node.get_url }}">{{ node.title }}</a>
+                    {% else %}
+                        <a class="" href="{{ node.parent.get_url }}#{{ node.slug }}">{{ node.title }}</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="ui hidden divider"></div>
+    <div class="ui item">
+        <div class="header">{{ currentNode.get_visits|length }} visites</div>
+        <div class="header">{{ currentNode.get_visitors|length }} visiteurs</div>
+    </div>
+    
+    <div class="ui hidden divider"></div>
+    <div class="ui item dividing" >
+        <h4 class="ui header">Mainteneur</h4>
+        {% with contributor=currentNode.get_author %}
+        <div class="item">
+            <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
+            <div class="content">
+                <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
+                <div class="content">
+                  {% moment_from_now contributor.modified_date %}
+                </div>
+            </div>
+        </div>
+        {% if contributor.email %}
+            {% if contributor.email == user_profile.email %}
+                <a class="ui item mini spaced button" href="free/" >Librerer</a>
+            {% else %}
+                <a class="ui item mini spaced button" href="contact/" >Contacter</a>
+            {% endif %}
+        {% else %}
+        <a class="ui item mini spaced button" href="claim/" >Se l'approprier</a>
+        {% endif %}
+        
+        {% endwith %}
+        {% if currentNode.get_visitors|length > 1 %}
+        <div class="ui hidden divider"></div>
+        
+        {% endif %}
+    </div>
+    
+    
+    {% with contributors=currentNode.get_contributors %}
+    {% if contributors|length > 1 %}
+    <div class="ui hidden divider"></div>
+    <div class="ui item dividing" >
+        <h4 class="ui header">Contributeurs ({{contributors|length}})</h4>
+        <div class="ui list" >
+            {% for contributor in contributors %}
+            <div class="item">
+                <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
+                <div class="content">
+                    <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
+                    <div class="content">
+                      {% moment_from_now contributor.modified_date %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <a class="ui item mini spaced button" href="invite/" >Inviter</a>
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    {% with subscribers=currentNode.get_subscribers %}
+    {% if subscribers|length > 1 %}
+    <div class="ui hidden divider"></div>
+    <div class="ui item dividing" >
+        <h4 class="ui header">Folowers ({{subscribers|length}} )</h4>
+        {% for subscriber in subscribers %}
+            <a class="ui item" href="{{ subscriber.get_url }}" >{{ subscriber.get_full_name }}</a>
+            {% if subscriber.email == user_profile.email %}
+                <a class="ui icon cogs" href="unsubscribe/" >X</a>
+            {% else %}
+            {% endif %}
+            {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        <div class="ui hidden divider"></div>
+        <a class="ui item mini spaced button" href="subscribe/" >Souscrire</a>
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    {% comment %}
+    <div class="ui hidden divider"></div>
+    <div class="ui item dividing">
+        <h4 class="ui header" >Note</h4>
+        {% moderate_average_evaluation currentNode %}
+    </div>
+    {% endcomment %}
+    
+    <div class="ui hidden divider"></div>
+    <div class="ui item dividing">
+        {% if currentNode.get_reviewers|length %}
+        <h4 class="ui header" >Avis des relecteurs</h4>
+        <div class="ui feed">
+        {% for comment in currentNode.get_reviewers %}
+            <div class="event">
+                <div class="label">
+                  <img class="ui avatar image" src="{{ comment.get_image.url }}">
+                </div>
+                <div class="content">
+                  <div class="summary">
+                    <a class="user" href="{{ comment.get_url }}" >
+                      {{ comment.get_full_name }}
+                    </a>
+                    <div class="ui label right" >{{ comment.status }}</div>
+                  </div>
+                  <div class="extra text">
+                    <div class="date">
+                      {% moment_from_now comment.modified_date %}
+                    </div>
+                  </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <div class="ui divider"></div>
+        {% endif %}
+        {% include 'moderate/tags/review_form.html' %}
+    </div>
+    
+    
+</div>
+{% endblock page_container %}

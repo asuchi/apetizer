@@ -1,0 +1,77 @@
+{% extends "content/page.html" %}
+{% load cache i18n content_tags content_ui_tags %}
+
+{% block page-header %}
+<div style="padding: 0 20px;">	
+	<h1>{% trans "Sitemap" %}</h1>
+	<h2>{% trans "All accessible content paths" %}</h2>
+</div>
+{% endblock page-header %}
+
+{% block content %}
+<div class="container" >
+	{% for node in all_nodes %}
+		{% if node.parent %}
+			{% if node.is_visible or has_permission %}
+			<li style="position:relative" class="{% if has_permission %}{% if node.is_published %}items-published{% else %}items-unpublished{% endif %}{% endif %}" >
+		        
+		        {% if has_permission %}
+					<div class="frontendadmin-item-toolbar" >
+						{% for translation in node.get_translations %}
+							{% content_change_link translation translation.language.code %}
+						{% endfor %}
+						{% content_change_link node "Edit" %}
+						{% content_delete_link translation.model "Delete" %}
+					</div>
+				{% endif %}
+		        
+		        {% if node.is_leaf_node or node.level > 1 %}
+		        	<a href="{{ node.get_url }}" >{{ node.title }}</a>
+		    	{% else %}
+		    		<i class="icon-chevron-right"></i>
+			    	<a href="{{ node.get_url }}" >{{ node.title }}</a>
+		    		<ul class="branch " >
+		        		{{ children }}
+		        	</ul>
+			     {% endif %}
+	        </li>
+	        {% endif %}
+        {% else %}
+        	{% if children %}
+	        	{% if node.is_visible or has_permission %}
+			        <div class="col-xs-6 col-md-4 {% if has_permission %}{% if node.is_published %}items-published{% else %}items-unpublished{% endif %}{% endif %} item-page-element" >
+						
+						<h3 style="position:relative" ><a href="{{ node.get_url }}" >{{ node.title }}</a>
+						{% if has_permission %}
+							<div class="frontendadmin-item-toolbar" >
+								{% for translation in node.get_translations %}
+									{% content_change_link translation translation.language.code %}
+								{% endfor %}
+								{% content_change_link node "Edit" %}
+								{% content_delete_link translation.model "Delete" %}
+							</div>
+						{% endif %}
+						</h3>
+						<ul class="root" >
+				        	{{ children }}
+				        </ul>
+				    </div>
+				{% endif %}
+			{% endif %}
+        {% endif %}
+		{% if not node.parent and not node.get_descendants %}
+        {% if node.is_visible or has_permission %}
+            <li class="col-xs-6 col-md-4 {% if has_permission %}{% if node.is_published %}items-published{% else %}items-unpublished{% endif %}{% endif %}" style="width:220px;padding:10px;list-style:none;" >
+                {% if node.image %}
+                    <img src="{{ node.image.url }}" style="width:64px;margin:10px;"  ></span>
+                {% endif %}
+                <h3 style="position:relative;" >{% if node == currentNode %}<span class="icon-caret-right" ></span>{% endif %} <a href="{{ node.get_url }}" >{{ node.title }}</a>
+                {% content_item_toolbar node %}
+                </h3>
+            </li>
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
+{{ block.super }}
+{% endblock %}

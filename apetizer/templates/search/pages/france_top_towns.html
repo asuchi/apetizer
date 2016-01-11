@@ -1,0 +1,10 @@
+{% load i18n %}
+
+{% if top_france_town_list %}
+	<h3>{% trans "Top towns" %}</h3>
+	<ul class="top-town-list clearfix">
+	{% for key, value in top_france_town_list.items %}
+		<li><a href="{{ key|directory_key_url }}" >{{ key|drilldown_key_label:'town' }}  <span>({{ value }})</span></a></li>
+	{% endfor %}
+	</ul>
+{% endif %}

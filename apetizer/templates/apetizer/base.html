@@ -1,103 +1,333 @@
-{% extends "base.html" %}
-{% load i18n sekizai_tags %}
+{% load static content_tags content_ui_tags thumbnail momentjs moderate_tags %}<!DOCTYPE html>
+<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+{% comment %}
+<link rel="image_src" type="image/jpeg" href="/static/images/logo-front.png">
+{% endcomment %}
+{% if not currentNode.parent %}
+    {% if not currentNode.visible %}
+        <base href="{{ currentNode.get_uid_url }}" ></base>
+    {% else %}
+        <base href="{{ currentNode.get_url }}" ></base>
+    {% endif %}
+{% else %}
+    <base href="{{ currentNode.get_url }}" ></base>
+{% endif %}
+<title>{{ currentNode.get_root.title }} - {{ currentNode.label }} - {{ currentNode.title }}</title>
+<meta name="description" content="{{ currentNode.description|linebreaks }}">
+<meta name="keywords" content="{{ currentNode.keywords }}">
 
-{% block content %}
-    {% if not request.is_ajax and messages %}
-    <ul id="system-messages" class="messages alert-top-right-notification">
+<link rel="stylesheet" type="text/css" class="ui" href="{% static 'components/semantic/dist/semantic.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'components/semanticui/docs.css' %}">
+{% include "content/assets/styles.html" %}
+
+<script src="{% static 'components/semanticui/jquery.min.js' %}"></script>
+<script src="{% static 'components/semantic/dist/semantic.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'components/momentjs/moment-2.10.6.js' %}" ></script>
+<script type="text/javascript" src="{% static 'components/momentjs/lang/fr.js' %}" ></script>
+
+<script type="text/javascript">
+    $(document).ready( function(){
+            
+        moment.locale('fr');
+        $('time.moment-from-now').each( function( index ){
+                try {
+                        var datetime = moment( $(this).attr('datetime') );
+                        $(this).text( datetime.fromNow(false) );
+                } catch( err ) {
+                    console.log(err);
+                }
+        });
+        
+        $('.message .close')
+          .on('click', function() {
+            $(this)
+              .closest('.message')
+              .transition('fade')
+            ;
+          });
+
+    });
+
+    $(document).ready(function(){
+    //    $('.ui.accordion').accordion();
+    });
+
+</script>
+
+{% block extra-styles %}
+
+
+{% if currentNode.image %}
+<style type="text/css">
+<!--
+    #masthead:before {
+        position:absolute;
+        width:100%;
+        height:100%;
+        top:0px;
+        content:"";
+        background-image:url('{{ currentNode.image.url }}');
+        background-repeat:no-repeat;
+        background-size: cover;
+        background-position:50% 50%;
+        opacity:0.05;
+        background-color:#888;
+        }
+-->
+</style>
+{% endif %}
+
+
+{% endblock %}
+<style type="text/css">
+<!--
+    .row{
+        margin:1rem 2rem;
+    }
+    .ui.input p{
+        display:none;
+    }
+    #masthead{
+        padding-bottom:0px;
+    }
+-->
+</style>
+<body >
+{% block page_body %}
+<div id="body" class="started pushable" ontouchstart="">
+
+
+
+<div class="pusher">
+<div class="ui inverted vertical center aligned segment" style="position:relative;z-index:2">
+    <div class="ui large secondary inverted pointing menu" >
+        <a href="/" class="active item">Acceuil</a>
+        <div class="item">
+          {% block search_form %}
+            <a href="/search/" class="small" ><i class="icon search"></i> Rechercher</a>
+          {% endblock %}
+        </div>
+        <div class="right inverted item">
+          {% if user_profile.email %}
+                {% if not user_profile.validated %}
+                    <a class="ui inverted button" href="{{ user_profile.get_url }}validate/" ><i class="icon warning-sign"></i>Valider ma session</a>
+                {% else %}
+                    <a class="ui inverted button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
+                    {% if user_profile.get_image %}
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <a class="ui inverted button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
+            {% endif %}
+        </div>
+        {% if request.user.is_authenticated %}
+            {% comment %}
+            <a href="{{ user_profile.get_url }}register/" class="item" >{% if request.user.is_authenticated %}{{ request.user.username }}{% endif %}
+            {% endcomment %}
+            <a href="{{ user_profile.get_url }}logout/" class="item" ><i class="icon remove"></i></a>
+        {% else %}
+            <a href="{{ user_profile.get_url }}reset/" class="item" ><i class="icon recycle"></i></a>
+        {% endif %}
+    </div>
+</div>
+    <div class="full height">
+        
+        {% block toc %}
+        <div class="toc">
+            <div class="ui vertical inverted menu full height" >
+            <div class="ui black big launch right attached fixed button">
+              <i class="content icon"></i>
+              <span class="text">Menu</span>
+            </div>
+            
+            <div class="item">
+              <a class="ui mini image" href="{{ rootNode.get_url }}">
+                {% if rootNode.image %}
+                    <img class="icon image" src="{{ rootNode.image.url }}" />
+                {% else %}
+                    {% comment %}<img src="{% static 'images/logo-apetizer.png' %}" />{% endcomment %}
+                {% endif %}
+              </a><br />
+              <a href="{{ rootNode.get_url }}view/"><b>{{ rootNode.label }}</b></a>
+            </div>
+                
+                {% for node in roots %}
+                    {% ifchanged node.label %}
+                    <div class="item">
+                        <a class="" href="{{ node.get_url }}view/">
+                          <b>{{ node.label }}</b>
+                        </a>
+                        {% if user_profile.validated %}
+                        <a class="ui circular mini label" href="{{ node.get_url }}add/"> <b>+</b></a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="menu">
+                    <a class="item" href="{{ node.get_url }}view/">{{ node.title }}</a>
+                    </div>
+                    {% endifchanged %}
+                    {% if not node.is_leaf_node %}
+                    <div class="menu">
+                    {% with cnodes=node.get_children %}
+                      {% regroup cnodes|dictsort:"label" by label as label_list %}
+                      {% for l in label_list %}
+                        {% with child=l.list.0 %}
+                          {% if child.is_leaf_node %}
+                          <a class="item" href="{{ child.parent.get_url }}view/#{{ child.slug }}">{{ child.label }} </a>
+                          {% else %}
+                          <a class="item" href="{{ child.get_url }}view/"><b>{{ child.label }}</b> </a>
+                          {% endif %}
+                         {% endwith %}
+                      {% endfor %}
+                    {% endwith %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                
+                <div class="item hidden divider">
+                    
+                </div>
+                
+                {% if user_profile.validated %}
+                <div class="item divider">
+                    <a class="" href="{{ rootNode.get_url }}add/">
+                      <i class="icon add"></i> Ajouter un chapitre
+                    </a>
+                </div>
+                {% endif %}
+                
+             </div>
+        </div>
+        {% endblock toc %}
+        
+        <div class="article">
+        
+        {% block page_message %}
+        <div id="messages">
         {% for message in messages %}
             {% if not debug or 'debug' not in message.tags %}
-                <li class="alert {% if message.tags %}{{ message.tags }}{% endif %} alert-block fade in" >
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    <div>
-                        <p>{{ message|safe }}</p>
-                    </div>
-                </li>
+                <div class="ui warning message">
+                  <i class="close icon"></i>
+                  <div class="header">
+                    {{ message.title }}
+                  </div>
+                  {{ message|safe }}
+                </div>
             {% endif %}
         {% endfor %}
-    </ul>
-    {% endif %}
-    <div class="apetizer-form-page clearfix">
-        {% block apetizer-form-content %}
-        <div class="apetizer-form-body clearfix">
-            <div class="action-pipe-body-loader loader" style="display:none;">
-                <i class="icon-refresh icon-spin"></i>
-            </div>
-            <form id="action-form" class="clearfix" action="{{ request.path }}" method="POST"
-                  {% if action_component %}data-action-component="{{ action_component }}" {% endif %}data-parsley-validate="true"
-                  data-parsley-ui-enabled="true" data-parsley-focus="first">
-                {% csrf_token %}
-                
-                <div class="apetizer-form-head">
-                    {% block apetizer-form-form-head %}
-                        <h1>{% trans "Your informations" %}</h1>
-                    {% endblock %}
-                </div>
-                {% block apetizer-form-form-before %}
-                {% endblock apetizer-form-form-before %}
-                {% block apetizer-form-form-content %}
-                    {% for action_form in action_forms %}
-                        <div {% if action_form.slug %}id="{{ action_form.slug }}"{% endif %}
-                             class="apetizer-form-content clearfix">
-                            {% if action_form.title %}
-                                <h3>{{ action_form.title }}</h3>
-                            {% endif %}
-                            {% if action_form.description %}
-                                <p>{{ action_form.description }}</p>
-                            {% endif %}
-
-                            {% for field in action_form %}
-                                <div id="{{ field.name }}"
-                                     class="apetizer-form-field clearfix">
-                                    {% if not field.name in action_form.hidden_fields %}
-                                        {{ field.label_tag }}
-                                    {% endif %}
-                                    {{ field }}
-                                    {% if field.help_text %}
-                                        <div class="apetizer-form-help-text">{{ field.help_text|safe }}</div>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                {% endblock apetizer-form-form-content %}
-                {% block apetizer-form-form-foot %}
-                    <div class="apetizer-form-content"></div>
-                {% endblock apetizer-form-form-foot %}
-                <div class="apetizer-form-content action-form-button-bar clearfix">
-                    {% block apetizer-form-form-button-bar %}
-                        <button id="send-action-button"
-                                class="action-button flat-btn flat-pink pull-right">{% trans "Continue" %}</button>
-                    {% endblock %}
-                </div>
-            </form>
-            {% block apetizer-form-extra-foot %}
-            {% endblock %}
-        </div>
-        <div class="apetizer-form-sidebar sph-hide">
-            <div class="border-left">
-                {% block apetizer-form-sidebar %}
-                {% endblock %}
-            </div>
         </div>
         {% endblock %}
-    </div>
-    <div class="alert-top-right-notification">
-        {% block alerts %}
-        {% endblock alerts %}
-    </div>
-    {% if DEBUG %}
-        <div style="padding:40px;background:#ffd" class="collapse-group">
-            <div>
-                AKEY:{{ akey }}<br/>
-            </div>
-
-            <div id="debug-search-drilldown" class="collapse">
-                {{ debug_data }}
-            </div>
+        
+        {% block page_article %}
+            <div class="ui masthead vertical segment" >
+                {% block page_head %}
+                {% block body %}
+                {% endblock %}
+                {% endblock %}
+                
+                {% block ui %}
+                {% endblock %}
+                
+                {% block page_container %}
+                {% block content %}
+                {% endblock %}
+                {% endblock %}
+            </div>    
+        {% endblock page_article %}
         </div>
-    {% endif %}
+    </div>
     
+    <div class="ui black inverted vertical footer segment">
+        {% comment %}
+        <div class="ui center aligned container">
+            <h4 class="ui inverted header">Mes groupes</h4>
+            <div class="ui horizontal list">
+                {% for membership in user_profile.get_memberships %}
+                  <a class="item" href="{{ membership.get_url }}">
+                    {% if membership.image %}
+                        <img class="ui item mini image" src="{{ membership.image.url }}" />
+                    {% else %}
+                        <img class="ui item mini image" src="{% static 'images/logo-apetizer.png' %}" />
+                    {% endif %}
+                    <span>
+                     {{ membership.title }}
+                     </span>
+                  </a>
+                {% endfor %}
+            </div>
+            <div class="ui inverted section divider"></div>
+        </div>
+        {% endcomment %}
+    {% block page_footer %}
+        <div class="ui center aligned container">
+            <div class="ui stackable inverted grid">
+              <div class="three wide column">
+                <h4 class="ui inverted header">Réseau</h4>
+                <div class="ui inverted link list">
+                  <a class="item" href="/contribute/" target="_blank">Contribuer</a>
+                  {% comment %}
+                  <a class="item" href="/register/" target="_blank">Devenir membre</a>
+                  <a class="item" href="/acteurs/" target="_blank">Devenir acteur</a>
+                  {% endcomment %}
+                </div>
+              </div>
+              <div class="three wide column">
+                <h4 class="ui inverted header">Plateforme</h4>
+                <div class="ui inverted link list">
+                  <a href="http://apetizer.biodigitals.com" class="item">Documentation</a>
+                  <a href="{{ documentation.get_uid_url }}" class="item">Code</a>
+                  <a href="doc/" class="item">Api</a>
+                  {% if request.user.is_staff %}
+                    <a href="{{ api.get_uid_url }}" class="item">Live Api</a>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="seven wide right floated column">
+                <h4 class="ui inverted teal header">Aider à péréniser ce projet</h4>
+                <p> Le soutien du développement Apetizer vient directement de la communauté.</p>
+                {% comment %}
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                  <input type="hidden" name="cmd" value="_s-xclick">
+                  <input type="hidden" name="hosted_button_id" value="7ZAF2Q8DBZAQL">
+                  <button type="submit" class="ui large teal button">Faites un don aujourd'hui</button>
+                </form>
+                {% endcomment %}
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                <input type="hidden" name="cmd" value="_donations">
+                <input type="hidden" name="business" value="nicolas.danjean@free.fr">
+                <input type="hidden" name="lc" value="US">
+                <input type="hidden" name="item_name" value="Biodigitals - Apetizer">
+                <input type="hidden" name="no_note" value="0">
+                <input type="hidden" name="currency_code" value="EUR">
+                <input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+                <input type="image" src="{% static 'images/btn_donate_LG.gif' %}" border="0" name="submit" alt="PayPal - la solution de paiement en ligne la plus simple et la plus sécurisée !">
+                </form>
+        
+              </div>
+            </div>
+            <div class="ui inverted section divider"></div>
+            <img src="{% static 'images/logo-apetizer.png' %}" class="ui centered mini image">
+            {% comment %}
+            <div class="ui horizontal inverted small divided link list">
+              <a class="item" href="http://biodigitals.mit-license.org/" target="_blank">Gratuit et Open Source (MIT)(CC)</a>
+            </div>
+            {% endcomment %}
+          </div>
+        </div>
+        {% endblock page_footer %}
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
-{% block bottom-content %}
-{% endblock bottom-content %}
+{% block extra-scripts %}
+{{ block.super }}
+{% endblock %}
+
+{% include "content/assets/scripts.html" %}
+</body></html>

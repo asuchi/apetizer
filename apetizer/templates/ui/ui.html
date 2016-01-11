@@ -1,0 +1,29 @@
+{% extends 'content/page.html' %}
+
+{% block content %}
+    {% block ui-head %}
+     <div id="ui-panel" class="ui vertical menu" >
+        <div class="item">
+        {% endblock %}
+        {% block ui-form %}
+        {% endblock %}
+        {% block ui-foot %}
+         </div>
+    </div>
+    {% endblock %}
+{% endblock %}
+
+{% comment %}
+{% block ui %}
+    {% block ui-head %}
+     <div id="ui-panel" class="ui sidebar right fixed menu vertical inverted overlay visible" >
+        <div class="item">
+        {% endblock %}
+        {% block ui-form %}
+        {% endblock %}
+        {% block ui-foot %}
+         </div>
+    </div>
+    {% endblock %}
+{% endblock %}
+{% endcomment %}

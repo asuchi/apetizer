@@ -1,0 +1,28 @@
+{% extends 'content/page.html' %}
+{% load i18n content_tags momentjs %}
+
+{% block content %}
+<table class="ui very basic table">
+  <thead>
+    <tr>
+      <th>Label</th>
+      <th>Titre</th>
+      <th>Description</th>
+      <th>Auteur</th>
+      <th>Publié</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for node in nodes %}
+    <tr>
+      <td>{{ node.label }}</td>
+      <td>{{ node.title }}</td>
+      <td>{{ node.description }}</td>
+      <td>{{ node.get_author.get_full_name }}</td>
+      <td>{{ node.published }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{{ block.super }}
+{% endblock %}

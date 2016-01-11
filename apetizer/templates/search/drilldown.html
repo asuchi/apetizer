@@ -1,0 +1,282 @@
+{% load cache i18n drilldown_tags content_tags %}
+
+<div id="drilldown" class="ui container" data-dd-path="{{ user_data.search_pathldirectory_key_url }}" >
+    <div class="ui segment">
+    {% if admin0.items|length = 1 %}
+        {% for key, value in admin0.items %}
+          <a href="{{ key|directory_key_url }}"  ><label>{{ key|drilldown_key_label:'admin0' }} <span>({{ key|drilldown_key_count:'admin0' }})</span>
+        </label></a>{% endfor %}
+    {% endif %}
+    
+	{% if admin1.items|length = 1 %}
+		{% for key, value in admin1.items %}
+		  <a href="{{ key|directory_key_url }}"  ><label>{{ key|drilldown_key_label:'admin1' }} <span>({{ key|drilldown_key_count:'admin1' }})</span>
+		</label></a>{% endfor %}
+	{% endif %}
+	
+	{% if admin2.items|length = 1 %}
+	   {% for key, value in admin2.items %}
+	    <a href="{{ key|directory_key_url }}" >
+		    <label title="{{ key|drilldown_item_title:'admin2' }}" {{ key|drilldown_item_attrs:'admin2' }} >{{ key|drilldown_key_label:'admin2' }} <span>({{ key|drilldown_key_count:'admin2' }})</span>
+	   	</label></a>
+	    {% endfor %}
+	{% endif %}
+	
+	{% if admin3.items|length = 1 %}
+		{% for key, value in admin3.items %}
+		<a href="{{ key|directory_key_url }}"  ><label>{{ key|drilldown_key_label:'admin3' }} <span>({{ key|drilldown_key_count:'admin3' }})</span>
+			
+		</label></a>{% endfor %}
+	{% endif %}
+	
+	{% if admin3.items|length = 1 and admin3_label.items|length = 1 and admin3_slug.items|length = 1 %}
+	{% else %}
+		{% if slug and slug.items|length = 1 %}
+			
+			{% for key, value in slug.items %}<label>{{ key|drilldown_key_label:'slug' }} <span>({{ value }})</span>
+				{% if admin3.items|length = 1 %}
+				{% for key, value in admin3.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+			{% else %}
+				{% if admin2 and admin2.items|length > 0 %}
+					{% for key, value in admin2.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% else %}
+					{% for key, value in country.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% endif %}
+			{% endif %}
+			</label>{% endfor %}
+		{% else %}
+			{% if admin3_slug.items|length = 1 %}
+				
+				{% for key, value in admin3_slug.items %}<label>{{ key|drilldown_key_label:'slug' }} <span>({{ value }})</span>
+					{% if admin3.items|length = 1 %}
+					{% for key, value in admin3.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% else %}
+					{% for key, value in admin3_slug.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% endif %}
+				</label>{% endfor %}
+			{% endif %}
+		{% endif %}
+		
+		
+		{% if label.items|length = 1 %}
+			
+			{% for key, value in label.items %}<label>{{ key|drilldown_key_label:'label' }} <span>({{ value }})</span>
+			{% if admin3 and admin3.items|length = 1 %}
+				{% for key, value in admin3.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+			{% else %}
+				{% if admin2 and admin2.items|length > 0 %}
+					{% for key, value in admin2.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% else %}
+					{% for key, value in country.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% endif %}
+			{% endif %}
+			</label>{% endfor %}
+		{% else %}
+			{% if admin3_label.items|length = 1 %}
+				{% for key, value in admin3_label.items %}<label>{{ key|drilldown_key_label:'label' }} <span>({{ value }})</span>
+					{% if admin3 and admin3.items|length = 1 %}
+					{% for key, value in admin3.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% else %}
+					{% for key, value in admin3_label.items %}<a href="{{ key|directory_key_url }}" class="pull-right" ><i class="icon-trash" ></i></a>{% endfor %}
+				{% endif %}
+				</label>{% endfor %}
+			{% endif %}
+		{% endif %}
+		
+	{% endif %}
+	</div>
+	<div class="ui two columns grid" >
+	
+	{% if admin3 and admin3.items|length > 1 %}
+	<div class="ui column">
+		<h3>{% trans "admin3s" %}</h3>
+		<ul id="dd-top-admin3s" >
+		{% for key, value in admin3.items %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3' }}" ><span>{{ key|drilldown_item_label:'admin3' }}</span>{{ key|drilldown_key_label:'admin3' }}  </a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	
+	{% if admin2 and admin2.items|length > 1 %}
+	<div class="ui column">
+		<h3>{{ admin2.items|length }} {% trans "admin2s" %}</h3>
+		<ul id="dd-admin2" class="ui list">
+		{% for key, value in admin2.items %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin2' }}" {{ key|drilldown_item_attrs:'admin2' }} ><span>{{ key|drilldown_item_label:'admin2' }}</span>{{ key|drilldown_key_label:'admin2' }} </a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	
+	{% if admin1 and admin1.items|length > 1 %}
+    <div class="ui column">
+		<h3>{{ admin1.items|length }} {% trans "admin1s" %}</h3>
+		<ul id="dd-admin1" class="ui list">
+		{% for key, value in admin1.items %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin1' }}" {{ key|drilldown_item_attrs:'admin1' }} ><span>{{ key|drilldown_item_label:'admin1' }}</span>{{ key|drilldown_key_label:'admin1' }} </a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	
+	{% if slug and slug.items|length > 1 %}
+	<div class="ui column">
+		<h3>{{ slug.items|length }} {% trans "slugs" %}</h3>
+		<ul id="dd-slug" class="ui list">
+		{% for key, value in slug.items %}
+		    <li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'slug' }}" ><span>{{ key|drilldown_item_label:'slug' }}</span>{{ key|drilldown_key_label:'slug' }} </a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	
+	{% if label and label.items|length > 1 %}
+	<div class="ui column">
+		<h3>{{ label.items|length }} {% trans "labels" %}</h3>
+		<ul id="dd-label" class="ui list">
+		{% for key, value in label.items %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'label' }}" ><span>{{ key|drilldown_item_label:'label' }}</span>{{ key|drilldown_key_label:'label' }}</a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+	
+	{% if admin3.items|length = 1 or admin2.items|length = 1 %}
+		{% if admin3_slug and admin3_slug.items|length > 1 %}
+        	<div class="ui column">
+			{% if admin3 and admin3.items|length == 1 %}
+			<h3>{{ admin3_slug.items|length }} {% trans "slugs" %}</h3>
+			<ul id="dd-admin3-slug" class="ui list">
+				{% for key, value in admin3_slug.items %}
+					<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3-slug' }}" ><span>{{ key|drilldown_item_label:'slug' }}</span>{{ key|drilldown_key_label:'slug' }} </a> <span>({{ value }})</span></li>
+				{% endfor %}
+			</ul>
+			{% else %}
+			<h3>{{ admin3_slug.items|length }} {% trans "admin3s" %}</h3>
+			<ul id="dd-admin3-slug" class="ui list">
+				{% for key, value in admin3_slug.items %}
+					<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3-slug' }}" ><span>{{ key|drilldown_item_label:'admin3' }}</span>{{ key|drilldown_key_label:'admin3' }} </a> <span>({{ value }})</span></li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+			</div>
+		{% endif %}
+	
+		{% if admin3_label and admin3_label.items|length > 1 %}
+		  <div class="ui column">
+			{% if admin3 and admin3.items|length == 1 %}
+			<h3>{{ admin3_label.items|length }} {% trans "labels" %}</h3>
+			<ul id="dd-admin3-label" class="ui list">
+			{% for key, value in admin3_label.items %}
+				<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3-label' }}" ><span>{{ key|drilldown_item_label:'label' }}</span>{{ key|drilldown_key_label:'label' }} </a> <span>({{ value }})</span></li>
+			{% endfor %}
+			</ul>
+			{% else %}
+			<h3>{{ admin3_label.items|length }} {% trans "admin3s" %}</h3>
+			<ul id="dd-admin3-label" class="ui list">
+			{% for key, value in admin3_label.items %}
+				<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3-label' }}" ><span>{{ key|drilldown_item_label:'admin3' }}</span>{{ key|drilldown_key_label:'admin3' }} </a> <span>({{ value }})</span></li>
+			{% endfor %}
+			</ul>
+			{% endif %}
+		</div>
+		{% endif %}
+	
+	{% else %}
+		
+	
+	{% endif %}
+	
+	
+	
+	{% if admin2_slug and admin2_slug.items|length > 1 %}
+		{% if admin2.items|length == 1 %}
+			<h3>{{ admin2_slug.items|length }} {% trans "slugs" %}</h3>
+		{% else %}
+			<h3>{{ admin2_slug.items|length }} {% trans "admin2s" %}</h3>
+		{% endif %}
+		<ul id="dd-admin2-slug" class="ui column">
+		{% for key, value in admin2_slug.items %}
+			{% if not admin2 %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin2-slug' }}" {{ key|drilldown_item_attrs:'admin2-slug' }} ><span>{{ key|drilldown_item_label:'admin2' }}</span>{{ key|drilldown_key_label:'admin2' }} </a> <span>({{ value }})</span></li>
+			{% else %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin2-slug' }}" {{ key|drilldown_item_attrs:'admin2-slug' }} ><span>{{ key|drilldown_item_label:'slug' }}</span>{{ key|drilldown_key_label:'slug' }} </a> <span>({{ value }})</span></li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+	{% endif %}
+	
+	{% if admin2_label and admin2_label.items|length > 1 %}
+		{% if admin2.items|length == 1 %}
+			<h3>{{ admin2_label.items|length }} {% trans "labels" %}</h3>
+		{% else %}
+			<h3>{{ admin2_label.items|length }} {% trans "admin2s" %}</h3>
+		{% endif %}
+		<ul id="dd-admin2-label" class="ui column">
+		{% for key, value in admin2_label.items %}
+			{% if not admin2 %}
+				<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin2-label' }}" {{ key|drilldown_item_attrs:'admin2-label' }}><span>{{ key|drilldown_item_label:'admin2' }}</span>{{ key|drilldown_key_label:'admin2' }} </a> <span>({{ value }})</span></li>
+			{% else %}
+				<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin2-label' }}" {{ key|drilldown_item_attrs:'admin2-label' }}><span>{{ key|drilldown_item_label:'label' }}</span>{{ key|drilldown_key_label:'label' }} </a> <span>({{ value }})</span></li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+	{% endif %}
+	
+	
+	{% if label_model and admin3_label_model.items|length > 1 %}
+		<h3>{{ label_model.items|length }} {% trans "models" %}</h3>
+		<ul id="dd-label-model" class="ui column">
+		{% for key, value in admin3_label_model.items %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3-label-model' }}" ><span>{{ key|drilldown_item_label:'models' }}</span>{{ key|drilldown_key_label:'label_model' }} </a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+	
+	{% if admin3 and admin3.items|length > 1 %}
+		<h3>{{ admin3.items|length }} {% trans "admin3s" %}</h3>
+		<ul id="dd-admin3s" class="ui column">
+		{% for key, value in admin3.items %}
+			<li><a href="{{ key|directory_key_url }}" title="{{ key|drilldown_item_title:'admin3' }}" {{ key|drilldown_item_attrs:'admin3' }} ><span>{{ key|drilldown_item_label:'admin3' }}</span>{{ key|drilldown_key_label:'admin3' }}  </a> <span>({{ value }})</span></li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+	
+	</div>
+	
+	
+	{% if DEBUG %}
+	<div style="padding:40px;background:#ffd" class="collapse-group" >
+		
+		<div>
+			SKEY:{{ search_key }}<br />
+			DKEY:{{ directory_path }}<br />
+			<a href="#debug-search-drilldown" class="pull-right" data-toggle="collapse" >Show all</a>
+		</div>
+		
+		<div id="debug-search-drilldown" class="collapse" >
+			<div>
+				SKEY:{{ search_key }}<br />
+				SHITS:{{ search_key_hits }}<br />
+				SUPDATE: {{ search_key_update }}<br />
+				<hr/>			
+				DKEY:{{ directory_path }}<br />
+				DHITS: {{ directory_hits }}<br />
+				DRATE: {{ directory_changes }}<br />
+				DUPDATE: {{ directory_timestamp }}<br />
+				<hr/>
+			</div>
+			<div>
+				SJSON:<br />
+				{{ user_data_json }}
+				<hr/>
+				DJSON:<br />
+				{{ directory_json }}
+			</div>
+		</div>
+	</div>
+	{% endif %}
+
+	
+</div>

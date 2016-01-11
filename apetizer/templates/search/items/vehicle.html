@@ -1,0 +1,72 @@
+{% load i18n %}
+
+<div id="{{result_pa_uid}}" class="srslt-vehicle clearfix {{ result_unavailable }}" data-parking-address-uid="{{result_pa_uid}}" itemscope itemtype="http://schema.org/Offer" data-vehicle-id="{{ result_id }}">
+    
+    <div class="srslt-vehicle-number">
+    	{{ result_index }}
+    </div>
+	
+	<div class="srslt-vehicle-details clearfix" >
+		<div class="srslt-vehicle-prices black">
+            <h5 class="black">
+            	<span itemprop="price">{{ result_price }}</span>
+            	<meta itemprop="priceCurrency" content="{{ result_currency_ISO }}" />
+            </h5>
+            <span class="srslt-duration">{{ result_duration }}</span>
+            <meta itemprop="name" content="{% blocktrans with town=result_pa_town model=parking_address.vehicle.model %}Rent {{ model }} in {{ town }}{% endblocktrans %} {{ result_duration }}" />
+            <span class="sph-hide" itemprop="description"><br/>{% blocktrans with distance_units=parking_address.vehicle.distance_units|capfirst %}{{ distance_units }} and insurance included{% endblocktrans %}</span>
+			<div class="srslt-vehicle-price-details">
+				{{ result_hourly_price }}{{ per_hour }}&nbsp; {{ result_daily_price }}{{ per_day }}&nbsp; {{ result_distance_price }}{{ per_distance }}
+			</div>
+			<a href="{{ result_url }}" class="flat-btn flat-pink" itemprop="url">
+				{{ see }} <span class="srslt-ph-hide">{{ this_car }}</span>
+			</a>
+		</div>
+		
+		<div class="srslt-vehicle-photo">
+			<a href="{{ result_url }}" class="reserve-link">
+	        	<img src="{{ result_photo }}" alt="{% trans "Vehicle picture" %}" itemprop="image" />
+	        </a>
+	        <div class="srslt-flagbanner">
+				<div class="gray-flagbanner clearfix">
+					{{ unavailable }}
+				</div>
+				<div class="gray-flagbanner-bottom"></div>
+			</div>
+		</div>
+		
+		<div class="srslt-vehicle-infos" itemprop="itemOffered" itemscope itemtype="http://schema.org/Product">
+		    <meta itemprop="name" content="{% blocktrans with town=result_pa_town model=parking_address.vehicle.model %}Rent {{ model }} in {{ town }}{% endblocktrans %}" />
+			<h4>
+				<a href="{{ result_url }}" class="reserve-link" itemprop="url"><span itemprop="brand">{{ result_make }}</span> <span itemprop="model">{{ result_model_name }}</span> {{ result_year }}</a>
+				<span class="favorite-btn favorite-disabled"><i class="icon-star-empty"></i></span>
+			</h4>
+        	<p class="srslt-vehicle-info srslt-vehicle-description black" itemprop="description">{{ result_description }}</p>
+		</div>
+		
+		<div class="srslt-vehicle-location"  itemprop="availableAtOrFrom" itemscope itemtype="http://schema.org/Place">
+			<i class="icon-map-marker green" itemprop="geo" itemscope itemtype="http://schema.org/GeoCoordinates">    					
+	            <meta itemprop="latitude" content="{{ result_pa_fuzzy_latitude }}" />
+	            <meta itemprop="longitude" content="{{ result_pa_fuzzy_longitude }}" />
+			</i> 
+			<span itemprop="address" itemscope itemtype="http://schema.org/PostalAddress">
+				<span itemprop="addressLocality">{{ result_pa_town }}</span> 
+				<span itemprop="postalCode">{{ result_pa_postalcode }}</span> 
+				{{ result_pa_rounded_distance }}
+			</span>
+		</div>
+		
+		<div class="srslt-vehicle-owner" itemprop="seller" itemscope itemtype="http://schema.org/AutoRental">
+			<h5 class="black" itemprop="name">{{ result_owner_name }}</h5> 
+    		<span class="srslt-vehicle-new green">{{ result_new }}</span>
+    		<span itemprop="interactionCount">{{ result_rentals }}</span>
+			{% if result_comments %}<span class="srslt-comment"><i class="icon-comment icon-flip-horizontal"></i> {{ result_comments }}</span>{% endif %}
+			{% if result_reactivity %}<span class="srslt-stats"><i class="icon-time icon-flip-horizontal"></i> {{ result_reactivity }}</span>{% endif %}
+		</div>
+		
+		<div class="srslt-userdescription">
+			{{ result_short_description }}
+		</div>
+	</div>
+	
+</div>

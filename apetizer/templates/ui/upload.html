@@ -1,0 +1,128 @@
+{% extends "ui/base.html" %}
+{% load i18n thumbnail multiuploader staticfiles verbatim %}
+
+{% block Zcontent %}
+<div class="ui grid">
+    {% for ufile in currentNode.medias.all %}
+    <div class="five wide column">
+        <div class="ui segment image" data-ref-id="{{ ufile.id }}" >
+            <img src="{% thumbnail ufile.file 128x128 %}" />
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+
+{% block ui-form %}
+{{ block.super }}
+{% endblock %}
+{% include "ui/tags/upload.html" %}
+
+{% block extra-styles %}
+
+{{ block.super }}
+<link rel="stylesheet" href="{% static "components/multiuploader/styles/jquery-ui.css" %}" id="theme">
+<link rel="stylesheet" href="{% static "components/multiuploader/styles/jquery.fileupload-ui.css" %}">
+{% endblock %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+{% comment %}
+<script src="{% static "components/multiuploader/scripts/jquery.tmpl.min.js" %}"></script>
+<script src="{% static "components/multiuploader/scripts/jquery.iframe-transport.js" %}"></script>
+<script src="https://code.jquery.com/jquery-1.11.2.min.js" ></script>
+<script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js" ></script>
+
+<script src="https://raw.githubusercontent.com/blueimp/jQuery-File-Upload/master/js/jquery.fileupload.js"></script>
+<script src="https://raw.githubusercontent.com/blueimp/jQuery-File-Upload/master/js/jquery.fileupload-ui.js"></script>
+{% endcomment %}
+
+
+<script src="{% static "components/multiuploader/scripts/jquery.min.js" %}"></script>
+<script src="{% static "components/multiuploader/scripts/jquery-ui.min.js" %}"></script>
+<script src="{% static "components/multiuploader/scripts/jquery.tmpl.min.js" %}"></script>
+<script src="{% static "components/multiuploader/scripts/jquery.iframe-transport.js" %}"></script>
+<script src="{% static "components/multiuploader/scripts/jquery.fileupload.js" %}"></script>
+<script src="{% static "components/multiuploader/scripts/jquery.fileupload-ui.js" %}"></script>
+
+<script type="text/javascript" src="{% static "components/multiuploader/scripts/collectfiles.js" %}"></script>
+
+<script type="text/javascript">
+    var translation = {
+        {% comment %}Translators: Start and Stop uploading buttons captions {% endcomment %}
+        "Start": "{% trans "Start" %}",
+        "Stop": "{% trans "Stop" %}",
+        {% comment %}Translators: Errors and its descriptions {% endcomment %}
+        "Error": "{% trans "Error" %}",
+        "File is too big": "{% trans "File is too big" %}",
+        "File is too small": "{% trans "File is too small" %}",
+        "Filetype not allowed": "{% trans "Filetype not allowed" %}",
+        "Max number of files exceeded": "{% trans "Max number of files exceeded" %}",
+        "File exceeds upload_max_filesize": "{% trans "File exceeds maximum upload limit" %}",
+        "File exceeds MAX_FILE_SIZE (HTML form directive)": "{% trans "File exceeds maximum size of upload" %}",
+        "File is too small": "{% trans "File is too small" %}",
+        "File was only partially uploaded": "{% trans "File was only partially uploaded" %}",
+        "No File was uploaded": "{% trans "No File was uploaded" %}",
+        "Missing a temporary folder": "{% trans "Missing a temporary folder" %}",
+        "Failed to write file to disk": "{% trans "Failed to write file to disk" %}",
+        "File upload stopped by extension": "{% trans "File upload stopped by extension" %}",
+        "Empty file upload result": "{% trans "Empty file upload result" %}"
+    };
+</script>
+
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		
+		
+	    setup_widget(jQuery);
+	    setup_ui(jQuery);
+	
+	    (function ($) {
+	        'use strict';
+	
+	        var multiuploaderSelector = '#id_file';
+			
+	        var opts = {{ multiuploader_form.options|safe }};
+	
+	        // Making new RegExp from django string
+	        opts['acceptFileTypes'] = new RegExp(opts['acceptFileTypes'], 'i');
+	        opts['maxNumberOfFiles'] = opts['maxNumberOfFiles'];
+	
+	        $(multiuploaderSelector).fileupload(opts);
+	
+	        // Load existing files:
+	        $.getJSON($(multiuploaderSelector + ' form').prop('action'), function (files) {
+	            var fu = $(multiuploaderSelector).data('fileupload');
+	            fu._adjustMaxNumberOfFiles(-files.length);
+	            fu._renderDownload(files)
+	                    .appendTo($(multiuploaderSelector + ' .files'))
+	                    .fadeIn(function () {
+	                        // Fix for IE7 and lower:
+	                        $(this).show();
+	                    });
+	        });
+	
+	        // Open download dialogs via iframes,
+	        // to prevent aborting current uploads:
+	
+	        $(multiuploaderSelector + ' .files a:not([target^=_blank])').live('click', function (e) {
+	            e.preventDefault();
+	            $('<iframe style="display:none;"></iframe>')
+	                    .prop('src', this.href)
+	                    .appendTo('body');
+	        });
+			
+	        // Making multiuploader visible
+	        $(multiuploaderSelector).removeAttr("style");
+	
+	    })(jQuery);
+	    
+	    setup_filecollector(jQuery,"id_file","input[name=_edit]", true);
+    
+	});
+</script>
+
+{% endblock %}

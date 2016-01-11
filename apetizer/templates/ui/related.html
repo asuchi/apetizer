@@ -1,0 +1,36 @@
+{% extends 'content/page.html' %}
+
+
+{% block body %}
+{% if not currentNode.published %}
+<div class="ui segment" >
+    {% include 'content/tags/form.html' %}    
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}
+
+{% block page_container %}
+
+{% if currentNode.related_url and 'hackpad' in currentNode.related_url %}
+    <script src="{{ currentNode.related_url }}.js"></script><noscript>
+    <div>View <a href="{{ currentNode.related_url }}">{{ currentNode.title }}</a> on Hackpad.</div>
+    </noscript>
+{% elif currentNode.related_url and 'twitter' in currentNode.related_url %}
+    <div class="col-md-12 text-center">
+        <form action="" method="GET" >
+            <input name="keyword" value="{{ request.POST.keyword }}" type="text" placeholder="keyword" />
+        </form>
+    </div>
+{% elif currentNode.related_url and 'meetup' in currentNode.related_url %}
+
+{% elif currentNode.related_url %}
+<div class="ui sixteen wide column vertical segment" style="padding:0px;margin:0px">
+<iframe src="{{ currentNode.related_url }}" width="100%" height="720" border="0" style="border:1px solid gray;" ></iframe>
+</div>
+{% else %}
+
+{% endif %}
+<div class="ui hidden divider" ></div>
+{{ block.super }}
+{% endblock %}

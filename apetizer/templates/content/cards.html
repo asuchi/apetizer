@@ -1,0 +1,130 @@
+{% extends 'content/base.html' %}
+{% load content_tags momentjs thumbnail %}
+
+{% block body %}
+{{ block.super }}
+{% endblock %}
+
+{% block page_container %}
+
+
+    {% for node in nodes %}
+        
+        
+        {% ifchanged node.label %}
+        
+        {% if not forloop.first %}</div>{% endif %}
+    <div class="ui segment four wide column">
+        <div class="item" >
+            <h2 class="ui dividing header">{{ node.label }}<a class="anchor" id="{{ node.label }}"></a></h2>
+        </div>
+        {% endifchanged %}
+        
+        
+        {% ifchanged node.label %}
+        
+        <div class="ui hidden divider"></div>
+        <div class="ui item dividing" >
+            <h4 class="ui header">Auteur</h4>
+            <a class="ui item mini spaced button" href="contact/" >Contacter</a>
+        </div>
+        
+        <div class="ui hidden divider"></div>
+        <div class="ui item dividing" >
+            {% with contributors=node.get_contributors %}
+            <h4 class="ui header">Contributeurs ({{contributors|length}} )</h4>
+            <div class="ui list" >
+                {% for contributor in contributors %}
+                <div class="item">
+                    <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
+                    <div class="content">
+                        <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
+                        <div class="content">
+                          {% moment_from_now contributor.modified_date %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endwith %}
+            <a class="ui item mini spaced button" href="invite/" >Inviter</a>
+        </div>
+        
+        <div class="ui hidden divider"></div>
+        <div class="ui item dividing" >
+            {% with subscribers=node.get_subscribers %}
+                <h4 class="ui header">Curateurs ({{subscribers|length}} )</h4>
+                {% for subscriber in subscribers %}
+                    <a class="ui item" href="{{ subscriber.get_url }}" >{{ subscriber.get_full_name }}</a>
+                    {% if subscriber.email == user_profile.email %}
+                        <a class="ui icon cogs" href="unsubscribe/" >X</a>
+                    {% else %}
+                    {% endif %}
+                    {% if not forloop.last %},{% endif %}
+                {% endfor %}
+            {% endwith %}
+            <div class="ui hidden divider"></div>
+            <a class="ui item mini spaced button" href="subscribe/" >Souscrire</a>
+        </div>
+        
+        
+        {% endifchanged %}
+        
+        
+        
+        {% ifchanged node.label %}
+        {% if not forloop.first %}
+        <div class="ui hidden divider"></div>
+        {% endif %}
+        <div class="ui bottom right attached label">
+            <a class="ui tiny icon add" href="add/?label={{ node.label }}#{{node.slug}}" title="Ajouter"><i class="icon add"></i></a>
+        </div>
+        {% endifchanged %}
+        
+        <div class="item">
+            <div class="content">
+                <a class="anchor" id="{{ node.slug }}"></a>
+                {% if node.get_root.id != currentNode.get_root.id %}
+                    <img class="ui tiny image" src="{{ node.get_root.get_image }}" />
+                    <a href="{{ node.get_root.get_url }}">{{ node.get_root.label }} - {{ node.get_root.title }}</a>
+                {% endif %}
+                <h4 class="ui header" ><a href="{{ node.get_url }}" class="header">
+                    {{ node.title }}
+                </a><p class="meta sub header"><i>{{ node.description|linebreaks }}</i></p></h4>
+                {% if not node.is_leaf_node %}
+                    <a class="ui right floated primary button"  href="{{ node.get_url }}" >Lire plus <i class="right chevron icon"></i></a>
+                    <div class="ui hidden divider"></div>
+                {% else %}
+                    {% if node.parent == currentNode %}
+                    {% content_render node.content %}
+                    {% endif %}
+                {% endif %}
+                {% if node.file %}
+                    <div class="ui item">
+                        <img class="ui image full width" src="{{ node.file.url }}" />
+                    </div>
+                {% endif %}
+                <div class="ui date" >
+                  <a href="/{{ node.get_hash }}/" >{{ node.get_full_name }}</a>, 
+                  {% moment_from_now node.modified_date %}
+                </div>
+            </div>
+        </div>
+        
+        
+        
+        {% if forloop.last %}
+        </div>
+        {% endif %}
+        
+        
+        {% empty %}
+        {% endfor %}
+        <div class="ui divider"></div>
+        <div class="ui item">
+            <div class="ui right floated button" >
+                <a href="add/" title="Ajouter">Ajouter une carte</a>
+            </div>
+        </div>
+        
+{% endblock page_container %}

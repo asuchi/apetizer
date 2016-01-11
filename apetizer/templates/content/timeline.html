@@ -1,0 +1,34 @@
+{% extends 'content/page.html' %}
+{% load static i18n content_tags momentjs %}
+
+
+{% block body %}
+{% endblock %}
+
+{% block content %}
+
+<div class="ui divider"></div>
+<div class="ui grid">
+    {% for item in nodes %}
+    <div class="item row" >
+      <div class="three wide column date">
+        <div class="ui item icon clock" >{% moment_from_now item.start %}</div>
+        <div class="ui item icon clock" >{% moment_from_now item.end %}</div>
+      </div>
+      <div class="ten wide column">
+         
+         <div class="ui header">{{ item.title }}
+          <a class="ui" href="{{ item.get_url }}timing/" ><i class="icon clock" ></i></a>
+          <p class="ui sub header sixteen wide column" >{{ item.description }}
+          </p>
+          </div>
+      </div>
+      <div class="three wide column">
+          <a class="ui button right floated" href="{{ item.get_url }}" >{% trans "view" %}</a>
+      </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="ui divider"></div>
+{% endblock %}
+

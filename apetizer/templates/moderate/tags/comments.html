@@ -1,0 +1,70 @@
+{% load momentjs moderate_tags %}
+{% comment %}
+<div class="ui comments">
+  <h3 class="ui dividing header">Comments</h3>
+{% for comment in review.comments %}
+  <div class="comment {% if not comment.validated %}disable{% endif %}" >
+    <a class="avatar">
+      <img src="{{ comment.get_image.url }}">
+    </a>
+    <div class="content">
+      <a class="author" href="{{ comment.get_url }}" >{{ comment.get_full_name }}</a> 
+        {{ comment.subject }}
+      <div class="metadata">
+        <span class="date">{% moment_from_now comment.modified_date %}</span>
+      </div>
+      <div class="text">
+        {{ comment.message }}
+      </div>
+      <div class="actions">
+        <a class="reply">Reply</a>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endcomment %}
+<h3 class="ui dividing header">Comments</h3>
+<div class="ui feed">
+{% for comment in currentNode.get_history %}
+<div class="event" {% if not comment.validated %}style="opacity:0.3;"{% endif %}>
+    {% if comment.status == 'changed' %}
+    <div class="label">
+    </div>
+    <div class="content">
+      <div class="summary">
+      <i class="pencil icon"></i>
+        <a class="user" href="{{ comment.visitor.get_url }}" >
+          {{ comment.get_full_name }}
+        </a> {{ comment.subject }}
+        <div class="date">{% moment_from_now comment.modified_date %}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="label">
+      <img class="avatar" src="{{ comment.get_image.url }}">
+    </div>
+    <div class="content">
+      <div class="summary">
+        <a class="user" href="{{ comment.visitor.get_url }}" >
+          {{ comment.get_full_name }}
+        </a> {{ comment.subject }} - {{ comment.status }}
+        <div class="date">
+          {% moment_from_now comment.modified_date %}
+        </div>
+      </div>
+      <div class="extra text">
+        {{ comment.message }}
+      </div>
+      {% comment %}
+      <div class="meta">
+        <a class="like">
+          <i class="like icon"></i> 4 Likes
+        </a>
+      </div>
+      {% endcomment %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+</div>

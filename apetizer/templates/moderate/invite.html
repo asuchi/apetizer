@@ -1,0 +1,9 @@
+{% extends "moderate/base.html" %}
+{% load i18n content_tags %}
+
+{% block content %}
+    {% with item_form=action_forms.0 %}
+        {% include 'content/tags/form.html' %}
+    {% endwith %}
+{{ block.super }}
+{% endblock %}

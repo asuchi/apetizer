@@ -1,0 +1,57 @@
+{% extends 'dashboard.html' %}
+{% load i18n content_tags momentjs %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12" style="padding:40px;">
+        <form class="form-inline" action="" method="POST" >
+            {% csrf_token %}
+            <label for="id_keyword" >{% trans "Ajouter un therme de recherche :" %}</label>
+            <input class="form-control input-lg" id="id_keyword" name="keyword" value="{{ request.POST.keyword }}" type="text" placeholder="{% trans "keyword, expression" %}" />
+            <button type="submit" class="btn btn-default">{% trans "Ajouter" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+<div class="col-lg-12">
+<div class="ibox float-e-margins">
+<div class="ibox-content">
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Item </th>
+                <th>Event count</th>
+                <th>Last update</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in objects %}
+            <tr>
+                <td><small>{% for a in item.get_ancestors %}<a href="{{ a.get_url }}" >{{ a.label }}</a> > {% endfor %} <a href="{{ item.get_url }}" >{{ item.label }}</a></small><br/>
+                    {{ item.title }}<br/>
+                    <small>{{ item.description }}</small></td>
+                <td>{{ item.get_children|length }}</td>
+                <td>{% moment_from_now item.modified_date %}</td>
+                <td>
+                    <a href="{{ item.get_url }}">{% trans 'View' %}</a>
+                    <a href="{{ item.get_url }}map/" target="_front" >{% trans 'Map' %}</a>
+                    <a href="{{ item.get_url }}timeline/" target="_front" >{% trans 'Timeline' %}</a>
+                    <a href="{{ item.get_url }}agenda/" target="_front" >{% trans 'Agenda' %}</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+</div>
+
+</div>
+{% endblock %}

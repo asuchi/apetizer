@@ -1,0 +1,7 @@
+{% load i18n %}
+{% if has_permission %}
+<a class="frontendadmin frontendadmin_edit btn btn-mini" href="{{ edit_link }}?next={{ next_link }}">
+    <span class="icon-edit" ></span>
+    <span>{% if label %}{{ label }}{% else %}{% trans "Change" %}{% endif %}</span>
+</a>
+{% endif %}

@@ -1,0 +1,24 @@
+
+<h4 class="ui header" >Votre avis :</h4>
+<div class="ui borderless list horizontal" >
+    <form class="ui item" method="POST" action="review/">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="accepted" />
+        <input class="ui button" type="submit" value="Valider" />
+    </form>
+    <form class="ui item" method="POST" action="review/" >
+        {% csrf_token %}
+        <input type="hidden" name="status" value="rejected" />
+        <input class="ui button" type="submit" value="Rejeter" />
+    </form>
+</div>
+
+{% comment %}
+<form class="ui fuild form" method="POST" action="review/" >
+    {% csrf_token %}
+    <div class="ui group">
+        <input type="text" name="status" value="" />
+        <input class="ui button" type="submit" value="Autre" />
+    </div>
+</form>
+{% endcomment %}

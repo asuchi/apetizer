@@ -1,0 +1,115 @@
+'''
+Created on 25 sept. 2015
+
+@author: biodigitals
+'''
+
+from copy import deepcopy
+import json
+import traceback
+
+from django.forms.models import model_to_dict
+
+from apetizer.models import DataPath
+from apetizer.parsers.json import API_json_parser
+
+
+class ModelStore(object):
+    """
+    Key value store for action pipe data
+    """
+    data = {}
+    model = DataPath
+    
+    hash_key = 'akey'
+    range_key = 'action'
+
+    def put(self, hash_key, range_key, data):
+        
+        try:
+            params = {}
+            params[self.hash_key] = hash_key
+            params[self.range_key] = range_key
+            
+            data_object = self.model.objects.filter(**params).order_by('-ref_time')[0]
+            for key in data.keys():
+                if key == 'related':
+                    #data_object.model = data[key]
+                    pass
+                else:
+                    data_object.__setattr__(key, data[key])
+            data_object.full_clean()
+            data_object.save()
+        
+        except IndexError:
+            
+            if not self.range_key in data:
+                data[self.range_key] = range_key
+            
+            data_keys = data.keys()
+            for key in data_keys:
+                if key.endswith('_ptr'):
+                    del data[key]
+            
+            new_object = self.model(**data)
+            
+            # should check for matching hash_key/range_key
+            new_object.akey = hash_key
+            new_object.action = range_key
+            
+            #
+            new_object.data = json.dumps(new_object.data, default=API_json_parser)
+            
+            #
+            new_object.full_clean()
+            new_object.save()
+
+    def get_latest(self, hash_key, range_key=None):
+        try:
+            if range_key:
+                data_obj = self.model.objects.filter(akey=hash_key, action=range_key, completed_date__isnull=True).order_by('-ref_time')[0]
+            else:
+                data_obj = self.model.objects.filter(akey=hash_key, completed_date__isnull=True).order_by('-ref_time')[0]
+            
+            pipe_data = self.get_default_obj_data()
+            
+            obj_data = model_to_dict(data_obj)
+            
+            pipe_data.update(obj_data)
+            #try:
+            #    pipe_data['data'] = json.loads(data_obj.data)
+            #except:
+            #    traceback.print_exc()
+            #    pipe_data['data'] = {}
+            pipe_data['data'] = deepcopy(data_obj.data)
+            return pipe_data
+        
+        except IndexError:
+            return None
+    
+    def get_default_obj_data(self):
+        return {}
+    
+    def get_range_obj(self, hash_key):
+        rkeys = self.model.objects.filter(akey=hash_key)
+        range_list = []
+        for rkey in rkeys:
+            range_list.append(rkey.data)
+        return range_list
+
+    def set_range_obj(self, hash_key, data, range_keys=None):
+        if range_keys:
+            for range_key in range_keys:
+                self.put(hash_key, range_key, data)
+        else:
+            # get range keys from existing
+            for o in self.get_range_obj(hash_key):
+                self.put(hash_key, o.action, data)
+
+    def remove_range_obj(self, hash_key, range_keys=None):
+        if range_keys == None:
+            self.model.objects.filter(akey=hash_key).delete()
+        else:
+            for range_key in range_keys:
+                self.model.objects.filter(akey=hash_key, action=range_key).delete()
+

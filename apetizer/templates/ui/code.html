@@ -1,0 +1,135 @@
+{% extends 'ui/base.html' %}
+{% load static content_tags %}
+
+{% block ui-form %}
+{% include 'apetizer/tags/action_forms.html' %}
+{% endblock %}
+
+{% block content %}
+{% content_item currentNode %}
+{{ block.super }}
+{% endblock %}
+
+
+https://github.com/NextStepWebs/simplemde-markdown-editor
+
+{% block extra-scripts %}
+
+{{ block.super }}
+<script type="text/javascript" src="{% static 'components/ckeditor/ckeditor.js' %}"></script>
+<script src="{% static 'components/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static 'components/codemirror/mode/xml/xml.js' %}"></script>
+<script src="{% static 'components/codemirror/mode/javascript/javascript.js' %}"></script>
+<script src="{% static 'components/codemirror/mode/css/css.js' %}"></script>
+<script src="{% static 'components/codemirror/mode/htmlmixed/htmlmixed.js' %}"></script>
+
+<script type="text/javascript">
+   $(document).ready(function(){
+    
+    // Iterate through all frontendadmin links
+    $('a.Zfrontendadmin').each(function(){
+
+           // Change the background color of the parent container on hover
+        $(this).hover(
+            function(){
+                $(this).parent().addClass('frontendadmin_container_hover');
+            },
+            function(){
+                $(this).parent().removeClass('frontendadmin_container_hover');
+            }
+        );
+           // Load the frontendadmin form url into the parent container
+        $(this).click(function(){
+            $(this).parent().removeClass('frontendadmin_container_hover');
+            $("#panel").show();
+            $("#panel-content").load( $(this).attr('href')+' div#frontendadmin-content' );
+            return false;
+        });
+    })
+   });
+   </script>
+   
+<script type="text/javascript" >
+    
+    CKEDITOR.disableAutoInline = true;
+    
+    function editBloc( bloc ){
+        if ( !CKEDITOR.instances[bloc] )
+            {
+            CKEDITOR.inline( bloc );
+            }
+        $( 'div#'+bloc+'-toolbar' ).show();
+    }
+    
+    function saveBloc( bloc, id ){
+        
+        var editor = CKEDITOR.instances[bloc];
+        var form = $('form#'+bloc+'-form');
+        $('input#'+id+'_content').val( editor.getData() );
+        
+        $.post( $(form).attr('action'), form.serialize(), function(){
+            // alert('Saved '+id);
+        });
+        editor.destroy();
+        $( 'div#'+bloc+'-toolbar' ).hide();
+    }
+    
+    function cancelBloc( bloc, id ){
+        var editor = CKEDITOR.instances[bloc];
+        editor.focusManager.blur();
+        editor.setData( $('input#'+id+'_content').val() );
+        editor.destroy(true);
+        //$( 'div#'+bloc ).html( $('input#'+id+'_content').val() );
+        $( 'div#'+bloc+'-toolbar').hide();
+        $( 'div#'+bloc+'-code').remove();
+        $( 'button#'+bloc+'-code-btn' ).show();
+    }
+    
+    function setSortable(){
+        $('.item-list').sortable({
+            /*containment: 'parent',
+            zindex: 10, */
+            items: '.item-list-element',
+            handle: 'a:first',
+            update: function() {
+                $(this).find('.item-list-element').each(function(i) {
+                    if ($(this).find('input[id$=name]').val()) {
+                        $(this).find('input[id$=order]').val(i+1);
+                    }
+                });
+            }
+        });
+        $('.item-list').disableSelection();
+        $('.item-list-element').css('cursor', 'move');
+        $('.item-list-element').find('input[id$=order]').parent('div').hide();
+    };
+    
+    function codeBloc( bloc, id ){
+        
+        var ckeditor = CKEDITOR.instances[bloc];
+        ckeditor.focusManager.blur();
+        
+        // edit area
+        var editArea = $('<div id="'+bloc+'-code" ><textarea id="'+bloc+'-code-area" name="code" style="height:128px" ></textarea><div>');
+        editArea.val( ckeditor.getData() );
+        
+        // add textarea
+        $( 'div#'+bloc+'-toolbar' ).prepend( editArea );
+        
+        // init codemirror
+        var codeEditor = CodeMirror.fromTextArea( document.getElementById( bloc+"-code-area" ), 
+                {
+                mode: "text/html", 
+                tabMode: "indent", 
+                lineNumbers:true, 
+                onBlur: function(cm){ ckeditor.setData( cm.getValue() ); },
+                });
+        
+        ckeditor.on('blur', function() { codeEditor.setValue( ckeditor.getData() ) });
+        
+        // hide code btn
+        $( 'button#'+bloc+'-code-btn' ).hide();
+    }
+    
+</script>
+{% endblock %}

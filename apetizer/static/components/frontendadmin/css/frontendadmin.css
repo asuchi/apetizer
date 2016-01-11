@@ -1,0 +1,197 @@
+    
+    a.frontendadmin:link,
+    a.frontendadmin:visited{
+       
+        font-size: 0.95em;
+    }
+
+    a.frontendadmin_add:link,
+    a.frontendadmin_add:visited{
+        display: block;
+        margin-bottom: 20px;
+    }
+	
+    .frontendadmin_container_hover{
+        background-color: #FEF9D7;
+    }
+	
+	.frontendadmin{
+	}
+	
+	.frontendadmin-form{
+	}
+	
+	.frontendadmin-container{
+		
+	}
+
+	
+    .frontendadmin-form fieldset{
+        margin: 10px;
+        padding: 0px 0px;
+        border: 1px dotted #6498CC;
+        font-size: 12px;
+        clear:both;
+        border-bottom:1px solid black;
+    }
+
+    .frontendadmin-form frontendadmin-field{
+        background-color: #777;
+        margin: 0 0 0px 0;
+        padding: 15px 20px;
+        clear:both;
+        border-bottom:1px dashed black;
+        clear:both;
+    }
+	
+    .frontendadmin-form legend{
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #AAA;
+    }
+
+    .frontendadmin-form label{
+        font-size: 0.9em;
+        
+        color: #FFF;
+        display: block;
+        margin-bottom: 3px;
+    }
+	.frontendadmin-form input,
+	.frontendadmin-form select{
+		width:auto;
+		float:right;
+		font-size:18px;
+	}
+	
+    .frontendadmin-form input[type=text],
+    .frontendadmin-form input[type=password],
+    .frontendadmin-form textarea{
+        width: 100%;
+    }
+
+    .frontendadmin-form ul.errorlist{
+    	margin: 0;
+    	padding: 0;
+    	list-style: none;
+   	}
+
+    .frontendadmin-form ul.errorlist li{
+        margin: 5px 0 2px 0;
+        padding: 5px 10px;
+        color: White;
+        background-color: #F74A4A;
+    }
+    
+.frontendadmin-panel{
+	position:fixed;
+	top:40px;
+	left:0px;
+	width:20%;
+	bottom:64px;
+	background:#FFC;
+	
+	font-size:14px;
+	font-family:courier;
+	line-height:19px;
+	
+	z-index:10000;
+}
+
+.frontendadmin-toolbar{
+	position:fixed;
+	bottom:0px;
+	left:0px;
+	width:100%;
+	min-height:72px;
+	text-align:right;
+	margin:0px;
+	padding:20px;
+	background:rgba(255,255,255,0.9);
+	max-height:80%;
+	overflow:auto;
+	z-index:10;
+	}
+
+.frontendadmin-toolbar a {
+	color:#f80;
+}
+
+.frontendadmin-item-zone{
+	position:relative;
+}
+
+/*.frontendadmin-item-zone:hover {outline: 1px dashed black;}*/
+
+.frontendadmin-item-toolbar{
+	position:absolute;
+	top:0px;
+	right:0px;
+}
+
+.frontendadmin-item-editable{
+	position:relative;
+	
+}
+
+.frontendadmin-item-editable:hover{
+    outline:4px dashed rgba(128,128,128,0.7);
+    
+}
+
+.frontendadmin-item-editable-toolbar {
+	position:absolute;
+	bottom:-32px;
+	left:0px;
+	right:0px;
+	height:32px;
+	text-align:right;
+}
+
+.frontendadmin-item-zone .frontendadmin-item-toolbar{
+	opacity: 0.2;
+	background:rgba(128,128,128,0.8);
+	position:absolute;
+	top:-32px;
+	height:32px;
+	
+}
+
+.frontendadmin-item-zone:hover .frontendadmin-item-toolbar{
+	opacity: 1;
+}
+
+.frontendadmin-item-header:hover .frontendadmin-item-toolbar{
+	 
+}
+
+.frontendadmin-item-toolbar{
+	position:absolute;
+	top:0px;
+	right:0px;
+}
+
+.frontendadmin-item-body-toolbar{
+	background:#333;
+}
+.frontendadmin-item-body-toolbar > div{
+	background:#fff;
+	border-top: 1px solid #333;
+}
+
+#panel select[multiple], #panel select[size] {
+	height:300px;
+}
+
+#panel form span{
+	font-size:10px;
+}
+
+
+
+.shadow {
+  -moz-box-shadow:    -1px 3px 10px 1px #000;
+  -webkit-box-shadow: -1px 3px 10px 1px #000;
+  box-shadow:         -1px 3px 10px 1px #000;
+}
+

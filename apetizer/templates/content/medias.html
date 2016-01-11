@@ -1,0 +1,15 @@
+{% extends "content/page.html" %}
+{% load i18n thumbnail %}
+
+{% block content %}
+<div class="ui grid">
+    {% for ufile in nodes %}
+    <div class="five wide column">
+        <div class="ui segment image" data-ref-id="{{ ufile.id }}" >
+            <img src="{% thumbnail ufile.file 128x128 %}" />
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

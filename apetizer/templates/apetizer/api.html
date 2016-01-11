@@ -1,0 +1,39 @@
+{% extends 'content/base.html' %}
+{% load i18n %}
+
+{% block extra-styles %}
+    {{ block.super }}
+    <link href="{{ STATIC_URL }}css/documentation.css" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block page_container %}
+<div class="ui main">
+    <div class="ui vertical segment">
+         <h3 class="header">Vocabulaire d'action</h3>
+         <div class="ui inverted five columns grid segment" >         
+         {% for a in actions %}
+            <div class="ui column ">
+                 <a class="ui {% if api_action == a %}inverted{% endif %} fluid button" href="api/?action={{ a }}">{{ a }}</a>
+            </div>
+         {% endfor %}
+         </div>
+     </div>
+     <div class="ui vertical segment">
+         {% with action_url=api_action|add:'.json' action_target='api_iframe' %}
+            {% include 'apetizer/tags/action_forms.html' %}
+         {% endwith %}
+     </div>
+     <div class="ui vertical segment" >
+        <div class="ui segment">
+            <iframe name="api_iframe" 
+                    width="100%"
+                    height="600" 
+                    src="{{ api_action|default:'view'|add:'.json' }}" 
+                     ></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+   
