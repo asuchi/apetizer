@@ -10,18 +10,23 @@ STATIC_ROOT = "static"
 STATIC_URL = "/static/"
 MEDIA_ROOT = "media"
 MEDIA_URL = "/media/"
-INSTALLED_APPS = ( 
+INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.staticfiles",
     "django.contrib.sessions",
+    "django.contrib.sites",
+    "django.contrib.contenttypes",
+    "django.contrib.humanize",
+    "django.contrib.messages",
     "django.contrib.sitemaps",
+    "django.contrib.staticfiles",
     "easy_thumbnails",
-    "markdown_deux",
+    "image_cropping",
     "leaflet",
     "apetizer",
-    )
+    "markdown_deux",
+    
+]
 
 MIDDLEWARE_CLASSES = (
     #"apetizer.middleware.BasicAuthMiddleware",
