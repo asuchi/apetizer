@@ -872,12 +872,6 @@ def get_default_language():
     return 'fr'
 
 
-#
-TYPES = {}
-
-# the outut
-TYPES_CHOICES = {}
-
 DATETIME_FORMATS = (('%Y-%m-%d %H:%M:%S'),)
 
 class Item(Translation):
@@ -897,8 +891,9 @@ class Item(Translation):
     image = ImageField(upload_to=upload_to, blank=True, null=True)
     file = models.FileField(upload_to=upload_to, max_length=255, blank=True, null=True)
     
+    # instance class
+    type = models.CharField(max_length=65, default='Thing')
     # representation
-    type = models.CharField(max_length=65, default='view', choices=TYPES_CHOICES)
     behavior = models.CharField(max_length=65, default='view', choices=(('view','Article'),
                                                                             ('image','Image'),
                                                                             ('map','Carte'),
@@ -1236,6 +1231,22 @@ class Item(Translation):
             return self.parent.label
         else:
             return self.label
+    
+    def get_data(self):
+        """
+        return the data conbtained in item as a python object
+        
+        # TODO use the apetizer.parsers.jsonparser
+        """
+        return json.loads(self.data)
+    
+    def set_data(self, value):
+        """
+        return the data conbtained in item as a python object
+        
+        # TODO use the apetizer.parsers.jsonparser
+        """
+        self.data = json.dumps(value)
     
     
     def get_translation(self):

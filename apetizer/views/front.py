@@ -10,12 +10,12 @@ from django.template.context import RequestContext
 from apetizer.models import Item
 from apetizer.views.content import ContentView
 from apetizer.views.directory import DirectoryView
-from apetizer.views.search import SearchView
+from apetizer.views.semantic import SemanticView
 from apetizer.views.ui import UIView
 from apetizer.views.user import UserView
 
 
-class FrontView(DirectoryView, UIView, UserView):
+class FrontView(DirectoryView, UIView, SemanticView, UserView):
     """
     Display the service front page
     """

@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='Apetizer',
-    version='0.5',
+    version='0.8',
     author='Nicolas Danjean',
     author_email='nicolas@biodigitals.com',
     packages=['apetizer',
@@ -28,6 +28,16 @@ setup(
     description='Django views for http, api and action scenarios.',
     long_description=open('readme.txt').read(),
     install_requires=[
-        "Django >= 1.5",
+        "Django==1.8.4",
+        "Pillow>=2.6.1",
+        "python-magic>=0.4.6",
+        "pytz>=2014.7",
+        "six>=1.8.0",
+        "python-twitter",
+        "django-markdown-deux",
+        "python-geohash",
+        "geopy",
+        "pattern",
+        "dateutils",
     ],
 )
