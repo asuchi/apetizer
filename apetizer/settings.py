@@ -28,17 +28,31 @@ INSTALLED_APPS = [
     
 ]
 
-MIDDLEWARE_CLASSES = (
-    #"apetizer.middleware.BasicAuthMiddleware",
+MIDDLEWARE_CLASSES = [
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.locale.LocaleMiddleware", # Cookie-based, for anonymous users
+    
+    'apetizer.middleware.multisite.DynamicSitesMiddleware',
     "apetizer.middleware.multilingual.MultilingualURLMiddleware",
     "apetizer.middleware.redirect.ItemRedirect",
-)
+    "apetizer.middleware.profiler.CProfileMiddleware",
+]
+
+
+SITES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sites')
+
+DEFAULT_HOST = 'localhost'
+
+HOSTNAME_REDIRECTS = {
+     'planrecup.com': 'www.planrecup.com',
+}
+ENV_HOSTNAMES = {
+    'biodigitals.dev':    'biodigitals',
+}
 
 WSGI_APPLICATION = "wsgi.application"
 DATABASES = {
