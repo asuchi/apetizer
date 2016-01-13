@@ -1,17 +1,20 @@
 {% extends 'content/page.html' %}
-
+{% load static %}
 {% block extra-scripts %}
 {{ block.super }}
+<script src="{% static 'components/codemirror/lib/codemirror.js' %}"></script>
+<script src="{% static 'components/codemirror/mode/python/python.js' %}"></script>
+
 <script src="/static/components/handsontable/handsontable.full.min.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function(){
 var container = document.getElementById('program_table');
 var data = [
-      ['', 'Kia', 'Nissan', 'Toyota', 'Honda'],
-      ['2014', 10, 11, 12, 13],
-      ['2015', 20, 11, 14, 13],
-      ['2016', 30, 15, 12, 13]
+      ['',''],
+      ['',''],
     ];
+    
 var hot = new Handsontable(container, {
   data: data,
   minSpareRows: 1,
@@ -22,10 +25,17 @@ var hot = new Handsontable(container, {
   manualColumnResize: true,
   manualRowResize: true,
   
-  colWidths: [47,0,0,200,500],
-  rowHeights: [47,0,47],
+  colWidths: [128,128],
+  rowHeights: [32,32],
   
 });});
+
+var macroEditor = CodeMirror(document.getElementById('program-editor'), {
+  value: "import os\n",
+  mode:  "python"
+});
+
+
 </script>
 {% endblock %}
 
@@ -35,8 +45,16 @@ var hot = new Handsontable(container, {
 {% endblock %}
 
 {% block page_container %}
+<div class="ui ten wide column" style="position:relative;">
+    <div id="program_table" style="position:relative;overflow:hidden;background:gray;height:720px;width:100%" ></div>
+</div>
+<div class="ui six wide column" style="position:relative;">
+    <div class="ui form" id="program-editor" style="min-height:640px"></div>
+    
+    <input type="hidden" name="macros" id="id_macros" value="" />
+    <button class="ui label">Save</button>
+</div>
 <div class="ui sixteen wide column" style="position:relative;">
-        <div id="program_table" style="position:relative;overflow:hidden;background:black;height:300px;width:100%" ></div>
     <div class="ui segment" >
         {% for key, table in tables %}
             <a href="program/?table={{forloop.count}}" class="ui button" >{{ key }}</a>
@@ -48,35 +66,15 @@ var hot = new Handsontable(container, {
 
 {% block content %}
 <div class="ui vertical segments">
-    
-    
-        {% comment %}
-    <div class="ui segment" style="position:relative; width:100%; min-height:300px;">
-        <table cols="{{table.0|length}}" rows="{{table|length}}" border="1" width="100%" style="" >
-        {% for key, table in tables %}
-            {% for row in table %}
-                <tr>
-                {% for col in row %}
-                    <td>{{col}}</td>
-                {% endfor %}
-                </tr>
-            {% endfor %}
-        {% endfor %}
-        </table>
-    </div>
-        {% endcomment %}
-    
-    <div class="ui segment">
+    <div class="ui hidden segment">
         {% include 'apetizer/tags/action_forms.html' %}
     </div>
-    
     <div class="ui segment">
         <a href="download/" class="ui button" >download</a>
         <a href="file/" class="ui button" >upload (replace)</a>
         <a href="" class="ui button" >merge (update)</a>
         <a href="" class="ui button" >execute</a>
     </div>
-    
 </div>
 {{ block.super }}
 {% endblock %}
