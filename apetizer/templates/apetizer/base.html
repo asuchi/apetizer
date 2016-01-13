@@ -106,10 +106,17 @@
 <div class="ui inverted vertical center aligned segment" style="position:relative;z-index:2">
     <div class="ui large secondary inverted pointing menu" >
         <a href="/" class="active item">Acceuil</a>
-        <div class="item">
+        <div class="item" style="opacity:0.5">
+        {% if LANGUAGE_CODE == 'en' %}
+          <a href="/fr/" class="small" ><i class="icon flag"></i>fr</a>
+        {% else %}
+          <a href="/en/" class="small" ><i class="icon flag"></i>en</a>
+        {% endif %}
+        {% comment %}
           {% block search_form %}
             <a href="/search/" class="small" ><i class="icon search"></i> Rechercher</a>
           {% endblock %}
+        {% endcomment %}
         </div>
         <div class="right inverted item">
           {% if user_profile.email %}
@@ -270,6 +277,7 @@
                 <div class="ui inverted link list">
                   <a class="item" href="/contribute/" target="_blank">Contribuer</a>
                   {% comment %}
+                  <a class="item" href="/search/" ><i class="icon search"></i> Rechercher</a>
                   <a class="item" href="/register/" target="_blank">Devenir membre</a>
                   <a class="item" href="/acteurs/" target="_blank">Devenir acteur</a>
                   {% endcomment %}
