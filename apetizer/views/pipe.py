@@ -285,6 +285,7 @@ class ActionPipeView(ApiView, ActionView):
         """
         Handles final pipe action view state
         """
+        return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
         action = kwargs['action']
         template_args['action_is_done'] = True
         template_args['action_forms'] = self.get_validated_forms(self.get_forms_instances(action, 

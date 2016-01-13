@@ -26,14 +26,15 @@ import markdown_deux
 from apetizer.forms.content import ItemChangeForm, ItemTranslateForm, ItemDeleteForm, \
     MultiUploadForm, ItemAddForm, ItemLocationForm, \
     ItemTimingForm, ItemDataForm, ItemRelatedForm, ItemImageForm, \
-    ItemCodeForm, ItemRedirectForm, ItemPublishForm, ItemRenameForm
+    ItemCodeForm, ItemRedirectForm, ItemPublishForm, ItemRenameForm, \
+    ItemReorderForm
 from apetizer.models import Item, Translation, Moderation, get_new_uuid
 from apetizer.views.moderate import ModerateView
+from apetizer.views.program import ProgramView
 from apetizer.views.visitor import VisitorView
 from apetizer.workers.hackpad import Hackpad
 from apetizer.workers.meetup import MeetupWorker
 from apetizer.workers.twittersearch import TwitterWorker
-from apetizer.views.program import ProgramView
 
 
 log = logging
@@ -55,7 +56,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
     class_actions_forms = {
                     'add':(ItemAddForm,),
                     
-                    'change':(ItemChangeForm,),
+                    'reorder':(ItemReorderForm,),
                     'translate':(ItemTranslateForm,),
                     'location':(ItemLocationForm,),
                     'timing':(ItemTimingForm,),
@@ -92,6 +93,8 @@ class UIView(ProgramView, ModerateView, VisitorView):
                         'publish':'ui/publish.html',
                         
                         'redirect':'ui/redirect.html',
+                        
+                        'reorder':'ui/change.html',
                         }
     
     def get_forms_instances(self, action, user_profile, kwargs):
@@ -230,16 +233,8 @@ class UIView(ProgramView, ModerateView, VisitorView):
     
     def process_reorder(self, request, user_profile, input_data, template_args, **kwargs):
         """
-        Reorder a list of element if provided
-        Otherwise consolidates ordering
-        # TODO
-        # for now freezes only the order
+        Change the item order
         """
-        i = 0
-        for node in kwargs['node'].get_children():
-            node.order = i
-            node.save()
-            i+=1
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
     
     def process_image(self, request, user_profile, input_data, template_args, **kwargs):
@@ -247,7 +242,6 @@ class UIView(ProgramView, ModerateView, VisitorView):
         Upload an image to the selected item
         """
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
-    
     
     def process_claim(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -688,21 +682,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
             return super(UIView, self).render_html(request, template_args,
                                                    result_message, result_status,
                                                    **kwargs)
-        print 'RENDER UI'
         
-        if 'data_view_url' not in template_args:
-            try:
-                template_args['data_view_url'] = reverse(self.view_name,
-                                                         kwargs={'action':'view'})
-                template_args['data_doc_url'] = reverse(self.view_name,
-                                                         kwargs={'action':'doc'})
-                template_args['data_api_url'] = reverse(self.view_name,
-                                                        kwargs=kwargs)+'.json'
-            except:
-                #if settings.DEBUG:
-                #    traceback.print_exc()
-                pass
-
         action = kwargs.get('action', UIView.default_action)
 
         if type(result_status) != type(200):

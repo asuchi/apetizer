@@ -48,7 +48,10 @@ class ItemAddForm(ActionModelForm):
         fields = ('label', 'title', 'description','order')
 
 
-
+class ItemReorderForm(ActionModelForm):
+    class Meta:
+        model = Item
+        fields = ('order',)
 
 class ItemTranslateForm(ActionModelForm):
     slug = 'item_translate'

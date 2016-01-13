@@ -34,13 +34,10 @@
             <a class="ui tiny icon add" href="add/?order={{ node.order }}&label={{ node.label }}#{{node.label|slugify}}-form" title="Ajouter"><i class="icon add"></i></a>
             <a class="ui tiny icon upload" href="upload/?order={{ node.order }}&label={{ node.label }}#{{node.label|slugify}}-form" title="Ajouter"><i class="icon upload"></i></a>
         </div>
-        <div class="ui top right attached label">
-        
-        </div>
         {% endifchanged %}
         
         {% if node.label != node.title or not node.description %}
-        <div class="item">
+        <div class="ui item">
             {% if not node.behavior == 'image' %}
             {% if node.image %}
             <div class="image">
@@ -48,6 +45,7 @@
             </div>
             {% endif %}
             {% endif %}
+            
             <div class="middle aligned content">
                 <a class="anchor" id="{{ node.slug }}"></a>
                 {% if node.parent.id != currentNode.id %}
@@ -86,6 +84,11 @@
                   {% moment_from_now node.modified_date %}
                 </div>
                 {% endif %}
+            </div>
+            <div class="ui top right" style="opacity:0.2">
+                <a class="ui tiny icon arrow up" href="{{ node.get_url }}reorder/?order={{ node.order|add:-1 }}" title="Deplacer vers le haut"><i class="icon arrow up"></i></a>
+                <a class="ui tiny icon arrow down" href="{{ node.get_url }}reorder/?order={{ node.order|add:1 }}" title="Deplacer vers le bas"><i class="icon arrow down"></i></a>
+                <a class="ui tiny icon edit" href="{{ node.get_url }}translate/" title="Deplacer vers le bas"><i class="icon arrow edit"></i></a>
             </div>
         </div>
         {% endif %}
