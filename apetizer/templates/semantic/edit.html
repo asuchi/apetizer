@@ -1,0 +1,12 @@
+{% extends 'semantic/describe.html' %}
+
+{% block semantic-attributes %}
+instance de : {{ currentNode.slug }}
+
+<div class="ui segment" >
+{% for attribute in class_attributes %}
+    <div class="ui item" >{{ attribute.name }} : {{ attribute.value }}</div>
+{% endfor %}
+</div>
+{% endblock %}
+

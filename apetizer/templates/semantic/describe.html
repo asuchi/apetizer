@@ -1,0 +1,19 @@
+{% extends 'content/page.html' %}
+
+{% block content %}
+
+{% block semantic-attributes %}
+Nom de la classe : {{ currentNode.slug }} <a href="rename/">Rename</a>
+
+<div class="ui segment" >
+{% for attribute in class_attributes %}
+    <div class="ui item" >{{ attribute.name }} : {{ attribute.type }}</div>
+{% endfor %}
+</div>
+{% endblock %}
+
+<div class="ui segment" >
+{% include 'apetizer/tags/action_forms.html' %}
+</div>
+
+{% endblock %}
