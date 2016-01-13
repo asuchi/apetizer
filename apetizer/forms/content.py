@@ -62,7 +62,7 @@ class ItemRenameForm(ActionModelForm):
     title = _('Rename this item')
     class Meta:
         model = Translation
-        fields = ('slug',)
+        fields = ('slug','type')
 
 class ItemChangeForm(ActionModelForm):
     class Meta:
