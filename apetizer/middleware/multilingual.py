@@ -42,10 +42,13 @@ class MultilingualURLMiddleware(object):
     '''
     cached_language_regexp = None
 
+    def get_supported_languages(self):
+        return ('fr','en')
+
     def has_lang_prefix(self, path):
         
         if not self.cached_language_regexp:
-            self.cached_language_regexp = re.compile(r"^/(%s)/.*" % "|".join([re.escape(l[0]) for l in self.get_supported_languages()]))
+            self.cached_language_regexp = re.compile(r"^/(%s)/.*" % "|".join([re.escape(l) for l in self.get_supported_languages()]))
 
         check = self.cached_language_regexp.match(path)
         
@@ -54,23 +57,11 @@ class MultilingualURLMiddleware(object):
         else:
             return False
 
-    def get_supported_languages(self):
-        """
-        TODO
-        get locales from database
-        """
-        LANGUAGES = [
-            ('fr', 'Français'),
-            ('en', 'English'),
-        ]
-        return LANGUAGES
 
     def get_language_from_request(self, request):
         
         changed = False
-        
         prefix = self.has_lang_prefix(request.path_info)
-        
         if prefix:
             request.path = "/" + "/".join(request.path.split("/")[2:])
             request.path_info = request.path
@@ -82,26 +73,21 @@ class MultilingualURLMiddleware(object):
                 changed = True
         else:
             lang = translation.get_language_from_request(request)
-
-        # insert domain path into request.path
-        # request.path_info = request.path
-        #if not request.path.startswith('/admin/') and not request.path.startswith('/search/'):
-        # request.path_info = '/'+request.META['HTTP_HOST'].split(':')[0]+request.path
-        #    #request.path = '/'+request.META['HTTP_HOST'].split(':')[0]+request.path
-
+        
         if not changed:
             if hasattr(request, "session"):
                 lang = request.session.get("django_language", None)
                 if lang in self.get_supported_languages() and lang is not None:
                     return lang
+            
             elif "django_language" in request.COOKIES.keys():
                 lang = request.COOKIES.get("django_language", None)
                 if lang in self.get_supported_languages() and lang is not None:
                     return lang
+        
             if not lang:
                 lang = translation.get_language_from_request(request)
-                
-        lang = get_default_language(lang)
+        
         return lang
 
     def process_request(self, request):

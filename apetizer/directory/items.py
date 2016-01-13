@@ -14,6 +14,7 @@ from apetizer.directory.drilldown import Drilldown
 from apetizer.dispatchers.async import AsyncDispatcher
 from apetizer.models import Item, get_new_uuid
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
+from django.utils.translation import get_language
 
 
 class ItemDrilldown(Drilldown):
@@ -27,7 +28,7 @@ class ItemDrilldown(Drilldown):
             print '\nStart parsing items ...'
         
         kwargs= {}
-        kwargs['pipe'] = {'locale':'fr',
+        kwargs['pipe'] = {'locale':get_language(),
                           'akey':get_new_uuid(),
                           'action':'import',
                           'status':'imported',

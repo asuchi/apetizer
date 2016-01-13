@@ -32,7 +32,7 @@ from django.forms.models import model_to_dict
 from django.utils import translation
 from django.utils.text import get_valid_filename, slugify
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, get_language
 from geopy.distance import EARTH_RADIUS
 
 import apetizer.default_settings as DEFAULTS
@@ -213,10 +213,8 @@ class DataPath(AuditedModel):
     
     path = models.CharField(max_length=512)
     
-    #data = JSONField(default={}, blank=True, null=True, 
-    #                 dump_kwargs={'default':API_json_parser}, 
-    #                 load_kwargs={'object_pairs_hook': collections.OrderedDict}
-    #                 )
+    # instance class
+    type = models.CharField(max_length=65, default='Thing')
     data = TextField(default={}, blank=True, null=True)
     
     locale = models.CharField(max_length=6)
@@ -228,7 +226,6 @@ class DataPath(AuditedModel):
     
     def __init__(self, *args, **kwargs):
         super(DataPath, self).__init__(*args, **kwargs)
-        #print self.path
     
     def full_clean(self, exclude=None, validate_unique=True):
         
@@ -869,7 +866,7 @@ class LocationManager(TreeManager):
 
 
 def get_default_language():
-    return 'fr'
+    return get_language()
 
 
 DATETIME_FORMATS = (('%Y-%m-%d %H:%M:%S'),)
@@ -882,27 +879,15 @@ class Item(Translation):
     __dirty__ = False
     
     parent = models.ForeignKey('self', editable=True, blank=True, null=True, related_name='children')
-    # TODO
-    # rename as priority ?
-    order = models.IntegerField(default=0)
-    # left, index, right
     
     geojson = models.TextField(verbose_name=_('GeoJSON data field'), null=True, blank=True)
     image = ImageField(upload_to=upload_to, blank=True, null=True)
     file = models.FileField(upload_to=upload_to, max_length=255, blank=True, null=True)
     
-    # instance class
-    type = models.CharField(max_length=65, default='Thing')
     # representation
-    behavior = models.CharField(max_length=65, default='view', choices=(('view','Article'),
-                                                                            ('image','Image'),
-                                                                            ('map','Carte'),
-                                                                            ('agenda','Agenda'),
-                                                                            ('tree','Arborescence'),
-                                                                            ('related','Related service'),
-                                                                            )
-                                )
+    behavior = models.CharField(max_length=65, default='view')
     published = models.NullBooleanField(blank=True)
+    order = models.IntegerField(default=0)
     
     # bridge
     related_url = models.URLField(verbose_name=_('Related URL'), null=True, blank=True)
@@ -1249,25 +1234,17 @@ class Item(Translation):
         self.data = json.dumps(value)
     
     
-    def get_translation(self):
+    def get_translation(self, locale=None):
         
-        locale = get_default_language()
+        if locale is None:
+            locale = get_default_language()
         
         if not self.related_id:
-            #if not self.related:
             return self
         
         if not self.get_uid_path() in object_tree_cache:
             return self
-#            try:
-#                return Translation.objects.filter(related_id=self.id, locale=locale).order_by('-created_date')[0]
-#            except IndexError:
-            
-            #print 'Not cached', self.get_uid_path()
-            #return self
-        #else:
-        #    print 'cached', self.get_uid_path()
-        
+
         node_data = self.get_cache_data()
         try:
             return node_data['translations'][locale]
