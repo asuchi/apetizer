@@ -1,8 +1,10 @@
 *.pyc
+*.db
+.Python
 .project
 .pydevproject
 /Apetizer.egg-info/
-.DS_STORE
+.DS_Store
 .settings
 /media/
 /bin/
