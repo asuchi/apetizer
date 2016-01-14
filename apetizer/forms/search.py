@@ -19,6 +19,16 @@ def get_types_choices():
     return {}
 
 
+class DirectoryQueryForm(forms.Form):
+    '''
+    Main search input handling the raw search input
+    I actually handles only the search term
+    '''
+    query = forms.CharField(label=_(u'What ?'), max_length=16, min_length=3)
+    
+    def __init__(self, *args, **kwargs):
+        super(SearchKeywordForm, self).__init__(*args, **kwargs)
+
 class SearchInputForm(forms.Form):
     '''
     Main search input handling the raw search input

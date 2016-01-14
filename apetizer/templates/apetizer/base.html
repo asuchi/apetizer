@@ -53,8 +53,19 @@
     });
 
     $(document).ready(function(){
-    //    $('.ui.accordion').accordion();
+    
+        $('.ui.sticky')
+          .sticky({
+            context: '#body',
+            pushing: true,
+          })
+        ;
+        
+        $('.ui.accordion').accordion();
+    
     });
+    
+    
 
 </script>
 

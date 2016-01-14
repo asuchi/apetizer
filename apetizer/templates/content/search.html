@@ -3,20 +3,66 @@
 
 {% block page_head %}
 <div class="ui container" >
-{% if nodes|length > 0 %}
-    <div>{{ nodes|length }} {% trans "results" %}</div>
-{% else %}
-    <div>{% trans "No result found in content" %}</div>
-{% endif %}
-</div>
-{% endblock %}
 
 {% block search_form %}
 <form class="ui form form-search" action="" method="get" rol="form" >
-  	<div class="ui action input form-group" >
-    	<input class="form-control" name="keyword" type="text" placeholder="{% trans "Keyword" %} ..." value="{{ keyword }}" />
-    	<input type="submit" class="ui icon search button" value="Go"/>
+  	<div class="ui category search">
+      <div class="ui icon input">
+        <input class="prompt" name="keyword" placeholder="Search keyword ..." type="text">
+        <i class="search icon"></i>
+      </div>
+      <div class="results"></div>
     </div>
 </form>
+{% endblock %}
 
+</div>
+{% endblock %}
+
+{% block content %}
+
+{% if nodes|length > 0 %}
+    <div>{{ nodes|length }} {% trans "results" %}</div>
+{% else %}
+    <div>{% trans "No result" %}</div>
+{% endif %}
+
+
+
+{{ block.super }}
+
+{% endblock %}
+
+
+{% block extra-scripts %}
+{{ block.super }}
+<script>
+    
+    $('.ui.search')
+      .search({
+        debug: true,
+        type:'category',
+        minCharacters : 3,
+        
+        searchFullText: false,
+        //stateContext: '.ui.input',
+        
+        apiSettings:{
+            url: '{{rootNode.get_url}}query.json?query={query}',
+            successTest: function(response) {
+              // test whether a JSON response is valid
+              return response.success == true;
+            },
+            onResponse : function(directoryResponse) {
+                console.log(directoryResponse.payload)
+                return directoryResponse.payload;
+            },
+        },
+        
+      })
+    ;
+    
+    
+    
+</script>
 {% endblock %}
