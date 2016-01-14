@@ -108,9 +108,9 @@
         <a href="/" class="active item">Acceuil</a>
         <div class="item" style="opacity:0.5">
         {% if LANGUAGE_CODE == 'en' %}
-          <a href="/fr/" class="small" ><i class="icon flag"></i>fr</a>
+          <a href="/fr/{{currentNode.id}}/{{action}}/" class="small" ><i class="icon flag"></i>fr</a>
         {% else %}
-          <a href="/en/" class="small" ><i class="icon flag"></i>en</a>
+          <a href="/en/{{currentNode.id}}/{{action}}/" class="small" ><i class="icon flag"></i>en</a>
         {% endif %}
         {% comment %}
           {% block search_form %}

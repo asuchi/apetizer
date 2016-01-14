@@ -33,13 +33,13 @@
 <div class="ui eleven wide column">
     
     {% block content %}
+    {% if action == 'view' and currentNode.content %}
     <div class="ui vertical segment">
-    {% if action == 'view' %}
         {% autoescape off %}
         {% content_render currentNode.content %}
         {% endautoescape %}
-    {% endif %}
     </div>
+    {% endif %}
     {% if currentNode.published == True or currentNode.is_leaf_node %}
     {% endif %}
     {% if currentNode.published == True %}
@@ -51,11 +51,7 @@
         {{ block.super }}
         {% include 'content/ui_page.html' %}
     {% endif %}
-    
     {% endblock content %}
-    
-    
-    <div class="ui hidden divider"></div>
     <div class="ui item">
         {% include 'moderate/tags/comments.html' %}
         {% include 'moderate/tags/comment_form.html' %}

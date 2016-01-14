@@ -12,8 +12,12 @@
             <a class="anchor" id="{{node.label|slugify}}"></a>
             <div class="item" >
                 <h2 class="header">{{ node.label }}<a class="anchor" id="{{ node.label }}"></a>
-                {% if node.label == node.title and not node.is_leaf_node %}
+                {% if node.label == node.title %}
+                    {% if not node.is_leaf_node %}
                     <a class="ui right floated primary button"  href="{{ node.get_url }}view/" >Lire plus <i class="right chevron icon"></i></a>
+                    {% else %}
+                    <a class="ui mini right floated button"  href="{{ node.get_url }}translate/" >Editer <i class="right chevron icon"></i></a>
+                    {% endif %}
                     </h2>
                     <div class="description">
                     {{ node.description|markdown }}
@@ -144,7 +148,6 @@
     {% endif %}
     
     <a class="anchor" id="bottom" />
-    <div class="ui divider"></div>
     <div class="ui horizontal list">
         <a class="ui item " href="add/#bottom" title="Ajouter"><i class="ui icon add"></i> Ajouter un article</a>
         <a class="ui item " href="upload/#bottom" title="Ajouter"><i class="ui icon upload"></i> Ajouter des images, fichiers</a>
