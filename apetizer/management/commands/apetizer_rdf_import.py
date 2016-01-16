@@ -20,6 +20,12 @@ import json,datetime
 from rdflib.namespace import RDF,RDFS,OWL
 
 
+def get_types(g):
+    pass
+
+def get_classes(g):
+    pass
+
 
 class Command(BaseCommand):
     help = ''
@@ -37,3 +43,8 @@ class Command(BaseCommand):
         g.parse("http://xmlns.com/foaf/spec/20140114.rdf")
 
         print g.serialize( format='json-ld')
+        #TODO: short uri system
+        # RDF,RDFS,OWL,FOAF
+        
+        #TODO: separate Classes, Ontologies, types
+
