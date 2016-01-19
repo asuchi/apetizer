@@ -118,7 +118,7 @@
     <div class="ui main stackable internally divided padded grid">      
         {% block page_container %}
         {% block content %}
-            {% if nodes|length %}
+            {% if nodes|length and not currentNode.published %}
             <div class="ui horizontal list">
                 <a class="ui item " href="add/?order=-1#top" title="Ajouter"><i class="ui icon add"></i> Inserer un article</a>
                 <a class="ui item " href="upload/?order=-1#top" title="Ajouter"><i class="ui icon upload"></i> Inserer des fichier</a>

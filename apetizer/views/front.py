@@ -13,6 +13,7 @@ from apetizer.views.directory import DirectoryView
 from apetizer.views.semantic import SemanticView
 from apetizer.views.ui import UIView
 from apetizer.views.user import UserView
+from django.http.response import HttpResponseRedirect
 
 
 class FrontView(DirectoryView, UIView, SemanticView, UserView):
@@ -28,7 +29,10 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
     class_action_templates = {'index':'index.html'}
     
     def process_index(self, request, user_profile, input_data, template_args, **kwargs):
-        return self.render(request, template_args, **kwargs)
+        if kwargs['node'].published != True:
+            return HttpResponseRedirect('view/')
+        else:
+            return self.render(request, template_args, **kwargs)
 
     def render_html(self, request, template_args, result_message, result_status,
                     **kwargs):

@@ -193,14 +193,20 @@ class ContentView(ApiView, ActionView):
     
     def process_view(self, request, user_profile, input_data, template_args, **kwargs):
         
-        if kwargs['node'].behavior != 'Item' and kwargs['node'].behavior != 'view':
-            kwargs['action'] = kwargs['node'].behavior
-            return self.process(request, user_profile, {}, template_args, **kwargs)
-        
         if kwargs['node'].redirect_url and kwargs['node'].visible == False:
             return HttpResponseRedirect(kwargs['node'].redirect_url)
         
-        return self.render(request, template_args, **kwargs)
+        if kwargs['node'].behavior \
+            and kwargs['node'].behavior != 'view' \
+            and kwargs['node'].behavior in self.actions:
+            
+            kwargs['action'] = kwargs['node'].behavior
+            template_args['action'] = kwargs['action']
+            
+            return self.process(request, user_profile, {}, template_args, **kwargs)
+        else:
+            print kwargs['node'].behavior
+            return self.render(request, template_args, **kwargs)
     
     def process_cards(self, request, user_profile, input_data, template_args, **kwargs):
         return self.render(request, template_args, **kwargs)

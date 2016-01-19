@@ -62,9 +62,9 @@ class SemanticView(ContentView):
         
         class_attributes = item.get_data().get('properties',[])
         
-        if input_data.get('attribut_name') and input_data.get('attribut_value'):
-            class_attributes.append({'name':input_data.get('attribut_name'),
-                                     'value':input_data.get('attribut_value') })
+        if input_data.get('property_name') and input_data.get('property_value'):
+            class_attributes.append({'name':input_data.get('property_name'),
+                                     'value':input_data.get('property_value') })
         
             data = item.get_data()
             data['properties'] = class_attributes
@@ -72,7 +72,7 @@ class SemanticView(ContentView):
             item.set_data(data)
             item.save()
         
-        template_args['class_attributes'] = class_attributes
+        template_args['class_properties'] = class_attributes
         
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
 
