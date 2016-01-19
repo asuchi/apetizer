@@ -1,19 +1,33 @@
 {% extends 'content/page.html' %}
 
-{% block content %}
+{% block page_container %}
+    <div class="ui six wide column vertical segment">
+        <label class="sub">Nom de la classe :</label>
+        <div class="ui right floated header">
+            {{ currentNode.slug }}
+            <a class="ui tiny label" href="rename/" >Rename</a>
+        </div>
+    </div>
+    
+    <div class="ui ten wide column vertical segment">
+        <div class="ui sub header">Attributes</div>
+        
+        {% block semantic-attributes %}
+        <div class="ui vertical segment" >
+        {% for attribute in class_attributes %}
+            <div class="ui item" >
+                {{ attribute.name }} : {{ attribute.type }}
+            </div>
+        {% endfor %}
+        </div>
+        {% endblock %}
+        
+        <div class="ui vertical segment" >
+            {% include 'apetizer/tags/action_forms.html' %}
+        </div>
+        
+    </div>
 
-{% block semantic-attributes %}
-Nom de la classe : {{ currentNode.slug }} <a href="rename/">Rename</a>
-
-<div class="ui segment" >
-{% for attribute in class_attributes %}
-    <div class="ui item" >{{ attribute.name }} : {{ attribute.type }}</div>
-{% endfor %}
-</div>
-{% endblock %}
-
-<div class="ui segment" >
-{% include 'apetizer/tags/action_forms.html' %}
-</div>
+{{ block.super }}
 
 {% endblock %}
