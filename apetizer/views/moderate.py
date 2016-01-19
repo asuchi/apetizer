@@ -13,7 +13,7 @@ from django.utils.translation import get_language
 
 from apetizer.forms.moderate import ModerateInviteForm, ModerateCommentForm, \
     ModerateContactForm, ModerateReviewForm, ModerateFollowForm, \
-    ModerateUnfollowForm, ModerateDiscussForm
+    ModerateUnfollowForm, ModerateDiscussForm, ModerateConsultForm
 from apetizer.models import Moderation, get_new_uuid
 from apetizer.views.content import ContentView
 from apetizer.views.pipe import ActionPipeView
@@ -23,7 +23,7 @@ class ModerateView(ContentView, ActionPipeView):
     view_name = 'moderate'
     view_template = 'moderate/base.html'
     class_actions = ['discuss', 'invite', 'comment', 'contact', 'review',
-                     'accept', 'reject', 'follow', 'unfollow']
+                     'accept', 'reject', 'follow', 'unfollow', 'consult']
     
     class_actions_forms = {'invite':(ModerateInviteForm,),
                            'contact': (ModerateContactForm,),
@@ -35,6 +35,7 @@ class ModerateView(ContentView, ActionPipeView):
                            'follow':(ModerateFollowForm,),
                            'unfollow':(ModerateUnfollowForm,),
                            
+                           'consult':(ModerateConsultForm,),
                            }
     
     class_action_templates = {
@@ -43,6 +44,8 @@ class ModerateView(ContentView, ActionPipeView):
                     'discuss': 'moderate/discuss.html',
                     'contact': 'moderate/contact.html',
                     'review': 'moderate/review.html',
+                    
+                    'consult': 'moderate/consult.html',
                     
                     'accept':'moderate/accept.html',
                     'reject': 'moderate/reject.html',
@@ -68,6 +71,7 @@ class ModerateView(ContentView, ActionPipeView):
         
         self.action_scenarios['contact'] = contact_scenario
         self.action_scenarios['invite'] = contact_scenario
+
         
     def get_forms_instances(self, action, user_profile, kwargs):
         
@@ -194,8 +198,7 @@ class ModerateView(ContentView, ActionPipeView):
         except ObjectDoesNotExist:
             messages.warning(request, 'You are not actually following this item')
             return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
-    
-    
+
     def process_contact(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Contact the creator
@@ -213,6 +216,24 @@ class ModerateView(ContentView, ActionPipeView):
         Discuss about the related item
         """
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+
+    def process_consult(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Consult me and the item changes
+        """
+        # gether the whole item moderations statuses
+        statuses = ['commented','changed','told']
+        
+        # filter by the selected status
+        if input_data.get('status'):
+            template_args['history'] = kwargs['node'].get_history().filter(status__in=(input_data.get('status'),))
+        else:
+            template_args['history'] = kwargs['node'].get_history()
+        
+        # check for related item nodes
+        template_args['action_forms'] = self.get_validated_forms( tuple(), input_data, kwargs['action'], save_forms = False, bound_forms=False)
+        return self.render(request, template_args, **kwargs)
     
     def process_review(self, request, user_profile, input_data, template_args, **kwargs):
         """

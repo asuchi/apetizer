@@ -3,7 +3,7 @@ Created on 16 juil. 2015
 
 @author: biodigitals
 '''
-from django.forms.fields import CharField, TypedChoiceField, NullBooleanField, \
+from django.forms.fields import CharField, TypedChoiceField, \
     IntegerField, BooleanField
 from django.forms.widgets import Textarea, TextInput, RadioSelect
 from django.utils.translation import ugettext_lazy as _
@@ -30,6 +30,8 @@ class ModerateFollowForm(ActionPipeForm):
 class ModerateUnfollowForm(ActionPipeForm):
     unfollow = BooleanField('Un-follow this item', initial=False)
 
+class ModerateConsultForm(ActionPipeForm):
+    status = CharField(label='Filter by status', initial=None, required=False)
 
 class ModerateCommentForm(ActionModelForm):
     subject = CharField(max_length=65, required=False)

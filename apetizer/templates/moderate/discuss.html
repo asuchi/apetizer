@@ -5,7 +5,7 @@
 <div class="ui vertical segment">
 <h3>Discussion</h3>
 </div>
-<div class="ui vertical segment">
+<div class="ui vertical segment" >
     <div class="ui grid" >
         {% for message in currentNode.get_discussion %}
             {% ifchanged  message.get_author.get_hash %}
@@ -33,6 +33,7 @@
 <div class="ui vertical segment">
     {% include 'apetizer/tags/action_forms.html' %}
 </div>
-
-
+<div class="ui vertical segment">
+</div>
+{{ block.super }}
 {% endblock %}
