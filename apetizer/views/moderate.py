@@ -6,12 +6,14 @@ Created on 6 juil. 2015
 from collections import OrderedDict
 import json
 
+from django.contrib import messages
+from django.core.exceptions import ObjectDoesNotExist
 from django.http.response import HttpResponseRedirect
 from django.utils.translation import get_language
 
-from apetizer.forms.moderate import ModerateInviteForm, ModerateCommentForm, ModerateSubscribeForm, \
-    ModerateContactForm, ModerateProposeForm, ModerateReviewForm, \
-    ModerateDiscussForm
+from apetizer.forms.moderate import ModerateInviteForm, ModerateCommentForm, \
+    ModerateContactForm, ModerateReviewForm, ModerateFollowForm, \
+    ModerateUnfollowForm, ModerateDiscussForm
 from apetizer.models import Moderation, get_new_uuid
 from apetizer.views.content import ContentView
 from apetizer.views.pipe import ActionPipeView
@@ -20,15 +22,19 @@ from apetizer.views.pipe import ActionPipeView
 class ModerateView(ContentView, ActionPipeView):
     view_name = 'moderate'
     view_template = 'moderate/base.html'
-    class_actions = ['discuss', 'invite', 'comment', 'subscribe', 'contact', 'review', 'accept', 'reject']
+    class_actions = ['discuss', 'invite', 'comment', 'contact', 'review',
+                     'accept', 'reject', 'follow', 'unfollow']
     
     class_actions_forms = {'invite':(ModerateInviteForm,),
                            'contact': (ModerateContactForm,),
                            'comment':(ModerateCommentForm,),
-                           'discuss':(ModerateDiscussForm,),
                            'review':(ModerateReviewForm,),
-                           'propose':(ModerateProposeForm,),
-                           'subscribe': (ModerateSubscribeForm,),
+
+                           'discuss':(ModerateDiscussForm,),
+                           
+                           'follow':(ModerateFollowForm,),
+                           'unfollow':(ModerateUnfollowForm,),
+                           
                            }
     
     class_action_templates = {
@@ -37,10 +43,12 @@ class ModerateView(ContentView, ActionPipeView):
                     'discuss': 'moderate/discuss.html',
                     'contact': 'moderate/contact.html',
                     'review': 'moderate/review.html',
-                    'subscribe': 'moderate/subscribe.html',
                     
                     'accept':'moderate/accept.html',
                     'reject': 'moderate/reject.html',
+                    
+                    'follow':'ui/change.html',
+                    'unfollow': 'ui/change.html',
                     }
     
     comment_auto_invite = False
@@ -86,17 +94,15 @@ class ModerateView(ContentView, ActionPipeView):
         new_moderation.validated = user_profile.validated
         
         if kwargs['action'] == 'comment':
-            new_moderation.subject = 'Commentaire'
+            new_moderation.subject = 'Nouveau commentaire'
+        
         elif kwargs['action'] == 'review':
             new_moderation.subject = 'Nouvel avis'
-        elif kwargs['action'] == 'evaluate':
-            new_moderation.subject = 'Nouvelle evaluation'
-        elif kwargs['action'] == 'subscribe':
-            new_moderation.subject = 'Nouvelle Souscription'
-        elif kwargs['action'] == 'unsubscribe':
-            new_moderation.subject = 'De Souscription'
+        
         elif kwargs['action'] == 'discuss':
             new_moderation.subject = 'Nouveau message'
+        
+        
         
         return new_moderation
     
@@ -151,18 +157,44 @@ class ModerateView(ContentView, ActionPipeView):
         return HttpResponseRedirect(kwargs['node'].get_url())
 
 
+    def process_follow(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Follow the object changes
+        """
+        # check for an existing following state
+        try:
+            Moderation.objects.get(related_id=kwargs['node'].id, status='following')
+            messages.warning(request, 'You are already following this item')
+        except ObjectDoesNotExist:
+            if input_data.get('follow'):
+                moderation, = self.get_forms_instances('follow', user_profile, kwargs)
+                moderation.status = 'following'
+                moderation.save()
+                messages.success(request, 'You are now following this item')
+            else:
+                # maybe form is wrong ?
+                return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+        
+        return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
     
-    def process_subscribe(self, request, user_profile, input_data, template_args, **kwargs):
+    def process_unfollow(self, request, user_profile, input_data, template_args, **kwargs):
         """
-        Subscribe to the object
+        Unfollow the object changes
         """
-        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+        try:
+            moderation = Moderation.objects.get(related_id=kwargs['node'].id, status='following')
+            if input_data.get('unfollow'):
+                moderation.status = 'followed'
+                moderation.save()
+                messages.success(request, 'You not following this item anymore')
+                return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
+            else:
+                return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+        except ObjectDoesNotExist:
+            messages.warning(request, 'You are not actually following this item')
+            return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
     
-    def process_unsubscribe(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        Unsubscribe to the object
-        """
-        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
     
     def process_contact(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -187,12 +219,7 @@ class ModerateView(ContentView, ActionPipeView):
         Review an item
         """
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
-    
-    def process_propose(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        Make a task proposition
-        """
-        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
     
     def process_invite(self, request, user_profile, input_data, template_args, **kwargs):
         """

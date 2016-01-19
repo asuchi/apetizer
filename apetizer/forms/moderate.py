@@ -4,7 +4,7 @@ Created on 16 juil. 2015
 @author: biodigitals
 '''
 from django.forms.fields import CharField, TypedChoiceField, NullBooleanField, \
-    IntegerField
+    IntegerField, BooleanField
 from django.forms.widgets import Textarea, TextInput, RadioSelect
 from django.utils.translation import ugettext_lazy as _
 
@@ -23,12 +23,12 @@ class ModerateEvaluateForm(ActionPipeForm):
     subject = CharField(max_length=185)
     message = CharField(max_length=4096, widget=Textarea)
 
-class ModerateProposeForm(ActionPipeForm):
-    subject = CharField(max_length=185)
-    message = CharField(max_length=4096, widget=Textarea)
+    
+class ModerateFollowForm(ActionPipeForm):
+    follow = BooleanField('Follow this item', initial=False)
 
-class ModerateSubscribeForm(ActionPipeForm):
-    subscribe = NullBooleanField(initial=False)
+class ModerateUnfollowForm(ActionPipeForm):
+    unfollow = BooleanField('Un-follow this item', initial=False)
 
 
 class ModerateCommentForm(ActionModelForm):

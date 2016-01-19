@@ -13,7 +13,6 @@ import uuid
 from django.contrib import messages
 from django.core.files.uploadedfile import UploadedFile
 from django.core.signing import Signer, BadSignature
-from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect, render_to_response
@@ -23,7 +22,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, get_language
 import markdown_deux
 
-from apetizer.forms.content import ItemChangeForm, ItemTranslateForm, ItemDeleteForm, \
+from apetizer.forms.content import ItemTranslateForm, ItemDeleteForm, \
     MultiUploadForm, ItemAddForm, ItemLocationForm, \
     ItemTimingForm, ItemDataForm, ItemRelatedForm, ItemImageForm, \
     ItemCodeForm, ItemRedirectForm, ItemPublishForm, ItemRenameForm, \
