@@ -524,12 +524,16 @@ class Moderation(Visitor):
         else:
             return super(Moderation, self).get_url()
     
+    def get_author(self):
+        return self.visitor_ptr
+    
     def full_clean(self, exclude=None, validate_unique=True):        
         super(Moderation, self).full_clean(exclude=exclude, validate_unique=validate_unique)
         
     def save(self, *args, **kwargs):
         super(Moderation, self).save(*args, **kwargs)
-
+    
+    
 
 class Translation(Moderation):
     
@@ -1358,11 +1362,15 @@ class Item(Translation):
         return self.get_distincts(subscribers, 'email')
 
     def get_comments(self):
-        comments = Moderation.objects.filter(related=self, status='comment', visible=True).order_by('ref_time')
+        comments = Moderation.objects.filter(related=self, status__in=('commented', 'invited'), visible=True).order_by('ref_time')
         return comments
     
+    def get_discussion(self):
+        messages = Moderation.objects.filter(related=self, status='told', visible=True).order_by('created_date')
+        return messages
+    
     def get_history(self):
-        comments = Moderation.objects.filter(related=self, visible=True).exclude(status__in=('contact',)).order_by('ref_time')
+        comments = Moderation.objects.filter(related=self, visible=True).exclude(status__in=('contact','told')).order_by('ref_time')
         return comments
     
     def get_reviewers(self):

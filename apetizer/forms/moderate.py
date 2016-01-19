@@ -45,6 +45,19 @@ class ModerateCommentForm(ActionModelForm):
             self.instance.subject = 'Commentaire'
         super(ModerateCommentForm, self).save(*args, **kwargs)
 
+class ModerateDiscussForm(ActionModelForm):
+    message = CharField(max_length=4096, widget=Textarea)
+    class Meta:
+        model = Moderation
+        fields = ('message',)
+    
+    def save(self, *args, **kwargs):
+        self.instance.status = 'told'
+        self.full_clean()
+        if not self.instance.subject:
+            self.instance.subject = 'Told ...'
+        super(ModerateDiscussForm, self).save(*args, **kwargs)
+
 class ModerateContactForm(ActionModelForm):
     subject = CharField(max_length=156)
     message = CharField(max_length=4096, widget=Textarea, required=True)

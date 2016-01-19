@@ -1,0 +1,38 @@
+{% extends 'content/page.html' %}
+{% load momentjs %}
+
+{% block content %}
+<div class="ui vertical segment">
+<h3>Discussion</h3>
+</div>
+<div class="ui vertical segment">
+    <div class="ui grid" >
+        {% for message in currentNode.get_discussion %}
+            {% ifchanged  message.get_author.get_hash %}
+            {% if not forloop.first %}
+                </div>
+                <div class="ui three wide column">{% moment_from_now message.created_date %}</div>
+            </div>
+            {% endif %}
+            <div class="row" style="padding:4px 0px;margin:0px;border-top:1px solid lightgrey">
+                <div class="ui four wide column">
+                  <img class="ui avatar inverted image" src="{{ message.get_author.get_image.url }}">
+                  <a class="ui inverted" href="{{ message.get_author.get_url }}" >{{ message.get_author.get_full_name }}</a>
+                </div>
+                <div class="ui nine wide column">
+            {% endifchanged %}
+              {{ message.message }}<br />
+            {% if forloop.last %}
+                </div>
+              <div class="ui three wide column"><p class="small">{% moment_from_now message.created_date %}<p></div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div class="ui vertical segment">
+    {% include 'apetizer/tags/action_forms.html' %}
+</div>
+
+
+{% endblock %}

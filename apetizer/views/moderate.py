@@ -6,24 +6,26 @@ Created on 6 juil. 2015
 from collections import OrderedDict
 import json
 
+from django.http.response import HttpResponseRedirect
 from django.utils.translation import get_language
 
 from apetizer.forms.moderate import ModerateInviteForm, ModerateCommentForm, ModerateSubscribeForm, \
-    ModerateContactForm, ModerateProposeForm, ModerateReviewForm
+    ModerateContactForm, ModerateProposeForm, ModerateReviewForm, \
+    ModerateDiscussForm
 from apetizer.models import Moderation, get_new_uuid
 from apetizer.views.content import ContentView
 from apetizer.views.pipe import ActionPipeView
-from django.http.response import HttpResponseRedirect
 
 
 class ModerateView(ContentView, ActionPipeView):
     view_name = 'moderate'
     view_template = 'moderate/base.html'
-    class_actions = ['invite', 'comment', 'subscribe', 'contact', 'review', 'accept', 'reject']
+    class_actions = ['discuss', 'invite', 'comment', 'subscribe', 'contact', 'review', 'accept', 'reject']
     
     class_actions_forms = {'invite':(ModerateInviteForm,),
                            'contact': (ModerateContactForm,),
                            'comment':(ModerateCommentForm,),
+                           'discuss':(ModerateDiscussForm,),
                            'review':(ModerateReviewForm,),
                            'propose':(ModerateProposeForm,),
                            'subscribe': (ModerateSubscribeForm,),
@@ -32,6 +34,7 @@ class ModerateView(ContentView, ActionPipeView):
     class_action_templates = {
                     'invite':'moderate/invite.html',
                     'comment': 'moderate/comment.html',
+                    'discuss': 'moderate/discuss.html',
                     'contact': 'moderate/contact.html',
                     'review': 'moderate/review.html',
                     'subscribe': 'moderate/subscribe.html',
@@ -92,7 +95,8 @@ class ModerateView(ContentView, ActionPipeView):
             new_moderation.subject = 'Nouvelle Souscription'
         elif kwargs['action'] == 'unsubscribe':
             new_moderation.subject = 'De Souscription'
-        
+        elif kwargs['action'] == 'discuss':
+            new_moderation.subject = 'Nouveau message'
         
         return new_moderation
     
@@ -169,6 +173,12 @@ class ModerateView(ContentView, ActionPipeView):
     def process_comment(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Comment the related item
+        """
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    def process_discuss(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Discuss about the related item
         """
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
     
