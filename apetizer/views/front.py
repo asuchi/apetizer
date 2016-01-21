@@ -29,18 +29,18 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
     class_action_templates = {'index':'index.html'}
     
     def process_index(self, request, user_profile, input_data, template_args, **kwargs):
-        if kwargs['node'].published != True:
+        if kwargs['node'].published != True and not request.path.endswith('index/'):
             return HttpResponseRedirect('view/')
         else:
+            if template_args['currentNode'].parent == None:
+                template_args['projects'] = template_args['user_profile'].get_roots().filter(published=True, visible=True)
+            else:
+                template_args['projects'] = template_args['currentNode'].parent.get_children().filter(visible=True).exclude(id=template_args['currentNode'].id)
+            
             return self.render(request, template_args, **kwargs)
 
     def render_html(self, request, template_args, result_message, result_status,
                     **kwargs):
-        
-        if template_args['currentNode'].parent == None:
-            template_args['projects'] = template_args['user_profile'].get_roots().filter(published=True, visible=True)
-        else:
-            template_args['projects'] = template_args['currentNode'].parent.get_children().filter(visible=True).exclude(id=template_args['currentNode'].id)
         
         template_args['documentation'] = Item.objects.get_at_url('/localhost/')
         template_args['api'] = Item.objects.get_at_url('/localhost/')
