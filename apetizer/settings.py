@@ -20,12 +20,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
+    "markdown_deux",
     "easy_thumbnails",
-    "image_cropping",
     "leaflet",
     "apetizer",
-    "markdown_deux",
-    
 ]
 
 MIDDLEWARE_CLASSES = [

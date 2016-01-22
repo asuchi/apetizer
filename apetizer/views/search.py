@@ -22,7 +22,6 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template.context import RequestContext
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
-from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext as _, ugettext
 from geopy import units
 import geopy.distance
@@ -44,6 +43,7 @@ from apetizer.models import Item
 from apetizer.templatetags.drilldown_tags import drilldown_item_title
 from apetizer.templatetags.search_tags import get_applied_form_filters
 from apetizer.views.visitor import VisitorView
+from collections import OrderedDict
 
 
 logger = logging.getLogger(__name__)
@@ -708,7 +708,7 @@ class SearchSession():
         # set top admin3s
         if 'admin3' in self.data and len(self.data['admin3']) > 30:
             # sort admin3 list by count
-            sorted_dict = SortedDict()
+            sorted_dict = OrderedDict()
             admin3_list = sorted(self.data['admin3'].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:top_admin3s_length]
             for kv in admin3_list:
                 sorted_dict[kv[0]] = kv[1]
@@ -724,7 +724,7 @@ class SearchSession():
                     # sort by name
                     sorted_keys = self.data[key].keys()
                     sorted_keys.sort()
-                    sorted_dict = SortedDict()
+                    sorted_dict = OrderedDict()
                     for k in sorted_keys:
                         sorted_dict[k] = self.data[key][k]
                     

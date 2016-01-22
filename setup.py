@@ -28,16 +28,18 @@ setup(
     description='Django views for http, api and action scenarios.',
     long_description=open('readme.txt').read(),
     install_requires=[
-        "Django==1.8.4",
         "Pillow>=2.6.1",
         "python-magic>=0.4.6",
         "pytz>=2014.7",
-        "six>=1.8.0",
         "python-twitter",
-        "django-markdown-deux",
         "python-geohash",
         "geopy",
         "pattern",
         "dateutils",
+        "Django>=1.8.4",
+        "django-markdown-deux",
+        "six>=1.8.0",
+        'django-jsonfield',
+        'easy_thumbnails'
     ],
 )
