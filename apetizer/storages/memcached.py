@@ -7,6 +7,7 @@ import json
 import logging
 import zlib
 
+from apetizer.parsers.json import dump_json, load_json
 from apetizer.utils.compatibility import unicode3
 
 
@@ -159,10 +160,10 @@ class MemcacheStorage():
         return True
     
     def _serialize(self, data):
-        return json.dumps(data)
+        return dump_json(data)
     
     def _deserialize(self, data):
-        return json.loads(data)
+        return load_json(data)
     
     def _conform_key(self,key):
         if type(key) != type(u''):

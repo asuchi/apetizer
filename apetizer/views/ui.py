@@ -34,6 +34,7 @@ from apetizer.views.program import ProgramView
 from apetizer.views.visitor import VisitorView
 from apetizer.workers.hackpad import Hackpad
 from apetizer.workers.meetup import MeetupWorker
+from apetizer.parsers.json import load_json
 
 
 log = logging
@@ -534,7 +535,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 
                 messages.warning(request, 'Your proposal have already been posted but you can still modify it !')
                 
-                new_data = json.loads(proposal.data)
+                new_data = load_json(proposal.data)
                 new_data.update(input_data)
                 input_data = new_data
                 if request.method.lower() == 'get':
@@ -599,7 +600,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 
                 messages.warning(request, 'Your proposal have already been posted but you can modify it !')
                 
-                new_data = json.loads(proposal.data)
+                new_data = load_json(proposal.data)
                 new_data.update(input_data)
                 input_data = new_data
                 

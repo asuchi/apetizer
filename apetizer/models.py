@@ -37,7 +37,7 @@ from geopy.distance import EARTH_RADIUS
 
 import apetizer.default_settings as DEFAULTS
 from apetizer.forms.frontend import FolderNameField, SubdomainListField
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.json import API_json_parser, load_json, dump_json
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
 from apetizer.utils.compatibility import unicode3
 
@@ -1227,18 +1227,14 @@ class Item(Translation):
     def get_data(self):
         """
         return the data conbtained in item as a python object
-        
-        # TODO use the apetizer.parsers.jsonparser
         """
-        return json.loads(self.data)
+        return load_json(self.data)
     
     def set_data(self, value):
         """
         return the data conbtained in item as a python object
-        
-        # TODO use the apetizer.parsers.jsonparser
         """
-        self.data = json.dumps(value)
+        self.data = dump_json(value)
     
     
     def get_translation(self, locale=None):

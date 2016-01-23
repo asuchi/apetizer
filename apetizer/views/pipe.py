@@ -337,7 +337,7 @@ class ActionPipeView(ApiView, ActionView):
             data_dict['data'] = load_json(data_dict['data'])
         
         #if isinstance(data_dict['data'], str) or isinstance(data_dict['data'], unicode):
-        #    data_dict['data'] = json.loads(data_dict['data'])
+        #    data_dict['data'] = load_json(data_dict['data'])
         
         # update dict with new values
         for k in data:
@@ -354,7 +354,7 @@ class ActionPipeView(ApiView, ActionView):
             #    del data_dict['data'][field]
         
         # ensure json normalize
-        data_dict['data'] = json.loads(json.dumps(data_dict['data']))
+        data_dict['data'] = load_json(json.dumps(data_dict['data']))
         
         # markup
         data_dict['action'] = kwargs.get('action')
@@ -388,7 +388,7 @@ class ActionPipeView(ApiView, ActionView):
 
         # restore uncompressed
         try:
-            data_dict['data'] = json.loads(data_dict['data'])
+            data_dict['data'] = load_json(data_dict['data'])
         except:
             data_dict['data'] = {}
 

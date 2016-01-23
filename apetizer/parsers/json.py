@@ -29,15 +29,16 @@ def API_json_parser(obj):
                                                                  ))
 
 def load_json(value):
+    """
+    Unserialize json string
+    """
     try:
         return json.loads(value)
     except:
-        # TODO
-        # check if it mays be savec as a python serialized object
-        if value[:2] == "{'":
-            return eval(value)
+        return {}
 
 def dump_json(value):
+    """Serialize json string"""
     return json.dumps(value, default=API_json_parser)
 
 

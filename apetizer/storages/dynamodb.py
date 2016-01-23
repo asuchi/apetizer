@@ -3,15 +3,18 @@ Created on 10 oct. 2013
 
 @author: rux
 '''
-from boto.dynamodb2.fields import HashKey, RangeKey
-from boto.dynamodb2.table import Table
-import boto.dynamodb2
-
-from django.conf import settings
-from time import time
 import json
 import logging
+from time import time
 import traceback
+
+from django.conf import settings
+
+from apetizer.parsers.json import load_json
+import boto.dynamodb2
+from boto.dynamodb2.fields import HashKey, RangeKey
+from boto.dynamodb2.table import Table
+
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +170,7 @@ class DynamoTable(object):
             rkey = item[self.range_key]
             
             if rkey == 'index':
-                data = json.loads(item['value'])
+                data = load_json(item['value'])
                 break
             else:
                 for key in item.keys():
@@ -175,7 +178,7 @@ class DynamoTable(object):
                         if key == 'value':
                             value = item[key]
                             try:
-                                rkey_data = json.loads(str(value))
+                                rkey_data = load_json(str(value))
                             except:
                                 rkey_data = value
                         
