@@ -7,10 +7,11 @@ from django.template.defaulttags import register
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _, to_locale, get_language
 
-from apetizer.forms.search import UserInputForm, SearchInputForm,\
-    SearchTypesForm,SearchSettingsForm, SearchAgeForm
 from apetizer.directory.utils import get_search_session_vars, \
     _get_default_search_vars
+from apetizer.forms.search import UserInputForm, SearchInputForm, \
+    SearchTypesForm, SearchSettingsForm, SearchAgeForm
+from apetizer.utils.compatibility import unicode3
 
 
 @register.filter
@@ -70,9 +71,8 @@ def get_applied_form_filters( applied_filters, default_form, to_form ):
             #try:
             if default_field.name in ('num_vehicle_seats', 'num_vehicle_doors', 'max_age'):
                 for choice in default_field.field.widget.choices:
-                    #print unicode(choice[1])
                     if str(choice[0]) == str(filter_field.value()):
-                        value = unicode(choice[1])
+                        value = unicode3(choice[1])
                         break
                 if value == None:
                     value = filter_field.value()

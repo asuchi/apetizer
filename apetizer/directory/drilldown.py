@@ -7,6 +7,8 @@ Created on 11 fev. 2014
 from collections import OrderedDict
 from math import radians, cos, sin, asin, sqrt
 
+from apetizer.utils.compatibility import unicode3
+
 
 class Drilldown():
     
@@ -33,11 +35,11 @@ class Drilldown():
         # verify all index keys are unicode
         self.indexes = {}
         for otype in index_map:
-            self.indexes[unicode(otype)] = {}
+            self.indexes[unicode3(otype)] = {}
             for index_key in index_map[otype]:
-                self.indexes[unicode(otype)][unicode(index_key)] = []
+                self.indexes[unicode3(otype)][unicode3(index_key)] = []
                 for index_value in index_map[otype][index_key]:
-                    self.indexes[unicode(otype)][unicode(index_key)].append(index_value)
+                    self.indexes[unicode3(otype)][unicode3(index_key)].append(index_value)
         
         self.prepare()
         
@@ -85,16 +87,16 @@ class Drilldown():
             return self.get_object(obj_type, slug)['count']
     
     def has_object(self, object_type, key):
-        key = unicode(key)
-        return self.object_map.has_key( unicode(object_type+'-'+key) )
+        key = unicode3(key)
+        return self.object_map.has_key( unicode3(object_type+'-'+key) )
     
     def get_object(self, object_type, key):
-        key = unicode(key)
-        return self.object_map.get_key_data( unicode(object_type+'-'+key) )
+        key = unicode3(key)
+        return self.object_map.get_key_data( unicode3(object_type+'-'+key) )
     
     def set_object(self, object_type, key, data):
-        key = unicode(key)
-        return self.object_map.set_key_data( unicode(object_type+'-'+key), data )
+        key = unicode3(key)
+        return self.object_map.set_key_data( unicode3(object_type+'-'+key), data )
     
     def add_object(self, obj_type, obj):
         
@@ -110,12 +112,12 @@ class Drilldown():
                 obj[k] = 'empty'
             
             if type(obj[k]) == type(0):
-                obj[k] = unicode(str(obj[k]))
+                obj[k] = unicode3(str(obj[k]))
             
             if type(obj[k]) == type(''):
-                obj[k] = unicode(str(obj[k]))
+                obj[k] = unicode3(str(obj[k]))
             
-            clean_data[unicode(k)] = obj[k]
+            clean_data[unicode3(k)] = obj[k]
         
         obj = clean_data
         
@@ -168,7 +170,7 @@ class Drilldown():
                     # for each index keys
                     for key in object_keys:
                         
-                        key = unicode(key)
+                        key = unicode3(key)
                         
                         if key in clean_data.keys():
                             
@@ -187,15 +189,13 @@ class Drilldown():
                     
                     # save modified data index
                     self.data_map.set_key_data( data_key, data_obj )
-                    
-        #print keys_modified
         
         return keys_modified
 
     def remove_object(self, obj_type, object_key):
         
-        obj_type = unicode(obj_type)
-        obj_map_key_dict = self.object_map.get_key_data( obj_type+'-'+unicode(object_key) )
+        obj_type = unicode3(obj_type)
+        obj_map_key_dict = self.object_map.get_key_data( obj_type+'-'+unicode3(object_key) )
         
         if 'indexes' in obj_map_key_dict:
             indexes = obj_map_key_dict[u'indexes']

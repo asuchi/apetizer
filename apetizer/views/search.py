@@ -696,7 +696,7 @@ class SearchSession():
         top_vehicles_length = 6
         top_admin3s_length = 9
         
-        # set top ten vehicles
+        # set top ten 
         if 'item' in self.data and len(self.data['item']) > 25:
             
             pa_ids = self.data['item'].keys()
@@ -709,10 +709,10 @@ class SearchSession():
         if 'admin3' in self.data and len(self.data['admin3']) > 30:
             # sort admin3 list by count
             sorted_dict = OrderedDict()
-            admin3_list = sorted(self.data['admin3'].iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:top_admin3s_length]
+            #admin3_list = sorted(self.data['admin3'].iteritems(), key=lambda(k,v):(v,k), reverse=True)[0:top_admin3s_length]
+            admin3_list = []
             for kv in admin3_list:
                 sorted_dict[kv[0]] = kv[1]
-            print sorted_dict
             self.template_vars['top_admin3_list'] = sorted_dict
 
         # assign all data keys
@@ -1148,8 +1148,6 @@ def parse_location(text):
         
     Throws a RuntimeError if it can't parse successfully.
     '''
-    #print text
-    
     if not text:
         raise ValueError(_(u'Must provide a valid address to parse:%s' % text))
     
@@ -1159,9 +1157,6 @@ def parse_location(text):
         text_slug = slugify(text)
         if _search_drilldown_cache.has_object('label', text_slug):
             location_object = _search_drilldown_cache.get_object('label', text_slug)
-            
-            print location_object
-            
             location = AbstractLocation(float(location_object['stats']['lat']), float(location_object['stats']['lng']) )
             
         elif _search_drilldown_cache.has_key(text_slug):
@@ -1170,9 +1165,6 @@ def parse_location(text):
             location_data = _search_drilldown_cache.get_key_data(text_slug)
             
             location_object = _search_drilldown_cache.get_object('item', location_data['item'].keys()[0])
-            
-            print location_object
-            
             location = AbstractLocation(float(location_object['data']['lat']), float(location_object['data']['lng']) )
             
         else:

@@ -384,7 +384,7 @@ class ModerateView(ContentView, ActionPipeView):
 
         try:
             evaluation = int(input_data.get('new_evaluation', 0))
-        except Exception, e:
+        except Exception:
             evaluation = 0
 
         if newStatus:

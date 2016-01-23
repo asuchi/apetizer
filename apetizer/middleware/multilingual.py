@@ -8,6 +8,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import translation
 
+from apetizer.utils.compatibility import unicode3
 from apetizer.views.action import ActionView
 from apetizer.views.api import get_class_that_defined_method
 
@@ -92,7 +93,7 @@ class MultilingualURLMiddleware(object):
 
     def process_request(self, request):
         
-        path = unicode(request.path)
+        path = unicode3(request.path)
         
         if not path in URLS_WITHOUT_LANGUAGE_REDIRECT and \
            not path.startswith(settings.MEDIA_URL) and \
@@ -107,10 +108,6 @@ class MultilingualURLMiddleware(object):
             request_language = self.get_language_from_request(request)
             request.LANGUAGE_CODE = request_language
             translation.activate(request_language)
-            
-            #print original_path
-            #print request.path
-            #print request.path_info
             
             # manage to remove the language root and patch with host path
             for no_redirect_url in URLS_WITHOUT_LANGUAGE_REDIRECT:
@@ -141,53 +138,4 @@ class MultilingualURLMiddleware(object):
                     return HttpResponseRedirect('/%s%s?%s' % (language, request.path, request.META.get('QUERY_STRING', '')))
                 #else:
                 #    return HttpResponseRedirect('/%s%s' % (language, request.path))
-
-
-def patch_response(content, pages_root, language):
-    # Customarily user pages are served from http://the.server.com/~username/
-    # When a user uses django-cms for his pages, the '~' of the url appears quoted in href links.
-    # We have to quote pages_root for the regular expression to match.
-    #
-    # The used regex is quite complex. The exact pattern depends on the used settings.
-    # The regex extracts the path of the url without the leading page root, but only matches urls
-    # that don't already contain a language string or aren't considered multilingual.
-    #
-    # Here is an annotated example pattern (_r_ is a shorthand for the value of pages_root):
-    #   pattern:        <a([^>]+)href=("|\')(?=_r_)(?!(/fr/|/de/|/en/|/pt-br/|/media/|/media/admin/))(_r_(.*?))("|\')(.*?)>
-    #                     |-\1--|     |-\2-|       |---------------------\3---------------------|    | |-\5--|||-\6-||-\7-|
-    #                                                                                                |---\4---|
-    #   input (_r_=/):  <a href="/admin/password_change/" class="foo">
-    #   matched groups: (u' ', None, u'/admin/password_change/', u'admin/password_change/', u' class="foo"')
-    #
-    # Notice that (?=...) and (?!=...) do not consume input or produce a group in the match object.
-    # If the regex matches, the extracted path we want is stored in the fourth group (\4).
-    quoted_root = urllib.quote(pages_root)
-    ignore_paths = ['%s%s/' % (quoted_root, l[0]) for l in settings.LANGUAGES]
-    ignore_paths += [settings.MEDIA_URL, settings.ADMIN_MEDIA_PREFIX]
-    if getattr(settings,'STATIC_URL', False):
-        ignore_paths += [settings.STATIC_URL]
-        
-    HREF_URL_FIX_RE = re.compile(ur'<a([^>]+)href=("|\')(?=%s)(?!(%s))(%s(.*?))("|\')(.*?)>' % (
-        quoted_root,
-        "|".join([re.escape(p) for p in ignore_paths]),
-        quoted_root
-    ))
-
-    # Unlike in href links, the '~' (see above) the '~' in form actions appears unquoted.
-    #
-    # For understanding this regex, please read the documentation for HREF_URL_FIX_RE above.
-    
-    ignore_paths = ['%s%s/' % (pages_root, l[0]) for l in settings.LANGUAGES]
-    ignore_paths += [settings.MEDIA_URL, settings.ADMIN_MEDIA_PREFIX]
-    if getattr(settings,'STATIC_URL', False):
-        ignore_paths += [settings.STATIC_URL]
-    FORM_URL_FIX_RE = re.compile(ur'<form([^>]+)action=("|\')(?=%s)(?!(%s))(%s(.*?))("|\')(.*?)>' % (
-        pages_root,
-        "|".join([re.escape(p) for p in ignore_paths]),
-        pages_root
-    ))
-
-    content = HREF_URL_FIX_RE.sub(ur'<a\1href=\2/%s%s\5\6\7>' % (language, pages_root), content)
-    content = FORM_URL_FIX_RE.sub(ur'<form\1action=\2%s%s/\5\6\7>' % (pages_root, language), content).encode("utf8")
-    return content
 

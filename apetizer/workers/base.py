@@ -85,7 +85,6 @@ class BaseWorker(object):
                 item.action = 'related'
                 
                 #item.save()
-                print item.pk
                 
             self.items.append(item)
         

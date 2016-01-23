@@ -15,6 +15,7 @@ from django.utils.translation import ugettext_lazy as _, get_language
 from apetizer.dispatchers.async import AsyncDispatcher
 from apetizer.forms.register import VisitorValidateForm, VisitorForm
 from apetizer.models import Visitor
+from apetizer.parsers.json import API_json_parser
 from apetizer.storages.model import ModelStore
 from apetizer.views.api import ApiView
 from apetizer.views.pipe import ActionPipeView
@@ -70,7 +71,7 @@ class VisitorView(ActionPipeView, ApiView):
             visitor = Visitor(akey=new_key)
             visitor.locale = get_language()
             visitor.action = 'home'
-            visitor.data = kwargs['pipe']['data']
+            visitor.data = json.dumps(kwargs['pipe']['data'], default=API_json_parser)
             visitor.path = request.path_info
             visitor.full_clean()
             visitor.save()
@@ -123,9 +124,6 @@ class VisitorView(ActionPipeView, ApiView):
             self.send_validation_link(user_profile)
         else:
             token = input_data.get('token', '')
-            
-            if settings.DEBUG:
-                print user_profile.get_token()
             
             if token and user_profile.is_valid_token(token) and akey == user_profile.akey:
                 
@@ -182,7 +180,6 @@ class VisitorView(ActionPipeView, ApiView):
 
 def send_validation_email(title, text, html):
     # call the email api
-    print 'VALIDATION EMAIL'
     return html
 
 def send_email(self, origin_email, target_email, title, message, content):

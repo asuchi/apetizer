@@ -3,11 +3,14 @@ Created on 2 mars 2014
 
 @author: rux
 '''
-from django.conf import settings
 import json
-import time
-import traceback
+import logging
 import zlib
+
+from apetizer.utils.compatibility import unicode3
+
+
+logger = logging.getLogger(__name__)
 
 class DictStorage():
     '''
@@ -46,7 +49,7 @@ class DictStorage():
     def _conform_key(self,key):
         return key
         if type(key) == type(''):
-            key = unicode(key)
+            key = unicode3(key)
         key = repr(key)
         return self.prefix+key
     
@@ -60,8 +63,8 @@ class DictStorage():
         '''
         Print debug and stats about the structure size
         '''
-        print 'Data map has now '+str(len( self.values ))+' paths'
-        print self.values.keys()
+        log = 'Data map has now '+str(len( self.values ))+' paths \n'
+        log += self.values.keys()+'\n'
         
         total_size = 0
         average_size = 0
@@ -84,36 +87,37 @@ class DictStorage():
             if size > allowed_max_size:
                 oversized_keys.append( (path,size) )
         
-        print 'Data map index now '+str( float(total_size)/(1024*1024) )+' Mo'
-        print 'Average key size is '+str( float(average_size)/(1024) )+' Ko'
-        print 'Minimum key size is '+str( float(min_size)/(1024) )+' Ko'
-        print 'Maximum key size is '+str( float(max_size)/(1024) )+' Ko at '+str(max_size_path)
+        log += 'Data map index now '+str( float(total_size)/(1024*1024) )+' Mo'+'\n'
+        log += 'Average key size is '+str( float(average_size)/(1024) )+' Ko'+'\n'
+        log += 'Minimum key size is '+str( float(min_size)/(1024) )+' Ko'+'\n'
+        log += 'Maximum key size is '+str( float(max_size)/(1024) )+' Ko at '+str(max_size_path)+'\n'
         
-        print 'More than 4k keys:'
+        log += 'More than 4k keys:'+'\n'
         for key in oversized_keys:
-            print '\t'+str(key[0])+' - '+str( float(key[1])/(1024) )+' Ko'
+            log += '\t'+str(key[0])+' - '+str( float(key[1])/(1024) )+' Ko'+'\n'
+        
+        logger.debug(log)
         
         return
         
-        print 'Towns with wrong geocoded vehicle:',
+        log += 'Towns with wrong geocoded vehicle:',
         wrong_town_geocode_count = 0
         for key in self.object_map['town']:
             if len(self.values[key]['country']) > 1 or len(self.values[key]['region']) > 1 or len(self.values[key]['dept']) > 1:
                 wrong_town_geocode_count += 1
                 
-        print wrong_town_geocode_count
+        log += wrong_town_geocode_count
         
-        print 'Vehicles with potential wrong geocoded town:',
+        log += 'Vehicles with potential wrong geocoded town:',
         wrong_geocode_count = 0
         for key in self.object_map['pa']:
             town = self.object_map['pa'][key]['data']['town']
             if len(self.values[town]['country']) > 1 or len(self.values[town]['region']) > 1 or len(self.values[town]['dept']) > 1:
-                #print town+' - '+str(self.values['pa'][key]['data']['pa'])
                 wrong_geocode_count+=1
         
-        print wrong_geocode_count
+        log += wrong_geocode_count
         
-        print '\n'
+        log += '\n'
     
 DIRECTORY_CACHE_PREFIX = 'dir-'
 DIRECTORY_VERSION = '1'
@@ -162,7 +166,7 @@ class MemcacheStorage():
     
     def _conform_key(self,key):
         if type(key) != type(u''):
-            key = unicode(key)
+            key = unicode3(key)
         key = repr(key)
         return str(self.prefix+key)
 

@@ -3,8 +3,11 @@ Created on 11 dec. 2015
 
 @author: biodigitals
 '''
-from StringIO import StringIO
 import sys
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from django.conf import settings
 

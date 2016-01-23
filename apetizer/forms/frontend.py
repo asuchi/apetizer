@@ -5,7 +5,10 @@ from django import forms
 from django.contrib.admin.widgets import AdminTextareaWidget, AdminTextInputWidget
 from django.core.validators import URLValidator, ValidationError
 from django.db import models
-from django.utils.encoding import smart_unicode
+try:
+    from django.utils.encoding import smart_unicode
+except:
+    from django.utils.encoding import smart_text as smart_unicode
 
 
 class SubdomainListFormField(forms.Field):
@@ -82,7 +85,6 @@ class SubdomainListField(models.TextField):
         return u','.join([smart_unicode(s) for s in value])
 
     def value_to_string(self, obj):
-        print 'value to string()'
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
         

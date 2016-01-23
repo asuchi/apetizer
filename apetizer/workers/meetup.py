@@ -9,6 +9,7 @@ from os.path import os
 from pprint import pprint
 
 from dateutil import parser
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datetime_safe import strftime
 import requests
@@ -20,7 +21,7 @@ from apetizer.workers.base import BaseWorker
 # https://secure.meetup.com/meetup_api/console/
 class MeetupWorker(BaseWorker):
     
-    meetup_api_key = '5971545d4317bf6936521750624c49'
+    meetup_api_key = settings.MEETUP_API_KEY
 
     def request(self, **kwargs):
         self.items = []
@@ -41,7 +42,6 @@ class MeetupWorker(BaseWorker):
         r = requests.get(meetup_url)
         data = r.json()
         self.raw_data = data
-        #print data
         return data
     
     def parse(self, **kwargs):

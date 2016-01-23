@@ -24,25 +24,6 @@ from apetizer.forms.search import SearchPageForm, SearchSortForm, \
     SearchInputForm, SearchSettingsForm, SearchAgeForm, SearchKeywordForm
 
 
-unicode_control_chars = ''.join(map(unichr, range(0,32) + range(127,160)))
-unicode_control_char_re = re.compile('[%s]' % re.escape(unicode_control_chars))
-ascii_control_char_re = re.compile('[\x01-\x1F\x7F]')
-
-def strip_control_characters(inputstr):
-    '''
-    Remove control characters from a unicode string
-    
-    Thanks to http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python
-    '''
-    if inputstr:
-        # unicode control character
-        inputstr = unicode_control_char_re.sub('', inputstr)
-        # ascii control characters
-        inputstr = ascii_control_char_re.sub('', inputstr)
-              
-    return inputstr  
-
-
 logger = logging.getLogger(__name__)
 
 SEARCH_KEY_NAME = 'skey'

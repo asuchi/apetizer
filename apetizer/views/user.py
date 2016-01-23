@@ -156,7 +156,6 @@ class UserView(VisitorView):
                 # set user password
                 if 'password' in request.POST and request.POST['password']:
                     user, = self.get_forms_instances(kwargs['action'], user_profile, kwargs)
-                    #print 'SETTING PWD'
                     user.set_password(request.POST['password'])
                     user.save()
                     

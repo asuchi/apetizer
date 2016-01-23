@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.utils.html import escape
 
 from apetizer.models import Item, Moderation, get_distincts
+from apetizer.views.api import get_class_that_defined_method
 from apetizer.views.front import FrontView
 
 
@@ -35,15 +36,6 @@ class Command(BaseCommand):
         
         doc_root = '/localhost'
         
-        # create root for documentation if it doaes not exists yet
-        #documentation = Item.objects.get_or_create_url(doc_root, **kwargs)
-        #documentation.delete()
-        def get_class_that_defined_method(meth):
-            for cls in inspect.getmro(meth.im_class):
-                if meth.__name__ in cls.__dict__: 
-                    return cls
-            return None
-        
         documentation = Item.objects.get_or_create_url(doc_root, **kwargs)
         documentation.visible = False
         documentation.save()
@@ -64,7 +56,6 @@ class Command(BaseCommand):
             action_item = Item.objects.get_or_create_url(doc_root+'/actions/'+action+'/', **kwargs)
             # get the documentation function class name
             action_item.label = get_class_that_defined_method(getattr(FrontView, 'process_' + action)).__name__
-            print action_item.label
             
             # get the documentation function docstring
             docstring = getattr(FrontView, 'process_' + action).__doc__
@@ -91,9 +82,12 @@ class Command(BaseCommand):
             for root, dirs, files in os.walk(root_package):
                 
                 for dir in dirs:
+                    
+                    if dir == '__pycache__':
+                        continue
+                    
                     fileitem = Item.objects.get_or_create_url(doc_root+'/'+os.path.join(root, dir), **kwargs)
                     
-                    #fileitem.behavior = 'view'
                     fileitem.label = 'Package'
                     fileitem.title = dir
                     
@@ -103,7 +97,6 @@ class Command(BaseCommand):
                     if file.endswith(".py"):
                         fileitem = Item.objects.get_or_create_url(doc_root+'/'+os.path.join(root, file), **kwargs)
                         
-                        #fileitem.behavior = 'upload'
                         fileitem.label = 'Module'
                         fileitem.title = os.path.splitext(file)[0]
                         
@@ -149,24 +142,5 @@ class Command(BaseCommand):
         
         # create the dependencies list
         dependencies = Item.objects.get_or_create_url(doc_root+'/requirements/', **kwargs)
-        
-        # create the dependencies list
-        dependencies = Item.objects.get_or_create_url(doc_root+'/static/', **kwargs)
-        
-        # create the dependencies list
-        dependencies = Item.objects.get_or_create_url(doc_root+'/cache/', **kwargs)
-        
-        # create the dependencies list
-        dependencies = Item.objects.get_or_create_url(doc_root+'/medias/', **kwargs)
-        
-        # create the dependencies list
-        dependencies = Item.objects.get_or_create_url(doc_root+'/manage/', **kwargs)
-        
-        # create the included projects list
-        
-        # create the imprint and git repose links etc ...
-        # create the linked vhosts git repositories list ?
-        
-
 
 

@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import jsonfield.fields
 
 
 class Migration(migrations.Migration):
@@ -19,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='datapath',
             name='data',
-            field=jsonfield.fields.JSONField(default=b'{}', null=True, blank=True),
+            field=models.TextField(default=b'{}', null=True, blank=True),
         ),
         migrations.AlterField(
             model_name='translation',

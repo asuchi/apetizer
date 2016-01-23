@@ -21,35 +21,23 @@ logger = logging.getLogger(__name__)
 
 
 def get_class_that_defined_method(meth):
-    
+    """
+    http://stackoverflow.com/questions/3589311/get-defining-class-of-unbound-method-object-in-python-3
+    """
     if inspect.ismethod(meth):
-        for cls in inspect.getmro(meth.im_class):
-            if meth.__name__ in cls.__dict__: 
-                return cls
-    
+        try:
+            for cls in inspect.getmro(meth.im_class):
+                if meth.__name__ in cls.__dict__: 
+                    return cls
+        except:
+            for cls in inspect.getmro(meth.__self__.__class__):
+                if meth.__name__ in cls.__dict__: 
+                    return cls
     elif inspect.isfunction(meth):
-        print 'is function'
-        print meth.__name__
-        print meth.__class__
-    else:
-        print meth
-    
-    return None
-
-def Zget_class_that_defined_method(meth):
-    if inspect.ismethod(meth):
-        for cls in inspect.getmro(meth.__self__.__class__):
-            if cls.__dict__.get(meth.__name__) is meth:
-                return cls
-        meth = meth.__func__ # fallback to __qualname__ parsing
+        return getattr(inspect.getmodule(meth),
+               meth.__qualname__.split('.<locals>', 1)[0].rsplit('.', 1)[0])
         
-    if inspect.isfunction(meth):
-        return None
-        cls = getattr(inspect.getmodule(meth),
-                      meth.__qualname__.split('.<locals>', 1)[0].rsplit('.', 1)[0])
-        if isinstance(cls, type):
-            return cls
-    return None # not required since None would have been implicitly returned anyway
+    return None
 
 class ApiView(ActionView):
     
@@ -78,8 +66,6 @@ class ApiView(ActionView):
         """
         return os.path.splitext(request.path)[1].lower() == '.json'
     
-    def process(self, request, user_profile, input_data, template_args, **kwargs):
-        return ActionView.process(self, request, user_profile, input_data, template_args, **kwargs)
     
     def render(self, request, template_args, result_payload=None,
                result_message="OK", result_status=200, **kwargs):
@@ -94,8 +80,6 @@ class ApiView(ActionView):
             result_payload['nodes'] = []
             for node in template_args['nodes']:
                 #node_item_data = model_to_dict(node)
-                #print node_item_data
-                
                 node_data = {}
                 node_data['id'] = node.id
                 node_data['start'] = node.start
@@ -174,8 +158,6 @@ class ApiView(ActionView):
             Return API documentation from action
             methods docstring and corresponding forms.
             """
-            
-            
             doc_string = '<p class="" ><h2 class="ui header" >' + self.__class__.__name__ + '</h2>'
             doc_string += self.__class__.__version__ + '</p>'
             if self.__class__.__doc__:

@@ -13,10 +13,11 @@ from django.forms.models import model_to_dict
 from django.http import HttpResponseRedirect
 from django.utils.timezone import now
 from django.utils.translation import get_language
+import six
 
 from apetizer.forms.base import ActionModelForm
 from apetizer.models import DataPath
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.json import API_json_parser, load_json
 from apetizer.storages.kvstore import KVStore
 from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
@@ -332,9 +333,12 @@ class ActionPipeView(ApiView, ActionView):
                 data_dict = self.get_default_pipe_data(request, akey, **kwargs)
         
         # decompress contained action data
-        if isinstance(data_dict['data'], str) or isinstance(data_dict['data'], unicode):
-            data_dict['data'] = json.loads(data_dict['data'])
-
+        if isinstance(data_dict['data'], six.string_types):
+            data_dict['data'] = load_json(data_dict['data'])
+        
+        #if isinstance(data_dict['data'], str) or isinstance(data_dict['data'], unicode):
+        #    data_dict['data'] = json.loads(data_dict['data'])
+        
         # update dict with new values
         for k in data:
             data_dict['data'][k] = data[k]

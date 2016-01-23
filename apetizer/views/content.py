@@ -62,7 +62,6 @@ class ContentView(ApiView, ActionView):
         url_regexp += '(?P<action>('
         url_regexp += '|'.join(cls_actions)
         url_regexp += '))'
-        print url_regexp
         return url_regexp
         
         
@@ -149,7 +148,6 @@ class ContentView(ApiView, ActionView):
                     page.related_id = page.id
                     page.save()
                 else:
-                    print root_slug
                     raise Http404
             
         # Check for permission
@@ -205,7 +203,6 @@ class ContentView(ApiView, ActionView):
             
             return self.process(request, user_profile, {}, template_args, **kwargs)
         else:
-            print kwargs['node'].behavior
             return self.render(request, template_args, **kwargs)
     
     def process_cards(self, request, user_profile, input_data, template_args, **kwargs):

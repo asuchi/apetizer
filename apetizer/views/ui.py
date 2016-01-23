@@ -28,12 +28,12 @@ from apetizer.forms.content import ItemTranslateForm, ItemDeleteForm, \
     ItemCodeForm, ItemRedirectForm, ItemPublishForm, ItemRenameForm, \
     ItemReorderForm
 from apetizer.models import Item, Translation, Moderation, get_new_uuid
+from apetizer.utils.compatibility import unicode3
 from apetizer.views.moderate import ModerateView
 from apetizer.views.program import ProgramView
 from apetizer.views.visitor import VisitorView
 from apetizer.workers.hackpad import Hackpad
 from apetizer.workers.meetup import MeetupWorker
-from apetizer.workers.twittersearch import TwitterWorker
 
 
 log = logging
@@ -485,13 +485,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
         
         if node.related_url:
             
-            if node.related_url.startswith('https://twitter.com') and input_data.get('keyword'):
-                wk = TwitterWorker(user_profile, kwargs['node'], input_data, kwargs)
-                items = wk.prepare()
-                template_args['nodes'] = items
-                #return self.render(request, template_args, **kwargs)
-            
-            elif node.related_url.startswith('http://www.meetup.com'):
+            if node.related_url.startswith('http://www.meetup.com'):
                 # and 
                 #input_data.get('keyword'):
                 wk = MeetupWorker(user_profile, kwargs['node'], input_data, kwargs)
@@ -499,13 +493,8 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 template_args['nodes'] = items
                 #return self.render(request, template_args, **kwargs)
             
-            elif node.related_url.startswith('https://googlecalendar.com'):
-                pass
-            
             elif node.related_url.startswith('https://hackpad.com/'):
                 hackpad_id = node.related_url.split('-')[-1]
-                
-                print 'importing hackpad'
                 
                 # import hackpad content
                 HACKPAD_CLIENT_ID = 'vTuK1ArKv5m'
@@ -516,15 +505,13 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 #node.description = hackpad.get_pad_content(hackpad_id, asUser='', response_format='md')
                 
                 hackpad_content = hackpad.get_pad_content(hackpad_id, asUser='', response_format='md')
-                #node.description =  unicode(decode(hackpad_content, 'latin1'))
+                #node.description =  unicode3(decode(hackpad_content, 'latin1'))
                 try:
-                    node.get_translation().content = markdown_deux.markdown( unicode(decode(hackpad_content, 'latin1')) )
+                    node.get_translation().content = markdown_deux.markdown( unicode3(decode(hackpad_content, 'latin1')) )
                     node.save()
                 except:
                     pass
                 
-                #print node.content
-        
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
 
 

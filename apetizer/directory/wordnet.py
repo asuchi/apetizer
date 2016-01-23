@@ -2,6 +2,8 @@
 Created on 3 mars 2014
 
 @author: rux
+
+Works with python 2.7, wordnet3.0 and pattern-2.6 for word extraction
 '''
 import logging
 import os
@@ -10,6 +12,7 @@ from django.conf import settings
 from django.core.cache import cache as drilldown_cache
 from django.template.defaultfilters import slugify
 from django.utils.translation import get_language
+from pattern.text import fr
 
 from apetizer.directory.drilldown import Drilldown
 from apetizer.dispatchers.async import AsyncDispatcher
@@ -20,7 +23,7 @@ from apetizer.storages.memcached import MemcacheStorage, DictStorage
 logger = logging.getLogger(__name__)
 
 
-class ItemDrilldown(Drilldown):
+class WordnetDrilldown(Drilldown):
     '''
     
     '''
@@ -53,18 +56,27 @@ class ItemDrilldown(Drilldown):
             
             #
             if item.label:
-                keywords.append(item.label)
-                for w in item.label.split(' '):
-                    keywords.append(slugify(w))
+                sentence = fr.parse(item.label)
+                for word in sentence.split()[0]:
+                    if word[1] == 'NN' and len(word[0]) > 2:
+                        if not word[0] in keywords:
+                            keywords.append(slugify(word[0]))
             
             if item.title:
-                for w in item.title.split(' '):
-                    keywords.append(slugify(w))
+                sentence = fr.parse(item.title)
+                for word in sentence.split()[0]:
+                    if word[1] == 'NN' and len(word[0]) > 2:
+                        if not word[0] in keywords:
+                            keywords.append(slugify(word[0]))
             
             if item.description:
-                for w in item.description.split(' '):
-                    keywords.append(slugify(w))
+                sentence = fr.parse(item.description)
+                for word in sentence.split()[0]:
+                    if word[1] == 'NN' and len(word[0]) > 2:
+                        if not word[0] in keywords:
+                            keywords.append(slugify(word[0]))
             
+            keywords.append(item.label)
             self.add_item_data(item.id, item.get_path(), item.label, keywords, item.latitude, item.longitude)
             
         if settings.DEBUG:
@@ -124,7 +136,7 @@ SEARCH_DRILLDOWN_INDEXES = { 'keyword': {
             
 
 def get_dict_drilldown():
-    drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
+    drilldown = WordnetDrilldown( SEARCH_DRILLDOWN_INDEXES, 
                                                  DictStorage(), 
                                                  DictStorage())
     return drilldown
@@ -132,7 +144,7 @@ def get_dict_drilldown():
 
 def get_memcache_drilldown():
     mem_storage = MemcacheStorage(drilldown_cache)
-    drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
+    drilldown = WordnetDrilldown( SEARCH_DRILLDOWN_INDEXES, 
                                                  mem_storage, 
                                                  mem_storage )
     

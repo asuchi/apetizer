@@ -11,8 +11,11 @@ from django.db import models
 from django.db.models import fields
 from django.forms import ValidationError
 from django.forms.widgets import TextInput
-from django.utils.encoding import smart_unicode
 
+try:
+    from django.utils.encoding import smart_unicode
+except:
+    from django.utils.encoding import smart_text as smart_unicode
 
 class UIDField(models.CharField):
     """
