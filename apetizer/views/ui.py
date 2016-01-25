@@ -109,7 +109,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 user_data = model_to_dict(user_profile)
                 
                 trans_data.update(user_data)
-                for key in trans_data.keys():
+                for key in list(trans_data.keys()):
                     if not key in Item.__localizable__:
                         del trans_data[key]
                 
