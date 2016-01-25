@@ -25,19 +25,26 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
     
     default_action = 'index'
     
-    class_actions = ['index']
-    class_action_templates = {'index':'index.html'}
+    class_actions = ['index', 'home']
+    class_action_templates = {'index':'index.html',
+                              'home':'home.html'}
+    
+    def process_home(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Display a home page
+        """
+        if template_args['currentNode'].parent == None:
+            template_args['projects'] = template_args['user_profile'].get_roots().filter(published=True, visible=True)
+        else:
+            template_args['projects'] = template_args['currentNode'].parent.get_children().filter(visible=True).exclude(id=template_args['currentNode'].id)
+        
+        return self.render(request, template_args, **kwargs)
     
     def process_index(self, request, user_profile, input_data, template_args, **kwargs):
-        if kwargs['node'].published != True and not request.path.endswith('index/'):
-            return HttpResponseRedirect('view/')
-        else:
-            if template_args['currentNode'].parent == None:
-                template_args['projects'] = template_args['user_profile'].get_roots().filter(published=True, visible=True)
-            else:
-                template_args['projects'] = template_args['currentNode'].parent.get_children().filter(visible=True).exclude(id=template_args['currentNode'].id)
-            
-            return self.render(request, template_args, **kwargs)
+        """
+        Display an index page
+        """
+        return self.render(request, template_args, **kwargs)
 
     def render_html(self, request, template_args, result_message, result_status,
                     **kwargs):
