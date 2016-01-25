@@ -340,16 +340,16 @@ class Visitor(DataPath):
     def get_token(self):
         # returns a hash based on the user email if exists
         if self.email:
-            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey+self.email).hexdigest()).hexdigest()
+            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey+self.email.encode('utf-8')).hexdigest()).hexdigest()
         else:
-            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey).hexdigest()).hexdigest()
+            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey.encode('utf-8')).hexdigest()).hexdigest()
 
     def get_hash(self):
         # returns a hash based on the user email if valid
         if self.email and self.validated:
-            return hashlib.md5(settings.SECRET_KEY+self.email).hexdigest()
+            return hashlib.md5(settings.SECRET_KEY+self.email.encode('utf-8')).hexdigest()
         else:
-            return hashlib.md5().hexdigest()
+            return hashlib.md5(u'').hexdigest()
 
     def is_valid_token(self, token):
         return self.get_token() == token
