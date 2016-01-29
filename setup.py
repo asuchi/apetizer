@@ -13,7 +13,6 @@ setup(
               'apetizer.middleware',
               'apetizer.migrations',
               'apetizer.parsers',
-              'apetizer.sites',
               'apetizer.storages',
               'apetizer.templatetags',
               'apetizer.test',
