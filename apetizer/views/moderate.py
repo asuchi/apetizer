@@ -17,6 +17,7 @@ from apetizer.forms.moderate import ModerateInviteForm, ModerateCommentForm, \
 from apetizer.models import Moderation, get_new_uuid
 from apetizer.views.content import ContentView
 from apetizer.views.pipe import ActionPipeView
+from apetizer.parsers.json import load_json
 
 
 class ModerateView(ContentView, ActionPipeView):
@@ -129,12 +130,12 @@ class ModerateView(ContentView, ActionPipeView):
         proposal_transfer = input_data.get('transfer','no')
         
         if proposal_transfer != 'no':
-            input_data = json.loads(proposal.data)
+            input_data = load_json(proposal.data)
             input_data.email = proposal.email
             input_data.username = proposal.username
             response = self.process(request, user_profile, input_data, template_args, **kwargs)
         else:
-            response = self.process(request, user_profile, json.loads(proposal.data), template_args, **kwargs)
+            response = self.process(request, user_profile, load_json(proposal.data), template_args, **kwargs)
         
         proposal.status = 'accepted'
         proposal.save()
@@ -384,7 +385,7 @@ class ModerateView(ContentView, ActionPipeView):
 
         try:
             evaluation = int(input_data.get('new_evaluation', 0))
-        except Exception, e:
+        except Exception:
             evaluation = 0
 
         if newStatus:

@@ -2,16 +2,6 @@
 
 ## concepts
 
-Visitor
-Visitor <- Translation
-Visitor <- Translation <- Moderation
-Visitor <- Translation <- Moderation <- Item
-Visitor <- Translation <- Moderation <- Item <- Media
-Visitor <- Translation <- Moderation <- Item <- Todo
-Visitor <- Translation <- Moderation <- Item <- Event
-Visitor <- Translation <- Moderation <- Item <- Template
-
-
 ## use
 
 ## install
@@ -23,7 +13,7 @@ Install python 2.7, virtualenv, libpython2.7-dev & postgresql-devel (libpq-dev i
 In the directory where you have cloned the repo,
 create a virtualenv to collect python packages
 
-    
+
     virtualenv --no-site-packages .
 
 Enter the virtualenv context
@@ -42,6 +32,11 @@ Create the database:
 
     python manage.py migrate
 
+
+Import the instance code and documentation:
+
+
+    python manage.py apetizer_documentation
 
 Create a superuser:
 
@@ -94,3 +89,4 @@ propose your changes back to the community
 creating a pull request from your fork
 
 ## do it yourself
+

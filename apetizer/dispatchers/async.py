@@ -6,12 +6,18 @@ Created on 22 sept. 2015
 from multiprocessing import Pool, Lock
 import multiprocessing, logging
 from multiprocessing.pool import ThreadPool
-from multiprocessing.process import Process
+
+try:
+    from multiprocessing import Process
+except:
+    from multiprocessing.process import Process
+
 import time
 
 from django.conf import settings
 
 
+#from multiprocessing.process import Process
 # thinking about threading/multiprocessing ...
 # http://stackoverflow.com/questions/8068945/django-long-running-asynchronous-tasks-with-threads-processing
 logger = multiprocessing.log_to_stderr()
@@ -60,7 +66,7 @@ class AsyncDispatcher(Process):
             if execution:
                 self.spawn(execution[0], execution[1], execution[2])
             self.iclock += 1
-        print "Stopped dispatcher"
+        logger.debug("Stopped dispatcher")
 
     def add_cron(self, function, args, kwargs, cycle, start=None, end=None, count=None):
         """
@@ -104,12 +110,10 @@ class AsyncDispatcher(Process):
             return execution
 
     def spawn(self, function, fargs, fkwargs):
-        print 'Executing '
-        print function
+        logger.debug('Spawning execution of %s' % function)
         result = self.pool.apply_async(function, fargs, fkwargs, self.finished_task)
         #result_q.get(timeout=1)
         self.results.append(result)
-        print result
         return result
 
     def delay(self, timeout, function, fargs, fkwargs):

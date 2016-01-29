@@ -8,13 +8,13 @@ from datetime import datetime
 from hashlib import sha1
 import hashlib
 import json
+import logging
 import math
 import operator
 import os
 from time import mktime
 import time
 import unicodedata
-import urllib2
 import uuid
 
 from django.conf import settings
@@ -37,9 +37,17 @@ from geopy.distance import EARTH_RADIUS
 
 import apetizer.default_settings as DEFAULTS
 from apetizer.forms.frontend import FolderNameField, SubdomainListField
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.json import API_json_parser, load_json, dump_json
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
+from apetizer.utils.compatibility import unicode3
 
+
+try:
+    from urllib.parse import unquote
+except:
+    from urllib import unquote
+
+logger = logging.getLogger(__name__)
 
 global URLS_PORT
 try:
@@ -87,8 +95,6 @@ class ObjectTree(dict):
             return True
         else:
             return False
-            #print 'Contains valid ? ',
-            #print key
             return self.storage.has_key(get_cached_key(key))
 
 global object_tree_cache
@@ -334,16 +340,16 @@ class Visitor(DataPath):
     def get_token(self):
         # returns a hash based on the user email if exists
         if self.email:
-            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey+self.email).hexdigest()).hexdigest()
+            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey+self.email.encode('utf-8')).hexdigest()).hexdigest()
         else:
-            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey).hexdigest()).hexdigest()
+            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey.encode('utf-8')).hexdigest()).hexdigest()
 
     def get_hash(self):
         # returns a hash based on the user email if valid
         if self.email and self.validated:
-            return hashlib.md5(settings.SECRET_KEY+self.email).hexdigest()
+            return hashlib.md5(settings.SECRET_KEY+self.email.encode('utf-8')).hexdigest()
         else:
-            return hashlib.md5('').hexdigest()
+            return hashlib.md5(u'').hexdigest()
 
     def is_valid_token(self, token):
         return self.get_token() == token
@@ -391,7 +397,6 @@ class Visitor(DataPath):
         if self.email and self.validated:
             #query = Q(akey=self.akey) | Q(email=self.email) | Q(related__email=self.email) | Q(related__akey=self.akey)
             query = Q(email=self.email) | Q(related__email=self.email) | Q(akey=self.akey) | Q(related__akey=self.akey)
-            print query
         else:
             query = Q(akey=self.akey) | Q(related__akey=self.akey)
         feed = Moderation.objects.filter(query).order_by('-modified_date')[0:50]
@@ -608,7 +613,7 @@ class TreeManager(Manager):
 
     def get_clean_path(self, url):
         
-        url = urllib2.unquote(url)
+        url = unquote(url)
         
         if url in ('', '/'):
             return ''
@@ -933,7 +938,7 @@ class Item(Translation):
 
     
     def __unicode__(self):
-        return unicode(self.path)
+        return unicode3(self.path)
 
     objects = LocationManager()
     
@@ -944,8 +949,6 @@ class Item(Translation):
         super(Item, self).__init__(*args, **kwargs)
         #self.set_cache_data()
         self.__inited__ = True
-        #print self.path
-        #print self.get_path()
         #self.get_translation()
     
     class Meta:
@@ -1224,18 +1227,14 @@ class Item(Translation):
     def get_data(self):
         """
         return the data conbtained in item as a python object
-        
-        # TODO use the apetizer.parsers.jsonparser
         """
-        return json.loads(self.data)
+        return load_json(self.data)
     
     def set_data(self, value):
         """
         return the data conbtained in item as a python object
-        
-        # TODO use the apetizer.parsers.jsonparser
         """
-        self.data = json.dumps(value)
+        self.data = dump_json(value)
     
     
     def get_translation(self, locale=None):
@@ -1502,8 +1501,8 @@ def strip_accents(s):
     try:
         return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
     except:
-        print 'NOT UNICODE'
-        print s
+        logger.debug('NOT UNICODE')
+        logger.debug(s)
 
 
 def FixCase(st):

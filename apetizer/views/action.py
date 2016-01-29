@@ -19,7 +19,7 @@ from django.utils.translation import ugettext
 from django.views.generic.base import View
 
 from apetizer.forms.base import ActionModelForm, ActionPipeForm
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.json import API_json_parser, load_json
 
 
 logger = logging.getLogger(__name__)
@@ -189,7 +189,7 @@ class ActionView(View):
 
         # use either the post or json data ?
         if 'application/json' in request.META.get('CONTENT_TYPE', ''):
-            data.update(json.loads(request.body))
+            data.update(load_json(request.body))
         else:
             data.update(request.POST.dict())
         

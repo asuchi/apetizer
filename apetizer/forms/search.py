@@ -8,10 +8,12 @@ Created on Oct 7, 2013
 import logging
 
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
-from django.forms.widgets import Select, HiddenInput, Textarea, DateInput
+from django.forms.widgets import Select, HiddenInput, DateInput
 from django.utils import translation
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
+
+from apetizer.utils.compatibility import unicode3
+
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +63,11 @@ def get_hour_ranges():
     
     for h in range(24):
         for m in range(2):
-            if h == 0:
+            if int(h) == 0:
                 h = '00'
-            elif h < 10:
+            elif int(h) < 10:
                 h = '0'+str(h)
-            if m == 0:
+            if int(m) == 0:
                 m = '00'
                 tstring = str(h)+':'+str(m)
             else:
@@ -201,6 +203,6 @@ class NameModelChoiceField(forms.ModelChoiceField):
     had trouble with.
     '''
     def label_from_instance(self, obj):
-        return getattr(obj, "name", unicode(obj))
+        return getattr(obj, "name", unicode3(obj))
 
 

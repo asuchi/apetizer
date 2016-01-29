@@ -26,10 +26,7 @@ def content_item_toolbar(context, node):
 @register.inclusion_tag('ui/tags/link_add.html', takes_context=True)
 def content_add_link(context, instance, label=None):
     
-    if isinstance(instance, Item):
-        target_url = instance.get_url()
-    else:
-        raise template.TemplateSyntaxError, "'%s' argument must be an item or a translation" % instance
+    target_url = instance.get_url()
     
     template_context = {
         'add_link': target_url+'add/',
@@ -60,7 +57,7 @@ def content_change_link(context, instance, label=None):
     elif isinstance(instance, Translation):
         target_url = instance.related.get_url()+'translate/'
     else:
-        raise template.TemplateSyntaxError, "'%s' argument must be an item or a translation" % instance
+        target_url = instance.get_url()
     
     template_context = {
         'edit_link': target_url,
@@ -87,10 +84,7 @@ def content_change_link(context, instance, label=None):
 @register.inclusion_tag('ui/tags/link_delete.html', takes_context=True)
 def content_delete_link(context, instance, label=None):
  
-    if isinstance(instance, Item):
-        target_url = instance.get_url()
-    else:
-        raise template.TemplateSyntaxError, "'%s' argument must be an item or a translation" % instance
+    target_url = instance.get_url()
     
     template_context = {
         'delete_link': target_url+'delete',

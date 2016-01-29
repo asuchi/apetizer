@@ -6,11 +6,11 @@ Created on 6 juil. 2015
 from datetime import datetime
 import re
 from time import mktime
+import traceback
 import unicodedata
 
+
 #http://iamtrask.github.io/2015/07/12/basic-python-network/
-
-
 def timestamp_to_datetime(timestamp):
     """
     Converts string timestamp to datetime
@@ -46,8 +46,10 @@ def strip_accents(s):
         return ''.join(c for c in unicodedata.normalize('NFD', s)
                            if unicodedata.category(c) != 'Mn')
     except:
-        print 'NOT UNICODE'
-        print s
+        return s
+        print('NOT UNICODE')
+        traceback.print_exc()
+        print(s)
 
 
 def extract_dates(message):
@@ -70,7 +72,7 @@ def extract_dates(message):
     
     day_num_regexp = '(?P<daynum>0[1-9]|[1-9]|1[0-9]|2[0-9]|3[0-1]|premier|1er)'
     
-    #months = [strip_accents(unicode(datetime.date(2000, m, 1).strftime('%B').lower())) for m in range(1, 13)]
+    #months = [strip_accents(unicode3(datetime.date(2000, m, 1).strftime('%B').lower())) for m in range(1, 13)]
     month_regexp = '(?P<month>'
     
     months = ('janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre')

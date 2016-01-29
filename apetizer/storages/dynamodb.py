@@ -3,15 +3,18 @@ Created on 10 oct. 2013
 
 @author: rux
 '''
-from boto.dynamodb2.fields import HashKey, RangeKey
-from boto.dynamodb2.table import Table
-import boto.dynamodb2
-
-from django.conf import settings
-from time import time
 import json
 import logging
+from time import time
 import traceback
+
+from django.conf import settings
+
+from apetizer.parsers.json import load_json
+import boto.dynamodb2
+from boto.dynamodb2.fields import HashKey, RangeKey
+from boto.dynamodb2.table import Table
+
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +170,7 @@ class DynamoTable(object):
             rkey = item[self.range_key]
             
             if rkey == 'index':
-                data = json.loads(item['value'])
+                data = load_json(item['value'])
                 break
             else:
                 for key in item.keys():
@@ -175,7 +178,7 @@ class DynamoTable(object):
                         if key == 'value':
                             value = item[key]
                             try:
-                                rkey_data = json.loads(str(value))
+                                rkey_data = load_json(str(value))
                             except:
                                 rkey_data = value
                         
@@ -223,9 +226,6 @@ class DynamoTable(object):
         update_date = time()
         
         if datablocks > 1000:
-            
-            #print hash_key,
-            #print datablocks
             
             # split over multiple items by data dict key
             with self.table.batch_write() as batch:
@@ -426,7 +426,7 @@ class DynamoStorage():
             self.dynamo_table.remove_range_obj(key)
             time.sleep(0.5)
             if settings.DEBUG:
-                print 'removed'
+                logger.debug('removed')
         
         self.deleted_keys = []
         
@@ -437,7 +437,7 @@ class DynamoStorage():
             self.dynamo_table.set_range_obj(key, data)
             time.sleep(0.5)
             if settings.DEBUG:
-                print 'updated '+key
+                logger.debug('updated '+key)
         
         self.modified_keys = []
         
@@ -448,7 +448,6 @@ class DynamoStorage():
         try:
             drilldown_lock = self.dynamo_table.get_range_obj('drilldown-lock')
             if drilldown_lock:
-                print drilldown_lock
                 return True
             else:
                 return False
@@ -466,17 +465,17 @@ class DynamoStorage():
             count_write = self.data_map.cached['write']
             count_del = self.data_map.cached['delete']
             
-            print 'CACHE: E:'+str(count_exists)+'-R:'+str(count_read)+'-W:'+str(count_write)+'-D:'+str(count_del)
+            logger.debug('CACHE: E:'+str(count_exists)+'-R:'+str(count_read)+'-W:'+str(count_write)+'-D:'+str(count_del))
             
             count_exists = self.data_map.counts['exists']
             count_read = self.data_map.counts['read']
             count_write = self.data_map.counts['write']
             count_del = self.data_map.counts['delete']
             
-            print 'STATS: E:'+str(count_exists)+'-R:'+str(count_read)+'-W:'+str(count_write)+'-D:'+str(count_del)
+            logger.debug('STATS: E:'+str(count_exists)+'-R:'+str(count_read)+'-W:'+str(count_write)+'-D:'+str(count_del))
             
             count_read = self.data_map.dynamo_table.counters['reads']
             count_write = self.data_map.dynamo_table.counters['writes']
             count_del = self.data_map.dynamo_table.counters['delete']
             
-            print 'NOSQL: R:'+str(count_read)+'-W:'+str(count_write)+'-D:'+str(count_del)
+            logger.debug('NOSQL: R:'+str(count_read)+'-W:'+str(count_write)+'-D:'+str(count_del) )

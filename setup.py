@@ -34,12 +34,12 @@ setup(
         "python-twitter",
         "python-geohash",
         "geopy",
-        "pattern",
         "dateutils",
         "Django>=1.8.4",
         "django-markdown-deux",
         "six>=1.8.0",
         'django-jsonfield',
-        'easy_thumbnails'
+        'django-leaflet',
+        'easy_thumbnails',
     ],
 )

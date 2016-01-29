@@ -3,12 +3,13 @@
  API Documentation: https://hackpad.com/Public-Hackpad-API-Draft-nGhsrCJFlP7
 """
 
-import requests
+import logging
 import sys
-import time
 
 from requests_oauthlib import OAuth1Session
-from urlparse import urljoin
+
+logger = logging.getLogger(__name__)
+
 
 class Hackpad(object):
   def __init__(self, sub_domain='', consumer_key='', consumer_secret=''):
@@ -123,9 +124,9 @@ class Hackpad(object):
     hackpad = {}
     try:
       if self.sub_domain:
-        path = urljoin('https://%s.hackpad.com/api/1.0/' % self.sub_domain, path)
+        path = '/'.join('https://%s.hackpad.com/api/1.0/' % self.sub_domain, path)
       else:
-        path = urljoin('https://hackpad.com/api/1.0/', path)
+        path = '/'.join('https://hackpad.com/api/1.0/', path)
 
       params = {
         'client_key': self.consumer_key,
@@ -149,7 +150,7 @@ class Hackpad(object):
         except:
             hackpad = r.content
     except:
-      print sys.exc_info()[0]
+      logger.debug(sys.exc_info()[0])
 
     return hackpad
 

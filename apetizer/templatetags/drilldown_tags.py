@@ -3,11 +3,11 @@ Created on 31 mai 2013
 
 @author: rux
 '''
+from collections import OrderedDict
 import traceback
 
 from django.core.urlresolvers import reverse
 from django.template.defaulttags import register
-from django.utils.datastructures import SortedDict
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 
@@ -178,8 +178,9 @@ def drilldown_france_top_towns(context):
     
     # sort top_towns
     # sort town list by count
-    sorted_dict = SortedDict()
-    town_list = sorted(top_towns.iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20]
+    sorted_dict = OrderedDict()
+    #town_list = sorted(top_towns.iteritems(), key=lambda (k,v): (v,k), reverse=True)[0:20]
+    town_list = []
     for kv in town_list:
         sorted_dict[kv[0]] = kv[1]
     

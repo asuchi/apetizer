@@ -36,15 +36,15 @@ class MyTest(TestCase):
         # always returns "testserver" when using the testclient
         return
         for (src,dest) in prod_redirect_host_tests.iteritems():
-            print 'testing %s ' % src
+            print('testing %s ' % src)
             # make a request for src
             response = self.client.get(src)
             self.assertEqual(response.status_code, 301)
             allgood = False
             badmsg = '%s did not redirect to %s as expected' % (src,dest)
-            print 'RESPONSE'
+            print('RESPONSE')
             for a,b in response.items():
-                print '%s=%s' % (a,b)
+                print ('%s=%s' % (a,b))
                 if a == 'Location':
                     # verify redirect to dest
                     self.assertEqual(b, dest, badmsg)

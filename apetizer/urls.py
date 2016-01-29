@@ -18,7 +18,7 @@ admin.autodiscover()
 handler404 = 'apetizer.views.front.handler404'
 handler500 = 'apetizer.views.front.handler500'
 
-urlpatterns = patterns('',
+urlpatterns = patterns( '', 
         
         url(r'^sitemap\.xml$', sitemap, {'sitemaps':{'content': ContentSitemap()}},
             name='django.contrib.sitemaps.views.sitemap'),
@@ -29,15 +29,15 @@ urlpatterns = patterns('',
             name='home',
             kwargs={'action':FrontView.default_action}),
         
-        url(FrontView.get_url_regexp('^')+'\/$',
+        url(FrontView.get_url_regexp(r'^')+'\/$',
             FrontView.as_view(),
             kwargs={'path':'/'}),
         
-        url(FrontView.get_url_regexp('(?P<path>.+)\/'),
+        url(FrontView.get_url_regexp(r'^(?P<path>.+)\/'),
             FrontView.as_view(),
             name=FrontView.view_name,),
         
-        url('^(?P<path>.+)\/$',
+        url(r'^(?P<path>.+)\/$',
             FrontView.as_view(),
             name='home',
             kwargs={'action':FrontView.default_action}),

@@ -4,6 +4,7 @@ Created on 2 mars 2014
 @author: rux
 '''
 import json
+import logging
 import pprint
 import re
 
@@ -16,6 +17,8 @@ from apetizer.forms.search import DirectoryQueryForm
 from apetizer.models import Item
 from apetizer.views.action import ActionView
 
+
+logger = logging.getLogger(__name__)
 
 class DirectoryView(ActionView):
     
@@ -84,7 +87,6 @@ class DirectoryView(ActionView):
         
         if _search_drilldown_cache.data_map.has_key(path):
             data = _search_drilldown_cache.data_map.get_key_data(path)
-            print data
             for key in data:
                 template_args[ slugify(key).replace('-','_') ] = data[key]
             
@@ -94,9 +96,9 @@ class DirectoryView(ActionView):
             else:
                 template_args['nodes'] = []
         else:
-            print 'No path '+path
+            logger.debug('No path '+path)
             if settings.DEBUG:
-                print _search_drilldown_cache.data_map.values.keys()[:100]
+                logger.debug(_search_drilldown_cache.data_map.values.keys()[:100])
             raise Http404
         
         return self.render(request, template_args, data, **kwargs)
