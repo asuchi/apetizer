@@ -88,5 +88,10 @@ propose your changes back to the community
 
 creating a pull request from your fork
 
-## do it yourself
+## <s>do it yourself</s>
+
+let's make it together !
+
+
+
 
