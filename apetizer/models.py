@@ -529,9 +529,6 @@ class Moderation(Visitor):
         else:
             return super(Moderation, self).get_url()
     
-    def get_author(self):
-        return self.visitor_ptr
-    
     def full_clean(self, exclude=None, validate_unique=True):        
         super(Moderation, self).full_clean(exclude=exclude, validate_unique=validate_unique)
         
@@ -1351,7 +1348,7 @@ class Item(Translation):
         """
         Get a contributor list
         """
-        contribution_status = ('added', 'modified', 'changed', 'accepted', 'rejected')
+        contribution_status = ('added', 'modified', 'changed')
         contribs = Moderation.objects.filter(related=self, status__in=contribution_status, visible=True).order_by('-ref_time')
         return self.get_distincts(contribs, 'email')
     
@@ -1361,7 +1358,12 @@ class Item(Translation):
         return self.get_distincts(subscribers, 'email')
 
     def get_comments(self):
-        comments = Moderation.objects.filter(related=self, status__in=('commented', 'invited'), visible=True).order_by('ref_time')
+        comments = Moderation.objects.filter(related=self, status__in=('comment', 
+                                                                       'commented', 
+                                                                       'invited', 
+                                                                       'accepted', 
+                                                                       'rejected'), 
+                                             visible=True).order_by('ref_time')
         return comments
     
     def get_discussion(self):
