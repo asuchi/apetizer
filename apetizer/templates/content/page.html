@@ -118,7 +118,7 @@
     
     <div class="ui hidden divider"></div>
     <div class="ui item dividing" >
-        <h4 class="ui header">Auteur</h4>
+        <h4 class="ui header">Auteur(s)</h4>
         {% with contributor=currentNode.get_author %}
         <div class="item">
             <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
@@ -129,24 +129,8 @@
                 </div>
             </div>
         </div>
-        
-        {% if contributor.email and contributor.validated %}
-            {% if contributor.get_token == user_profile.get_token %}
-                <a class="ui item mini spaced button" href="free/" >Librerer</a>
-            {% else %}
-                <a class="ui item mini spaced button" href="contact/" >Contacter</a>
-            {% endif %}
-        {% elif user_profile.validated %}
-            <a class="ui item mini spaced button" href="claim/" >Se l'approprier</a>
-        {% endif %}
-        
         {% endwith %}
-        {% if currentNode.get_visitors|length > 1 %}
-        <div class="ui hidden divider"></div>
-        
-        {% endif %}
     </div>
-    
     
     {% with contributors=currentNode.get_contributors %}
     {% if contributors|length > 1 %}

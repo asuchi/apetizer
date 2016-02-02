@@ -50,7 +50,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
 
     class_actions = ['add', 'change', 'upload', 'translate', 'delete', 'data', 
                      'image', 'code', 'search', 'location', 'timing', 
-                     'redirect', 'claim', 'free', 'publish', 'reorder', 
+                     'redirect', 'publish', 'reorder', 
                      'related', 'rename',]
 
     class_actions_forms = {
@@ -242,42 +242,8 @@ class UIView(ProgramView, ModerateView, VisitorView):
         Upload an image to the selected item
         """
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
-    
-    def process_claim(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        Claim for an item maintenance
-        """
-        # profil shoud be valid
-        if not user_profile.validated:
-            messages.warning(request, 'You cannot claim for a document as an anonymous.')
-        
-        elif kwargs['node'].email == None \
-            or kwargs['node'].validated == None:
-            kwargs['node'].username = user_profile.username
-            kwargs['node'].email = user_profile.email
-            kwargs['node'].validated = user_profile.validated
-            kwargs['node'].save()
-        else:
-            messages.warning(request, 'Actualy you cannot claim for document with author '+kwargs['node'].email+'('+str(kwargs['node'].validated)+').')
-        
-        return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
-    
-    def process_free(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        Free yourself from maintenance of an item
-        """
-        if not user_profile.email:
-            messages.warning(request, 'You cannot free a document as an anonymous.')
-        
-        elif kwargs['node'].email == user_profile.email and user_profile.validated:
-            kwargs['node'].username = None
-            kwargs['node'].email = None
-            kwargs['node'].save()
-        else:
-            messages.warning(request, 'Actualy you cannot free a document if your are not it\'s author.')
-        
-        return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
-    
+
+
     def process_publish(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Switch current object publishing state
@@ -549,36 +515,19 @@ class UIView(ProgramView, ModerateView, VisitorView):
             return self.render(request, template_args, **kwargs)
         else:
             return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
-        
     
     def is_proposal(self, user_profile, item, **kwargs):
+        """
+        Defines if the user_profile will set it's changes as a proposal
+        A proposal is raised when the user_profile is not validated
         
+        Override this method to get better rights management
+        """
         if kwargs['action'] in UIView.class_actions:
-            
-            if item.get_author().validated == None:
-                return False
-            
             if user_profile.validated == None:
                 return True
-            
-            if kwargs['action'] == 'add':
-                
-                if item.get_author().validated:
-                    if user_profile.get_hash() != item.get_author().get_hash():
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
-                
             else:
-                if item.get_author().validated:
-                    if user_profile.get_hash() != item.related.get_author().get_hash():
-                        return True
-                    else:
-                        return False
-                else:
-                    return False
+                return super(UIView, self).is_proposal(user_profile, item, **kwargs)
         else:
             return super(UIView, self).is_proposal(user_profile, item, **kwargs)
         

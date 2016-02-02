@@ -535,6 +535,8 @@ class Moderation(Visitor):
     def save(self, *args, **kwargs):
         super(Moderation, self).save(*args, **kwargs)
     
+    def get_author(self):
+        return self.visitor_ptr
     
 
 class Translation(Moderation):
@@ -585,20 +587,6 @@ class Translation(Moderation):
         
     def __unicode__(self):
         return self.slug+' - '+self.locale
-
-    def get_author(self):
-        author_status = ('added', 'modified', 'changed', 'created', 'claimed', 'imported')
-        try:
-            author = Moderation.objects.filter(related_id=self.related_id, status__in=author_status, validated__isnull=False).order_by('-created_date')[0]
-        except IndexError:
-            try:
-                author = Moderation.objects.filter(related_id=self.related_id, status__in=author_status).order_by('-created_date')[0]
-            except IndexError:
-                try:
-                    author = Moderation.objects.filter(related_id=self.related_id,).order_by('-created_date')[0]
-                except IndexError:
-                    author = self
-        return author
 
 
 class TreeManager(Manager):
@@ -1233,6 +1221,26 @@ class Item(Translation):
         """
         self.data = dump_json(value)
     
+    
+    
+    def get_author(self):
+        """
+        """
+        author_status = ('added', 'modified', 'changed', 'created', 'imported')
+        
+        try:
+            author = Moderation.objects.filter(related_id=self.id, status__in=author_status, validated__isnull=False).order_by('-created_date')[0]
+        except IndexError:
+            try:
+                author = Moderation.objects.filter(related_id=self.id, status__in=author_status).order_by('-created_date')[0]
+            except IndexError:
+                try:
+                    author = Moderation.objects.filter(related_id=self.id,).order_by('-created_date')[0]
+                except IndexError:
+                    author = self
+        
+        return author
+
     
     def get_translation(self, locale=None):
         
