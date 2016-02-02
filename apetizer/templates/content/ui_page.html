@@ -42,13 +42,11 @@
         
         {% if node.label != node.title or not node.description %}
         <div class="ui item">
-            {% if not node.behavior == 'image' %}
-            {% if node.image %}
-            <div class="image">
-                <img class="" src="{{ node.get_image.url }}" />
-            </div>
+        
+            {% if node.behavior == 'image' and node.image %}
+                <img class="ui large image " src="{{ node.image.url }}" />
             {% endif %}
-            {% endif %}
+            
             
             <div class="middle aligned content">
                 <a class="anchor" id="{{ node.slug }}"></a>
@@ -57,11 +55,7 @@
                     {% content_breadcrumb node %}
                 </div>
                 {% endif %}
-                {% if node.behavior == 'image' and node.image %}
-                    <div class="ui item">
-                        <img class="ui image full width" src="{{ node.image.url }}" />
-                    </div>
-                {% endif %}
+                
                 <h4 class="header" ><a href="{{ node.get_url }}view/" class="header">{{ node.title }}
                 </a></h4>
                 <p class="meta ">{{ node.description|markdown }}</p>

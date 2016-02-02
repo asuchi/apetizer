@@ -40,8 +40,12 @@
         {% endautoescape %}
     </div>
     {% endif %}
+    
+    {% comment %}
+    
     {% if currentNode.published == True or currentNode.is_leaf_node %}
     {% endif %}
+    
     {% if currentNode.published == True %}
         {% if action != 'view' %}
         {{ block.super }}
@@ -51,6 +55,11 @@
         {{ block.super }}
         {% include 'content/ui_page.html' %}
     {% endif %}
+    {% endcomment %}
+    
+    {{ block.super }}
+    {% include 'content/ui_page.html' %}
+    
     {% endblock content %}
     <div class="ui item">
         {% include 'moderate/tags/comments.html' %}
