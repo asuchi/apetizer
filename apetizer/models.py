@@ -1161,7 +1161,7 @@ class Item(Translation):
         """
         node_data = self.get_cache_data()
         if not 'children_qs' in node_data:
-            node_data['children_qs'] = Item.objects.filter(parent=self, visible=True).order_by('order', 'label')
+            node_data['children_qs'] = Item.objects.filter(parent=self, visible=True).order_by('label', 'order')
             node_data['children_count'] = node_data['children_qs'].count()
             object_tree_invalidate(self.get_uid_path())
         
