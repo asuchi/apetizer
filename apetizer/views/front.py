@@ -49,9 +49,6 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
     def render_html(self, request, template_args, result_message, result_status,
                     **kwargs):
         
-        template_args['documentation'] = Item.objects.get_at_url('/localhost/')
-        template_args['api'] = Item.objects.get_at_url('/localhost/')
-        
         if kwargs['action'] in FrontView.class_actions:
             return ContentView.render_html(self, request, template_args,
                                                    result_message, result_status,
