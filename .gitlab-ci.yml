@@ -1,0 +1,8 @@
+before_script:
+    - apt-get install libjpeg62-turbo-dev libfreetype6-dev zlib1g-dev
+
+
+test:
+    - cd /srv/website
+    - source bin/activate
+    - python manage.py test
