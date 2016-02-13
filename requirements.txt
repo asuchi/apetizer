@@ -13,3 +13,8 @@ django-leaflet
 django-markdown-deux
 six>=1.8.0
 easy_thumbnails
+
+django-markdown-deux
+django-leaflet
+
+tornado
