@@ -316,7 +316,7 @@ class ModerateView(ContentView, ActionPipeView):
 
         userReview = None
         for review in moderation_list:
-            if review.email == email and review.status != 'comment':
+            if review.email == email and review.status != 'commented':
                 userReview = review
         if not userReview:
             userReview = Moderation(akey=user_profile.akey,
@@ -331,7 +331,7 @@ class ModerateView(ContentView, ActionPipeView):
         userReview = self.update_moderation(request, user_profile, input_data, 
                                             model=template_args['currentNode'])
 
-        moderation_list = Moderation.objects.filter(related=template_args['currentNode'],status__in=('comment',))
+        moderation_list = Moderation.objects.filter(related=template_args['currentNode'],status__in=('commented',))
         
         review = self.display_view(request, moderation_list, userReview)
 
@@ -423,7 +423,7 @@ class ModerateView(ContentView, ActionPipeView):
             commentReview.email=user_profile.email
             commentReview.validated=user_profile.validated
             
-            commentReview.status = 'comment'
+            commentReview.status = 'commented'
             commentReview.subject = 'Commentaire'
             commentReview.message = newComment
             commentReview.is_sent = False

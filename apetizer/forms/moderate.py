@@ -41,7 +41,7 @@ class ModerateCommentForm(ActionModelForm):
         fields = ('subject', 'message',)
     
     def save(self, *args, **kwargs):
-        self.instance.status = 'comment'
+        self.instance.status = 'commented'
         self.full_clean()
         if not self.instance.subject:
             self.instance.subject = 'Commentaire'

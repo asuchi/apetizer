@@ -19,7 +19,7 @@ def moderate_evaluation(context, model={'editable': True}):
 
 @register.inclusion_tag('moderate/tags/moderation_stars.html', takes_context=True )
 def moderate_average_evaluation(context, document):
-    moderations = Moderation.objects.filter(related=document, status='comment', visible=True)
+    moderations = Moderation.objects.filter(related=document, status='commented', visible=True)
     evaluation = 0
     n = 0
     total = 0

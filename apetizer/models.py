@@ -481,7 +481,7 @@ class Visitor(DataPath):
         """
         Get my todo list
         """
-        subscription_status = ('comment', 'modified', 'changed', 'published', 'added')
+        subscription_status = ('comment', 'commented', 'modified', 'changed', 'published', 'added')
         if self.email and self.validated:
             contribs = Moderation.objects.filter(email=self.email, status__in=subscription_status, subscribed=True).order_by('-modified_date')
         else:

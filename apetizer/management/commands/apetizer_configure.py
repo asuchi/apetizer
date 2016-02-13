@@ -1,9 +1,4 @@
 '''
-Created on 17 déc. 2015
-
-@author: biodigitals
-'''
-'''
 Created on 19 oct. 2015
 
 @author: biodigitals
@@ -50,6 +45,13 @@ class Command(BaseCommand):
                     return cls
             return None
         
+        doc_root = '/localhost'
         documentation = Item.objects.get_or_create_url(doc_root, **kwargs)
         documentation.visible = False
         documentation.save()
+        
+        doc_root = '/network'
+        documentation = Item.objects.get_or_create_url(doc_root, **kwargs)
+        documentation.visible = False
+        documentation.save()
+

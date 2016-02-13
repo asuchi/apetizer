@@ -524,13 +524,13 @@ class UIView(ProgramView, ModerateView, VisitorView):
         Override this method to get better rights management
         """
         if kwargs['action'] in UIView.class_actions:
-            if user_profile.validated == None:
+            if user_profile.validated == None and item.validated:
                 return True
             else:
                 return super(UIView, self).is_proposal(user_profile, item, **kwargs)
         else:
             return super(UIView, self).is_proposal(user_profile, item, **kwargs)
-        
+
 
     def manage_item_pipe(self, request, user_profile, input_data, template_args, **kwargs):
         

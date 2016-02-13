@@ -12,3 +12,5 @@
 /lib/
 /local/
 pip-selfcheck.json
+/static/
+__pycache__

@@ -3,6 +3,7 @@ Created on 15 janv. 2013
 
 @author: rux
 '''
+
 from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.contrib import admin
@@ -11,7 +12,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from apetizer.sitemap import ContentSitemap
 from apetizer.views.front import FrontView
-
 
 admin.autodiscover()
 
@@ -41,7 +41,8 @@ urlpatterns = patterns( '',
             FrontView.as_view(),
             name='home',
             kwargs={'action':FrontView.default_action}),
-                           
+        
+                       
         )
 
 # This is only needed when using runserver.

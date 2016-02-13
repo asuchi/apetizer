@@ -19,7 +19,7 @@
 <meta name="description" content="{{ currentNode.description|linebreaks }}">
 <meta name="keywords" content="{{ currentNode.keywords }}">
 
-<link rel="stylesheet" type="text/css" class="ui" href="{% static 'components/semantic/dist/semantic.min.css' %}">
+<link rel="stylesheet" type="text/css" class="ui" href="{% static 'components/semantic/dist/semantic.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'components/semanticui/docs.css' %}">
 {% include "content/assets/styles.html" %}
 
@@ -342,6 +342,16 @@
 
 {% block extra-scripts %}
 {{ block.super }}
+<script type="text/javascript">
+$(document).ready(function () {
+    var ws = new WebSocket("ws:{{ currentNode.get_root.slug }}:8000/{{ currentNode.id }}.ws");
+    ws.onmessage = function(event) {
+       var message = JSON.parse(event.data);
+       console.log(event.data);
+       $('#messages').append('<div class="ui warning message"><i class="close icon"></i><div class="header">'+message['subject']+'</div>'+message['message']+'</div>');
+    }
+});
+</script>
 {% endblock %}
 
 {% include "content/assets/scripts.html" %}
