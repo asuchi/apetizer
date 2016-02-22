@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "easy_thumbnails",
     "leaflet",
     "apetizer",
+    "dashboard",
 ]
 
 MIDDLEWARE_CLASSES = [

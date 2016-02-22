@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load content_tags %}
 <div class="ui breadcrumb" >
+
      {% for ancestor in breadcrumbAncestors %}
         <div class="right chevron icon divider"> / </div>
         <a class="section" href="{{ ancestor.get_url }}view/" title="{{ ancestor.title }}" >{% if not ancestor.parent %}{{ ancestor.label }}{% else %}{{ ancestor.title }}{% endif %}</a>
@@ -16,4 +17,18 @@
             {% comment %}<a href="{{ currentNode.get_url }}add/?label={{currentNode.label}}" ><i class="ui icon add"></i></a>{% endcomment %}
         {% endif %}
     {% endif %}
+        <i class="icon flag divider"></i>
+        {% if LANGUAGE_CODE == 'en' %}
+          <a href="/fr/{{currentNode.id}}/{{action}}/" class="small" >fr</a>
+          <span class="small" >en</span>
+        {% else %}
+          <span href="/fr/{{currentNode.id}}/{{action}}/" class="small" >fr</span>
+          <a href="/en/{{currentNode.id}}/{{action}}/" class="small" >en</a>
+        {% endif %}
+        {% comment %}
+          {% block search_form %}
+            <a href="/search/" class="small" ><i class="icon search"></i> Rechercher</a>
+          {% endblock %}
+        {% endcomment %}
+    
 </div>

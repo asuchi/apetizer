@@ -6,6 +6,7 @@ Created on 22 sept. 2015
 from multiprocessing import Pool, Lock
 import multiprocessing, logging
 from multiprocessing.pool import ThreadPool
+from copy import deepcopy
 
 try:
     from multiprocessing import Process
@@ -53,13 +54,16 @@ class AsyncDispatcher(Process):
 
     def __init__(self, *args, **kwargs):
         """
-        
+        Init a pool of thread or process
         """
         # start multiprocessing pool 
         self.pool = ThreadPool(processes=self.pool_size)
         super(AsyncDispatcher, self).__init__(*args, **kwargs)
 
     def run(self):
+        """
+        The dispatcher execution thread
+        """
         while self._stop is False:
             time.sleep(self.icycle)
             execution = self.get_execution()
@@ -72,7 +76,7 @@ class AsyncDispatcher(Process):
         """
         Adds a cron to manage
         Cycle represents the duration 
-        at witch the task has to execute
+            at witch the task has to execute
         123 -> every 123 seconds
         12s -> every 12 seconds
         1h  -> every hour
@@ -86,11 +90,9 @@ class AsyncDispatcher(Process):
         unlike other systems based on persistent cron data,
         the task execution is planned "in memory" and recalculated each execution
         """
-        # TODO
-        # create a deep copy of args and params 
-        # to avoid dict or other changes occurs
-        settings = {'callable':[function, args, kwargs],
+        settings = {'callable':[function, deepcopy(args), deepcopy(kwargs)],
                     'settings':[cycle, start, end, count],}
+        
         self.set_execution(settings)
 
     def set_execution(self, dict):
@@ -110,6 +112,9 @@ class AsyncDispatcher(Process):
             return execution
 
     def spawn(self, function, fargs, fkwargs):
+        """
+        Execute the function now in an asynchronous process/thread
+        """
         logger.debug('Spawning execution of %s' % function)
         result = self.pool.apply_async(function, fargs, fkwargs, self.finished_task)
         #result_q.get(timeout=1)
@@ -117,15 +122,24 @@ class AsyncDispatcher(Process):
         return result
 
     def delay(self, timeout, function, fargs, fkwargs):
+        """
+        Execute the function within a delay of timeout in an asynchronous process/thread
+        """
         # well ... requires some work to have correct time planning
         next_exec_time = self.istart+self.icycle+timeout
         self.cron_execution[next_exec_time] = [function, fargs, fkwargs]
 
     def finished_task(self, result):
+        """
+        Callback of a task
+        """
         # the result is the return value from the function
         return
 
     def join(self, timeout=None):
+        """
+        Join and vanish the running thread
+        """
         self._stop = True
         self.pool.join(timeout)
         super(AsyncDispatcher, self).join(timeout=timeout)

@@ -28,7 +28,7 @@ class ContentView(ApiView, ActionView):
     view_name = 'content'
     view_template = "content/page.html"
 
-    class_actions = ['view', 'cards', 'sitemap', 'medias',  'search', 'map', 'timeline', 'list' ]
+    class_actions = ['view', 'cards', 'sitemap', 'medias',  'search', 'map', 'timeline', 'list' , 'read']
     class_actions_forms = {}
     class_action_templates = {
                         'view':'content/page.html',
@@ -39,6 +39,8 @@ class ContentView(ApiView, ActionView):
                         'search':'content/search.html',
                         'map':'content/map.html',
                         'timeline':'content/timeline.html',
+                        
+                        'read':'content/page.html',
                         }
     
     @classmethod
@@ -204,6 +206,9 @@ class ContentView(ApiView, ActionView):
             return self.process(request, user_profile, {}, template_args, **kwargs)
         else:
             return self.render(request, template_args, **kwargs)
+    
+    def process_read(self, request, user_profile, input_data, template_args, **kwargs):
+        return self.render(request, template_args, **kwargs)
     
     def process_cards(self, request, user_profile, input_data, template_args, **kwargs):
         return self.render(request, template_args, **kwargs)

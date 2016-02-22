@@ -425,13 +425,16 @@ class ActionView(View):
             else:
                 result_status = 500
         
-        template_args['kwargs'] = kwargs
+        #template_args['kwargs'] = kwargs
         
         return render_to_response(self.get_template_path(action),
                                   template_args,
                                   context_instance=RequestContext(request))
     
     def get_template_path(self, action):
+        """
+        Get multiple template paths depending on action and view
+        """
         return self.action_templates.get(action, self.view_template)
     
     
@@ -441,6 +444,7 @@ class ActionView(View):
         reverses the action url concidering url parameters in kwargs
         kwargs['reverse_keys'] = ['key',]
         kwargs[key] = value
+        does not work pretty well actually ...
         """
         reverse_kwargs = {}
         for key in kwargs.get('reverse_keys'):

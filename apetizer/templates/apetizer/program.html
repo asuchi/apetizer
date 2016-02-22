@@ -11,7 +11,7 @@
 $(document).ready(function(){
 var container = document.getElementById('program_table');
 var data = [
-      ['',''],
+      ['','','','',''],
       ['',''],
     ];
     
@@ -20,7 +20,7 @@ var hot = new Handsontable(container, {
   minSpareRows: 1,
   rowHeaders: true,
   colHeaders: true,
-  contextMenu: false,
+  contextMenu: true,
   
   manualColumnResize: true,
   manualRowResize: true,
@@ -45,37 +45,34 @@ var macroEditor = CodeMirror(document.getElementById('program-editor'), {
 {% endblock %}
 
 {% block page_container %}
-<div class="ui ten wide column" style="position:relative;">
-    <div id="program_table" style="position:relative;overflow:hidden;background:gray;height:720px;width:100%" ></div>
-</div>
-<div class="ui six wide column" style="position:relative;">
-    <div class="ui form" id="program-editor" style="min-height:640px"></div>
-    
-    <input type="hidden" name="macros" id="id_macros" value="" />
-    <button class="ui label">Save</button>
+<div class="row" style="margin:0px;padding:0px;">
+    <div id="program_table" style="position:relative;overflow:hidden;background:gray;width:100%;height:auto" ></div>
 </div>
 <div class="ui sixteen wide column" style="position:relative;">
-    <div class="ui segment" >
-        {% for key, table in tables %}
-            <a href="program/?table={{forloop.count}}" class="ui button" >{{ key }}</a>
-        {% endfor %}
+    
+    <div class="ui vertical segment">
+        <div class="ui form" id="program-editor" ></div>
+        <input type="hidden" name="macros" id="id_macros" value="" />
+    </div>
+    <div class="ui vertical segments">
     </div>
 </div>
-{{ block.super }}
-{% endblock %}
-
-{% block content %}
-<div class="ui vertical segments">
-    <div class="ui hidden segment">
-        {% include 'apetizer/tags/action_forms.html' %}
-    </div>
+{% comment %}
+<div class="ui six wide column" style="position:relative;">
     <div class="ui segment">
         <a href="download/" class="ui button" >download</a>
         <a href="file/" class="ui button" >upload (replace)</a>
         <a href="" class="ui button" >merge (update)</a>
         <a href="" class="ui button" >execute</a>
     </div>
+    {% include 'apetizer/tags/action_forms.html' %}
 </div>
+{% endcomment %}
+
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
 {{ block.super }}
 {% endblock %}
 

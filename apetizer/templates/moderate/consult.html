@@ -1,13 +1,16 @@
 {% extends 'content/page.html' %}
 {% load momentjs %}
 
-
 {% block content %}
 <div class="ui vertical segment">
 {% include 'apetizer/tags/action_forms.html' %}
 </div>
 <div class="ui vertical segment">
-
+<div class="ui hidden divider"></div>
+<div class="ui item">
+    <div class="header">{{ currentNode.get_visits|length }} visites</div>
+    <div class="header">{{ currentNode.get_visitors|length }} visiteurs</div>
+</div>
 
 <div class="ui feed">
 {% for comment in history %}

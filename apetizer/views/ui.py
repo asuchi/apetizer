@@ -3,12 +3,10 @@ Created on 15 janv. 2013
 
 @author: rux
 '''
-from _codecs import encode, decode
-from email.header import UTF8
+from _codecs import decode
 import json
 import logging
 import os.path
-import uuid
 
 from django.contrib import messages
 from django.core.files.uploadedfile import UploadedFile
@@ -74,15 +72,17 @@ class UIView(ProgramView, ModerateView, VisitorView):
                     }
     
     class_action_templates = {
+                        'add':'ui/change.html',
+                        
                         'change':'ui/change.html',
-                        'translate':'ui/change.html',
+                        'translate':'ui/translate.html',
                         'redirect':'ui/change.html',
                         'image':'ui/change.html',
                         'delete':'ui/change.html',
                         
                         'rename':'ui/change.html',
 
-                        'add':'ui/add.html',
+
                         'code':'ui/code.html',
                         
                         'data':'ui/data.html',
@@ -215,7 +215,19 @@ class UIView(ProgramView, ModerateView, VisitorView):
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
 
     
-
+    def process_pull(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        get a markdown repsresentation of the object and it's children
+        """
+        return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    def process_push(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        apply a markdown as a group of object's children
+        """
+        return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    
     
     def process_change(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -562,7 +574,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
         if reloaded:
             template_args['action_forms'] = self.get_validated_forms(self.get_forms_instances(kwargs['action'], user_profile, kwargs), input_data, kwargs['action'], save_forms=False, files=request.FILES)
             self.validate_action_forms(request, template_args['action_forms'])
-            return self.render(request, template_args, **kwargs)
+            return self.render(request, template_args, {}, **kwargs)
         else:
             return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
 

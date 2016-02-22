@@ -7,17 +7,17 @@ Created on 24 juin 2015
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from django.utils.timezone import now
 
-from apetizer.models import Item
 from apetizer.views.content import ContentView
 from apetizer.views.directory import DirectoryView
-from apetizer.views.network import NetworkView
+from apetizer.views.platform import PlatformView
 from apetizer.views.semantic import SemanticView
 from apetizer.views.ui import UIView
 from apetizer.views.user import UserView
 
 
-class FrontView(DirectoryView, UIView, SemanticView, UserView):
+class FrontView(DirectoryView, UIView, SemanticView, UserView, PlatformView):
     """
     Display the service front page
     """

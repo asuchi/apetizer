@@ -49,6 +49,8 @@ class DirectoryView(ActionView):
             items = Item.objects.filter(id__in=key_data['item'].keys())
             
             for item in items:
+                r_id = item.id
+                r_url = item.get_url()
                 r_label = item.label
                 r_title = item.title
                 r_description = item.description[:50]
@@ -60,7 +62,7 @@ class DirectoryView(ActionView):
                     results[r_label]['results'] = []
                 
                 results[r_label]['name'] = r_label
-                results[r_label]['results'].append({'title':r_title,'description':r_description})
+                results[r_label]['results'].append({'uid':str(r_id), 'url':r_url, 'title':r_title, 'description':r_description})
         
         results_payload = {}
         if len(results):

@@ -1,11 +1,10 @@
 {% extends "content/page.html" %}
 {% load i18n leaflet_tags %}
 
-{% block page_article %}
-<div class="ui">
+{% block page_container %}
+<div class="ui sixteen width column" style="position:relative;width:100%;padding:0px;">
 {% leaflet_map "content-map" callback="window.map_init_basic" %}
 </div>
-<div class="ui hidden divider"></div>
 {{ block.super }}
 {% endblock %}
 

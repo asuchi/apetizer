@@ -20,7 +20,6 @@
 <meta name="keywords" content="{{ currentNode.keywords }}">
 
 <link rel="stylesheet" type="text/css" class="ui" href="{% static 'components/semantic/dist/semantic.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'components/semanticui/docs.css' %}">
 {% include "content/assets/styles.html" %}
 
 <script src="{% static 'components/semanticui/jquery.min.js' %}"></script>
@@ -72,6 +71,8 @@
 {% block extra-styles %}
 
 
+
+{% endblock %}
 {% if currentNode.image %}
 <style type="text/css">
 <!--
@@ -92,8 +93,6 @@
 </style>
 {% endif %}
 
-
-{% endblock %}
 <style type="text/css">
 <!--
     .row{
@@ -105,120 +104,83 @@
     #masthead{
         padding:0px;
     }
+    .pusher{
+        /* background-color:rgba(240,240,240,0.90) !important; */
+        background-color:#F9F9F9 !important;
+    }
+    .article{
+        /* background-color:#F9F9F9 !important;*/
+        background-color:rgba(253,253,253,0.95) !important;
+        border: 1px solid #E5E5E5;
+    }
+    
+    .secondary.pointing.menu{
+        margin:0px;
+    }
+    
+    .ui.full.height{
+        
+    }
+    @media all and (min-width: 1100px){
+    .ui.full.height {
+        margin:4% 5%;
+      }
+    }
+    @media all and (min-width: 1300px) {
+    .ui.full.height {
+        margin:6% 10%;
+      }
+    }
 -->
 </style>
+
 <body >
 {% block page_body %}
+
 <div id="body" class="started pushable" ontouchstart="">
 
-
-
 <div class="pusher">
-<div class="ui inverted vertical center aligned segment" style="position:relative;z-index:2">
-    <div class="ui large secondary inverted pointing menu" >
-        <a href="/" class="active item">Accueil</a>
-        <div class="item" style="opacity:0.5">
-        {% if LANGUAGE_CODE == 'en' %}
-          <a href="/fr/{{currentNode.id}}/{{action}}/" class="small" ><i class="icon flag"></i>fr</a>
-        {% else %}
-          <a href="/en/{{currentNode.id}}/{{action}}/" class="small" ><i class="icon flag"></i>en</a>
-        {% endif %}
-        {% comment %}
-          {% block search_form %}
-            <a href="/search/" class="small" ><i class="icon search"></i> Rechercher</a>
-          {% endblock %}
-        {% endcomment %}
-        </div>
-        <div class="right inverted item">
-          {% if user_profile.email %}
-                {% if not user_profile.validated %}
-                    <a class="ui inverted button" href="{{ user_profile.get_url }}validate/" ><i class="icon warning-sign"></i>Valider ma session</a>
+    <div class="ui full height" style="">
+    
+        <div class="article">
+        <div class="ui large secondary pointing menu" >
+            <a href="/" class="active item">Accueil</a>
+            {% block search-form %}
+            <a href="search/" class="item" ><i class="icon search"></i></a>
+            <form class="ui item form form-search" action="" method="get" rol="form" >
+                <div class="ui category search">
+                  <div class="ui icon input">
+                    <input class="large prompt" name="keyword" placeholder="Search keyword ..." type="text">
+                    <i class="search icon"></i>
+                  </div>
+                  <div class="results"></div>
+                </div>
+            </form>
+            {% endblock %}
+            
+            <div class="right item">
+              {% if user_profile.email %}
+                    {% if not user_profile.validated %}
+                        <a class="ui button" href="{{ user_profile.get_url }}validate/" ><i class="icon warning-sign"></i>Valider ma session</a>
+                    {% else %}
+                        <a class="ui button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
+                        {% if user_profile.get_image %}
+                        {% endif %}
+                    {% endif %}
                 {% else %}
                     <a class="ui inverted button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
-                    {% if user_profile.get_image %}
-                    {% endif %}
                 {% endif %}
-            {% else %}
-                <a class="ui inverted button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
-            {% endif %}
-        </div>
-        {% if request.user.is_authenticated %}
-            {% comment %}
-            <a href="{{ user_profile.get_url }}register/" class="item" >{% if request.user.is_authenticated %}{{ request.user.username }}{% endif %}
-            {% endcomment %}
-            <a href="{{ user_profile.get_url }}logout/" class="item" ><i class="icon remove"></i></a>
-        {% else %}
-            <a href="{{ user_profile.get_url }}reset/" class="item" ><i class="icon recycle"></i></a>
-        {% endif %}
-    </div>
-</div>
-    <div class="full height">
-        
-        {% block toc %}
-        <div class="toc">
-            <div class="ui vertical inverted menu full height" >
-            <div class="ui black big launch right attached fixed button">
-              <i class="content icon"></i>
-              <span class="text">Menu</span>
             </div>
             
-            <div class="item">
-              <a class="ui mini image" href="{{ rootNode.get_url }}">
-                {% if rootNode.image %}
-                    <img class="icon image" src="{{ rootNode.image.url }}" />
-                {% else %}
-                    {% comment %}<img src="{% static 'images/logo-apetizer.png' %}" />{% endcomment %}
-                {% endif %}
-              </a><br />
-              <a href="{{ rootNode.get_url }}view/"><b>{{ rootNode.label }}</b></a>
-            </div>
-                
-                {% for node in roots %}
-                    {% ifchanged node.label %}
-                    <div class="item">
-                        <a class="" href="{{ node.get_url }}view/">
-                          <b>{{ node.label }}</b>
-                        </a>
-                        {% if user_profile.validated %}
-                        <a class="ui circular mini label" href="{{ node.get_url }}add/"> <b>+</b></a>
-                        {% endif %}
-                    </div>
-                    {% else %}
-                    <div class="menu">
-                    <a class="item" href="{{ node.get_url }}view/">{{ node.title }}</a>
-                    </div>
-                    {% endifchanged %}
-                    {% if not node.is_leaf_node %}
-                    <div class="menu">
-                    {% with cnodes=node.get_children %}
-                      {% regroup cnodes|dictsort:"label" by label as label_list %}
-                      {% for l in label_list %}
-                        {% with child=l.list.0 %}
-                          {% if child.is_leaf_node %}
-                          <a class="item" href="{{ child.parent.get_url }}view/#{{ child.slug }}">{{ child.label }} </a>
-                          {% else %}
-                          <a class="item" href="{{ child.get_url }}view/"><b>{{ child.label }}</b> </a>
-                          {% endif %}
-                         {% endwith %}
-                      {% endfor %}
-                    {% endwith %}
-                    </div>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if user_profile.validated %}
-                <div class="item divider">
-                    <a class="" href="{{ rootNode.get_url }}add/">
-                      <i class="icon add"></i> Ajouter un chapitre
-                    </a>
-                </div>
-                {% endif %}
-                
-             </div>
+                {% comment %}
+            {% if request.user.is_authenticated %}
+                <a href="{{ user_profile.get_url }}register/" class="item" >{% if request.user.is_authenticated %}{{ request.user.username }}{% endif %}
+                <a href="{{ user_profile.get_url }}logout/" class="item" ><i class="icon remove"></i></a>
+            {% else %}
+                <a href="{{ user_profile.get_url }}reset/" class="item" ><i class="icon recycle"></i></a>
+            {% endif %}
+                {% endcomment %}
         </div>
-        {% endblock toc %}
-        
-        <div class="article">
         
         {% block page_message %}
         <div id="messages">
@@ -250,7 +212,7 @@
                 {% block content %}
                 {% endblock %}
                 {% endblock %}
-            </div>    
+            </div>
         {% endblock page_article %}
         </div>
     </div>
@@ -276,11 +238,65 @@
             <div class="ui inverted section divider"></div>
         </div>
         {% endcomment %}
+    
+    
+        {% block toc %}
+        <div class="ui vertical padded segment inverted container">
+              
+              <div class="ui six columns doubling grid">
+                  
+              <div class="column">
+                <a class="ui mini image" href="{{ rootNode.get_url }}">
+                    <img class="icon image" src="{{ rootNode.get_image.url }}" />
+                  </a><br />
+                  <a href="{{ rootNode.get_url }}view/"><b>{{ rootNode.label }}</b></a>
+              </div>
+            
+                {% for node in roots %}
+                
+                    {% ifchanged node.label %}
+                    <div class="column">
+                        <h4 class="ui inverted header" href="{{ node.get_url }}view/">
+                          {{ node.title }}<br/>
+                        <a class="sub header" href="{{ node.get_url }}view/">{{ node.label }}</a>
+                        </h4>
+                    {% else %}
+                    {% endifchanged %}
+                    
+                    {% if not node.is_leaf_node %}
+                    <div class="column">
+                    {% with cnodes=node.get_children %}
+                      {% regroup cnodes|dictsort:"label" by label as label_list %}
+                      <div class="ui inverted link list">
+                      {% for l in label_list %}
+                        {% with child=l.list.0 %}
+                          {% if child.is_leaf_node %}
+                          <a class="item" href="{{ child.parent.get_url }}view/#{{ child.slug }}">{{ child.label }} </a>
+                          {% else %}
+                          <a class="item" href="{{ child.get_url }}view/"><b>{{ child.label }}</b> </a>
+                          {% endif %}
+                         {% endwith %}
+                      {% endfor %}
+                     </div>
+                    {% endwith %}
+                    
+                    {% ifchanged node.label %}
+                    </div>
+                    {% endifchanged %}
+                    
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                
+              </div>
+        </div>
+        {% endblock toc %}
+    
     {% block page_footer %}
         <div class="ui center aligned container">
             <div class="ui stackable inverted grid">
               <div class="three wide column">
-                <h4 class="ui inverted header">Réseau</h4>
+                <h4 class="ui inverted header">Reseau</h4>
                 <div class="ui inverted link list">
                   <a class="item" href="/contribute/" target="_blank">Contribuer</a>
                   {% comment %}
@@ -294,11 +310,7 @@
                 <h4 class="ui inverted header">Plateforme</h4>
                 <div class="ui inverted link list">
                   <a href="http://apetizer.biodigitals.com" class="item">Documentation</a>
-                  <a href="{{ documentation.get_uid_url }}" class="item">Code</a>
                   <a href="doc/" class="item">Api</a>
-                  {% if request.user.is_staff %}
-                    <a href="{{ api.get_uid_url }}" class="item">Live Api</a>
-                  {% endif %}
                 </div>
               </div>
               <div class="seven wide right floated column">
@@ -335,13 +347,14 @@
         </div>
         {% endblock page_footer %}
     </div>
+    
   </div>
+  
 </div>
 
 {% endblock %}
 
 {% block extra-scripts %}
-{{ block.super }}
 <script type="text/javascript">
 $(document).ready(function () {
     var ws = new WebSocket("ws:{{ currentNode.get_root.slug }}:8000/{{ currentNode.id }}.ws");
@@ -352,6 +365,7 @@ $(document).ready(function () {
     }
 });
 </script>
+{{ block.super }}
 {% endblock %}
 
 {% include "content/assets/scripts.html" %}

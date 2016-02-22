@@ -402,6 +402,17 @@ class Visitor(DataPath):
         feed = Moderation.objects.filter(query).order_by('-modified_date')[0:50]
         return feed
     
+    def get_followings(self):
+        """
+        Get my creation list
+        """
+        proposal_status = ('following',)
+        if self.email and self.validated:
+            proposals = Moderation.objects.filter(email=self.email, status__in=proposal_status).order_by('-modified_date')
+        else:
+            proposals = Moderation.objects.filter(akey=self.akey, status__in=proposal_status).order_by('-modified_date')
+        return proposals
+    
     def get_proposals(self):
         """
         Get my creation list

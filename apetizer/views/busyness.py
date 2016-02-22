@@ -8,6 +8,9 @@ from django.http.response import HttpResponseRedirect
 
 from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
+from apetizer.models import get_new_uuid
+from apetizer.manager import CoreManager
+from apetizer.dispatchers.async import AsyncDispatcher
 
 
 class BusynessView(ApiView, ActionView):
@@ -19,10 +22,9 @@ class BusynessView(ApiView, ActionView):
     """
     view_name = 'status'
 
-    class_actions = ['status', 'pricing']
+    class_actions = ['status']
     class_action_templates = {
                               'status':'apetizer/status.html',
-                              'pricing':'apetizer/pricing.html',
                               }
     
     def process(self, request, user_profile, input_data, template_args, **kwargs):
@@ -45,15 +47,17 @@ class BusynessView(ApiView, ActionView):
         # ask data from running job ?
         return self.render(request, template_args, input_data, **kwargs)
     
-    def process_pricing(self, request, user_profile, input_data, template_args, **kwargs):
+    
+    def start_job(self, pipe, func, args, kwargs):
+        # generate a processing key based on akey
+        key = get_new_uuid()
         
-        return self.manage_pipe(request, template_args, input_data, **kwargs)
-    
-    
-    def start_job(self):
-        pass
+        core = CoreManager.get_core()
+        core.jobs[key] = AsyncDispatcher.get_instance().spawn(func, args, kwargs)
+        
+        return key
 
-    def stop_job(self):
+    def stop_job(self, key):
         pass
 
 

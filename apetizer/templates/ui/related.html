@@ -1,17 +1,14 @@
 {% extends 'content/page.html' %}
 
 
-{% block body %}
+{% block ui-form %}
 {% if not currentNode.published %}
-<div class="ui segment" >
-    {% include 'apetizer/tags/action_forms.html' %}    
-</div>
-{% endif %}
 {{ block.super }}
+{% include 'apetizer/tags/action_forms.html' %}
+{% endif %}
 {% endblock %}
 
 {% block page_container %}
-
 {% if currentNode.related_url and 'hackpad' in currentNode.related_url %}
     <script src="{{ currentNode.related_url }}.js"></script><noscript>
     <div>View <a href="{{ currentNode.related_url }}">{{ currentNode.title }}</a> on Hackpad.</div>

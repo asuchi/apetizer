@@ -1,7 +1,5 @@
-{% extends "ui/change.html" %}
-{% block body %}{% endblock %}
+{% extends "content/page.html" %}
+
 {% block ui-form %}
-{% if not request.GET.order %}
-    {% include 'apetizer/tags/action_forms.html' %}
-{% endif %}
+{% include "apetizer/tags/action_forms.html" %}
 {% endblock %}

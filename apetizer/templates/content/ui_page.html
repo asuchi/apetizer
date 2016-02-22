@@ -96,13 +96,7 @@
         {% endif %}
         
         {% if node.order|slugify == input_data.order and input_data.label %}
-            {% if action == 'add' %}
-                <div class="ui divider"></div>
-                <div class="ui segment">
-                    <h3 class="header">Ajouter un article</h3>
-                    {% include 'content/tags/form.html' %}
-                </div>
-            {% elif action == 'upload' %}
+            {% if action == 'upload' %}
                 <div class="ui divider"></div>
                 <div class="ui vertical segment">{% include 'ui/tags/upload.html' %}</div>
             {% endif %}
@@ -143,8 +137,7 @@
     
     <a class="anchor" id="bottom" />
     <div class="ui horizontal list">
-        <a class="ui item " href="add/#bottom" title="Ajouter"><i class="ui icon add"></i> Ajouter un article</a>
-        <a class="ui item " href="upload/#bottom" title="Ajouter"><i class="ui icon upload"></i> Ajouter des images, fichiers</a>
+        <a class="ui item " href="upload/" title="Ajouter"><i class="ui icon upload"></i> Ajouter des images, fichiers</a>
     </div>
     
     {% if not input_data.label and request.GET.order != '-1'  %}

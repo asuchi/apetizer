@@ -1,38 +1,26 @@
-{% extends "content/page.html" %}
+{% extends "apetizer/base.html" %}
 {% load i18n content_tags content_ui_tags %}
 
-{% block page_head %}
-<div class="ui container" >
-
-{% block search_form %}
-<form class="ui form form-search" action="" method="get" rol="form" >
-  	<div class="ui category search">
-      <div class="ui icon input">
-        <input class="prompt" name="keyword" placeholder="Search keyword ..." type="text">
+{% block search-form %}
+<form class="ui fluid item form" action="" method="get" rol="form" >
+  	<div class="ui large category search">
+      <div class="ui left icon transparent input">
         <i class="search icon"></i>
+        <input class=" prompt" name="keyword" placeholder="Search keyword ..." type="text">
       </div>
       <div class="results"></div>
     </div>
 </form>
 {% endblock %}
 
-</div>
-{% endblock %}
-
 {% block content %}
-
+{{ block.super }}
 {% if nodes|length > 0 %}
     <div>{{ nodes|length }} {% trans "results" %}</div>
 {% else %}
     <div>{% trans "No result" %}</div>
 {% endif %}
-
-
-
-{{ block.super }}
-
 {% endblock %}
-
 
 {% block extra-scripts %}
 {{ block.super }}
@@ -45,7 +33,10 @@
         minCharacters : 3,
         
         searchFullText: false,
-        //stateContext: '.ui.input',
+        
+        onSelect:function(data){
+          window.location.href = data['url']+'view/';
+        },
         
         apiSettings:{
             url: '{{rootNode.get_url}}query.json?query={query}',
@@ -54,7 +45,7 @@
               return response.success == true;
             },
             onResponse : function(directoryResponse) {
-                console.log(directoryResponse.payload)
+                //console.log(directoryResponse.payload)
                 return directoryResponse.payload;
             },
         },

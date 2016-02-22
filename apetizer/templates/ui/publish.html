@@ -1,11 +1,13 @@
 {% extends 'content/page.html' %}
 {% load content_tags content_ui_tags markdown_deux_tags momentjs %}
-{% block body %}
+
+{% block ui-form %}
 <div class="ui vertical segment">
 {% include 'apetizer/tags/action_forms.html' %}
 </div>
 {{ block.super }}
 {% endblock %}
+
 {% with item=currentNode %}
 {% block content %}
 

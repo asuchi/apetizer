@@ -11,7 +11,13 @@ from django.contrib.sitemaps.views import sitemap
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from apetizer.sitemap import ContentSitemap
+from apetizer.views.devices import DevicesView
+from apetizer.views.directory import DirectoryView
 from apetizer.views.front import FrontView
+from apetizer.views.network import NetworkView
+from apetizer.views.platform import PlatformView
+from dashboard.views import DashboardView
+
 
 admin.autodiscover()
 
@@ -42,7 +48,16 @@ urlpatterns = patterns( '',
             name='home',
             kwargs={'action':FrontView.default_action}),
         
-                       
+        # directory views
+        url(r'^(?P<path>.+)\/directory/$',
+            DirectoryView.as_view(),
+            name=DirectoryView.view_name,
+            kwargs={'action':DirectoryView.default_action}),
+        
+        url(r'^(?P<path>.+)\/query.json$',
+            DirectoryView.as_view(),
+            name=DirectoryView.view_name,
+            kwargs={'action':'query'}),
         )
 
 # This is only needed when using runserver.

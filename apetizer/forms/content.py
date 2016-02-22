@@ -19,7 +19,6 @@ from apetizer.forms.base import ActionModelForm
 from apetizer.forms.base import ActionPipeForm
 from apetizer.models import Item, Translation, DATETIME_FORMATS
 from apetizer.utils.upload import format_file_extensions
-from django.db.models.fields import TextField
 from django.forms.widgets import Textarea
 
 
@@ -65,7 +64,7 @@ class ItemRenameForm(ActionModelForm):
     title = _('Rename this item')
     class Meta:
         model = Translation
-        fields = ('slug','type')
+        fields = ('slug',)
 
 class ItemChangeForm(ActionModelForm):
     class Meta:
@@ -89,7 +88,7 @@ class ItemCodeForm(ActionModelForm):
 class ItemPublishForm(ActionModelForm):
     class Meta:
         model = Item
-        fields = ('behavior', 'published')
+        fields = ('behavior', 'type', 'published')
 
 class ItemDataForm(ActionModelForm):
     slug = 'item_data'
@@ -123,7 +122,7 @@ class ItemTimingForm(ActionModelForm):
     title = _('Timing for this item')
     
     start = DateTimeField(input_formats=DATETIME_FORMATS,)
-    end = DateTimeField(input_formats=DATETIME_FORMATS,)
+    end = DateTimeField(input_formats=DATETIME_FORMATS,required=False)
     
     class Meta:
         model = Item
