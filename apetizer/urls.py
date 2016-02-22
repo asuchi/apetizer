@@ -11,12 +11,8 @@ from django.contrib.sitemaps.views import sitemap
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from apetizer.sitemap import ContentSitemap
-from apetizer.views.devices import DevicesView
 from apetizer.views.directory import DirectoryView
 from apetizer.views.front import FrontView
-from apetizer.views.network import NetworkView
-from apetizer.views.platform import PlatformView
-from dashboard.views import DashboardView
 
 
 admin.autodiscover()
