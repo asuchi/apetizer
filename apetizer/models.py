@@ -1008,9 +1008,10 @@ class Item(Translation):
         if uidpath in object_tree_cache:
             del object_tree_cache[uidpath]
         
-        if self.parent and self.parent.get_uid_path() in object_tree_cache and 'children' in object_tree_cache[self.parent.get_uid_path()]:
+        if self.parent and self.parent.get_uid_path() in object_tree_cache \
+            and 'children_qs' in object_tree_cache[self.parent.get_uid_path()]:
+            
             parent_data = object_tree_cache[self.parent.get_uid_path()]
-            del parent_data['children']
             del parent_data['children_qs']
             del parent_data['children_count']
             object_tree_cache[self.parent.get_uid_path()] = parent_data
@@ -1056,13 +1057,14 @@ class Item(Translation):
         if self.get_uid_path() in object_tree_cache and 'translations' in object_tree_cache[self.get_uid_path()]:
             t_data = object_tree_cache[self.get_uid_path()]
             del t_data['translations']
-            return t_data
-        #if self.parent and self.parent.get_uid_path() in object_tree_cache:
-        #    del object_tree_cache[self.parent.get_uid_path()]
         
-        
-        #return
-
+        if self.parent and self.parent.get_uid_path() in object_tree_cache \
+            and 'children_qs' in object_tree_cache[self.parent.get_uid_path()]:
+            
+            parent_data = object_tree_cache[self.parent.get_uid_path()]
+            del parent_data['children_qs']
+            del parent_data['children_count']
+            object_tree_cache[self.parent.get_uid_path()] = parent_data
     
     def get_root(self):
         if self.parent_id == None:
