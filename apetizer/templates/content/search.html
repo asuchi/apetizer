@@ -14,12 +14,12 @@
 {% endblock %}
 
 {% block content %}
-{{ block.super }}
 {% if nodes|length > 0 %}
     <div>{{ nodes|length }} {% trans "results" %}</div>
 {% else %}
     <div>{% trans "No result" %}</div>
 {% endif %}
+{{ block.super }}
 {% endblock %}
 
 {% block extra-scripts %}
@@ -52,8 +52,5 @@
         
       })
     ;
-    
-    
-    
 </script>
 {% endblock %}

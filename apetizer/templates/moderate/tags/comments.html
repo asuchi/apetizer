@@ -25,53 +25,50 @@
 </div>
 {% endcomment %}
 
-<div class="ui vertical segment">
-    <h3 class="ui header">Comments</h3>
-    <div class="ui top right attached label"><a href="{{ currentNode.get_url }}consult/" >History</a></div>
 <div class="ui feed">
-{% for comment in currentNode.get_comments %}
-<div class="event" {% if not comment.validated %}style="opacity:0.3;"{% endif %}>
-    <div class="label">
-    {% ifchanged comment.get_author.get_hash %}
-      <img class="avatar" src="{{ comment.get_author.get_image.url }}">
-    {% endifchanged %}
-    </div>
-    {% if comment.status != 'commented' %}
-        {% ifchanged comment.status and not comment.get_author.get_hash %}
-        <div class="content">
-          <div class="summary">
-          <i class="pencil icon"></i>
-            <a class="user" href="{{ comment.get_author.get_url }}" >
-              {{ comment.get_full_name }}
-            </a> {{ comment.subject }}
-            <div class="date">{% moment_from_now comment.modified_date %}</div>
-          </div>
+    <h4 class="header">Commentaires</h4>
+    {% for comment in currentNode.get_comments %}
+        <div class="event" {% if not comment.validated %}style="opacity:0.3;"{% endif %}>
+            <div class="label">
+            {% ifchanged comment.get_author.get_hash %}
+              <img class="avatar" src="{{ comment.get_author.get_image.url }}">
+            {% endifchanged %}
+            </div>
+            {% if comment.status != 'commented' %}
+                {% ifchanged comment.status and not comment.get_author.get_hash %}
+                <div class="content">
+                  <div class="summary">
+                  <i class="pencil icon"></i>
+                    <a class="user" href="{{ comment.get_author.get_url }}" >
+                      {{ comment.get_full_name }}
+                    </a> {{ comment.subject }}
+                    <div class="date">{% moment_from_now comment.modified_date %}</div>
+                  </div>
+                </div>
+                {% else %}
+                {% endifchanged %}
+            {% else %}
+            <div class="content">
+              <div class="summary">
+                <a class="user" href="{{ comment.get_author.get_url }}" >
+                  {{ comment.get_full_name }}
+                </a> {{ comment.subject }} - {{ comment.status }}
+                <div class="date">
+                  {% moment_from_now comment.modified_date %}
+                </div>
+              </div>
+              <div class="extra text">
+                {{ comment.message }}
+              </div>
+              {% comment %}
+              <div class="meta">
+                <a class="like">
+                  <i class="like icon"></i> 4 Likes
+                </a>
+              </div>
+              {% endcomment %}
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        {% endifchanged %}
-    {% else %}
-    <div class="content">
-      <div class="summary">
-        <a class="user" href="{{ comment.get_author.get_url }}" >
-          {{ comment.get_full_name }}
-        </a> {{ comment.subject }} - {{ comment.status }}
-        <div class="date">
-          {% moment_from_now comment.modified_date %}
-        </div>
-      </div>
-      <div class="extra text">
-        {{ comment.message }}
-      </div>
-      {% comment %}
-      <div class="meta">
-        <a class="like">
-          <i class="like icon"></i> 4 Likes
-        </a>
-      </div>
-      {% endcomment %}
-    </div>
-    {% endif %}
-</div>
-{% endfor %}
-</div>
+    {% endfor %}
 </div>

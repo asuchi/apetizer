@@ -1369,9 +1369,9 @@ class Item(Translation):
         """
         Get a contributor list
         """
-        contribution_status = ('added', 'modified', 'changed')
+        contribution_status = ('added', 'modified', 'changed', 'imported')
         contribs = Moderation.objects.filter(related=self, status__in=contribution_status, visible=True).order_by('-ref_time')
-        return self.get_distincts(contribs, 'email')
+        return self.get_distincts(contribs, 'username')
     
     def get_subscribers(self):
         subscribers_status = ('subscribed', )
@@ -1396,7 +1396,7 @@ class Item(Translation):
         return comments
     
     def get_reviewers(self):
-        comments = Moderation.objects.filter(related=self, status__in=('accepted', 'rejected'), visible=True).order_by('-ref_time')
+        comments = Moderation.objects.filter(related=self, action__in=('review',), visible=True).order_by('-ref_time')
         return self.get_distincts(comments, 'email')
 
     def get_evaluations(self):

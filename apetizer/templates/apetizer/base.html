@@ -70,9 +70,8 @@
 
 {% block extra-styles %}
 
-
-
 {% endblock %}
+
 {% if currentNode.image %}
 <style type="text/css">
 <!--
@@ -98,19 +97,16 @@
     .row{
         margin:1rem 2rem;
     }
-    .ui.input p{
-        display:none;
-    }
     #masthead{
         padding:0px;
     }
     .pusher{
         /* background-color:rgba(240,240,240,0.90) !important; */
-        background-color:#F9F9F9 !important;
+        /* background-color:#F9F9F9 !important; */
     }
     .article{
         /* background-color:#F9F9F9 !important;*/
-        background-color:rgba(253,253,253,0.95) !important;
+        background-color:rgba(253,253,253,0.75) !important;
         border: 1px solid #E5E5E5;
     }
     
@@ -118,9 +114,6 @@
         margin:0px;
     }
     
-    .ui.full.height{
-        
-    }
     @media all and (min-width: 1100px){
     .ui.full.height {
         margin:4% 5%;
@@ -131,32 +124,59 @@
         margin:6% 10%;
       }
     }
+    .env{
+    
+    position:fixed;
+    top:-100px;
+    left:-100px;
+    right:-100px;
+    bottom:-100px;
+    
+    background-color:#aaaaaa;
+    background-image:url('{{ currentNode.get_root.get_image.url }}');
+    -webkit-filter: blur(100px);
+    -moz-filter: blur(100px);
+    -o-filter: blur(100px);
+    -ms-filter: blur(100px);
+    filter: blur(100px);
+    
+    background-repeat:no-repeat;
+    background-position:center center;
+    background-size:80%;
+    }
+    
+    #messages{
+        position:fixed;
+        top:2%;
+        right:2%;
+        z-index:999;
+        
+        
+    }
 -->
 </style>
 
 <body >
 {% block page_body %}
 
+<div class="env" ></div>
 <div id="body" class="started pushable" ontouchstart="">
-
 <div class="pusher">
     <div class="ui full height" style="">
     
         <div class="article">
         <div class="ui large secondary pointing menu" >
             <a href="/" class="active item">Accueil</a>
-            {% block search-form %}
-            <a href="search/" class="item" ><i class="icon search"></i></a>
-            <form class="ui item form form-search" action="" method="get" rol="form" >
-                <div class="ui category search">
-                  <div class="ui icon input">
-                    <input class="large prompt" name="keyword" placeholder="Search keyword ..." type="text">
+           
+            <form class="ui fluid item form" action="" method="get" rol="form" >
+                <div class="ui large category search">
+                  <div class="ui left icon transparent input">
                     <i class="search icon"></i>
+                    <input class=" prompt" name="keyword" placeholder="Search keyword ..." type="text">
                   </div>
                   <div class="results"></div>
                 </div>
             </form>
-            {% endblock %}
             
             <div class="right item">
               {% if user_profile.email %}
@@ -365,6 +385,38 @@ $(document).ready(function () {
     }
 });
 </script>
+
+
+<script>
+    
+    $('.ui.search')
+      .search({
+        debug: true,
+        type:'category',
+        minCharacters : 3,
+        
+        searchFullText: false,
+        
+        onSelect:function(data){
+          window.location.href = data['url']+'view/';
+        },
+        
+        apiSettings:{
+            url: '{{rootNode.get_url}}query.json?query={query}',
+            successTest: function(response) {
+              // test whether a JSON response is valid
+              return response.success == true;
+            },
+            onResponse : function(directoryResponse) {
+                //console.log(directoryResponse.payload)
+                return directoryResponse.payload;
+            },
+        },
+        
+      })
+    ;
+</script>
+
 {{ block.super }}
 {% endblock %}
 

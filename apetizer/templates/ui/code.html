@@ -2,18 +2,18 @@
 {% load static content_tags %}
 
 {% block body %}
-{% include 'apetizer/tags/action_forms.html' %}
 {% endblock %}
 
 {% block content %}
-{% content_item currentNode %}
+{% include 'apetizer/tags/action_forms.html' %}
 {{ block.super }}
 {% endblock %}
 
+{% content_item currentNode %}
 
 https://github.com/NextStepWebs/simplemde-markdown-editor
 
-{% block extra-scripts %}
+{% block Zextra-scripts %}
 
 {{ block.super }}
 <script type="text/javascript" src="{% static 'components/ckeditor/ckeditor.js' %}"></script>

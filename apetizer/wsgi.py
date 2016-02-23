@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-WSGI config for biodigitals project.
+WSGI config for apetizer project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -15,22 +15,8 @@ framework.
 
 """
 import os
-import site
-import sys
-
-os.environ.setdefault("DJANGO_ENV", "production")
-if os.environ["DJANGO_ENV"] == 'production':
-    # Add the site-packages of the chosen virtualenv to work with
-    site.addsitedir('/srv/biodigitals/local/lib/python2.7/site-packages')
-    
-    # Add the app's directory to the PYTHONPATH
-    sys.path.append('/srv/biodigitals/')
-    
-    # Activate your virtual env
-    activate_env=os.path.expanduser("/srv/biodigitals/bin/activate_this.py")
-    execfile(activate_env, dict(__file__=activate_env))
-    
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "biodigitals.settings")
+os.environ.setdefault("DJANGO_ENV", "dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apetizer.settings")
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()

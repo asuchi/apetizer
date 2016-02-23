@@ -1,20 +1,29 @@
 {% load i18n %}
+
+    
 <form class="ui form" method="post" action="{{ action }}/" 
-        target="{{ action_target|default:'_self' }}"
-      enctype="multipart/form-data">
-        {% csrf_token %}
+    target="{{ action_target|default:'_self' }}"
+    enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="ui padded vertical segment">
         {% for action_form in action_forms %}
             {% for field in action_form %}
-                <div class="ui item" >
-                    <div class="ui fluid inverted labeled input">
-                        <label class="ui label" for="id_{{field.name}}" >{{ field.label }}</label>
-                        {{ field }}
-                    </div>
+                <div class="field {% if field.field.required %}required{% endif %}{% if field.errors %}error{% endif %}" >
+                    <label for="id_{{field.name}}" >{{ field.label }}</label>
+                    {% if field.type == 'checkbox' %}
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
                     {{ field.errors }}
                 </div>
+                {% if field.help_text %}
+                    <p class="text">{{ field.help_text|safe }}</p>
+                {% endif %}
             {% endfor %}
         {% endfor %}
-        <div class="ui item">            
-            <input type="submit" class="ui button fluid" value="{% trans "Save" %}"/>
+        <div class="field">
+            <input type="submit" class="ui primary button" value="{% trans "Save" %}" />
         </div>
+    </div>
 </form>

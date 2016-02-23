@@ -1,12 +1,12 @@
-{% load i18n thumbnail %}
+{% load i18n %}
 
 {% if image_item and image_item.image and image_item.image.file %}
 	{% if image_item_display == 'fullscreen' %}
-	<div class="fullscreen-image" style="background-image:url('{% thumbnail image_item.image '300x300' crop=smart %}')">
+	<div class="fullscreen-image" style="background-image:url('{{ image_item.image.url }}');">
 		
 	</div>
 	{% else %}
-		<img src="{% thumbnail image_item.image '300x300' crop=smart %}" 
+		<img src="{{ image_item.image.url }}" style="max-width:300px"
 			 alt="{{ image_item.image.title }}" />
 	{% endif %}
 {% endif %}

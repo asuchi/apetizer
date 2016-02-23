@@ -11,14 +11,14 @@
         <input type="hidden" name="status" value="rejected" />
         <input class="ui button" type="submit" value="Rejeter" />
     </form>
+    <form class="ui fuild form" method="POST" action="review/" >
+        {% csrf_token %}
+        <div class="ui group">
+            <input type="text" name="status" value="" />
+            <input class="ui button" type="submit" value="Autre" />
+        </div>
+    </form>
 </div>
 
 {% comment %}
-<form class="ui fuild form" method="POST" action="review/" >
-    {% csrf_token %}
-    <div class="ui group">
-        <input type="text" name="status" value="" />
-        <input class="ui button" type="submit" value="Autre" />
-    </div>
-</form>
 {% endcomment %}

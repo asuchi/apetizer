@@ -107,8 +107,6 @@ class ModerateView(ContentView, ActionPipeView):
         elif kwargs['action'] == 'discuss':
             new_moderation.subject = 'Nouveau message'
         
-        
-        
         return new_moderation
     
     
@@ -153,6 +151,7 @@ class ModerateView(ContentView, ActionPipeView):
         """
         Reject a proposal
         """
+        
         proposal_uid = input_data['token']
         proposal = Moderation.objects.get(id=proposal_uid)
         

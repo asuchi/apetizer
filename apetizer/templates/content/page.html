@@ -34,6 +34,7 @@
     <div class="ui eleven wide column">
         
         {% block content %}
+        
         {% if action == 'view' and currentNode.content %}
         <div class="ui vertical segment">
             {% autoescape off %}
@@ -42,33 +43,13 @@
         </div>
         {% endif %}
         
-        {% comment %}
-        
-        {% if currentNode.published == True or currentNode.is_leaf_node %}
-        {% endif %}
-        
-        {% if currentNode.published == True %}
-            {% if action != 'view' %}
-            {{ block.super }}
-            {% endif %}
-            {% include 'content/published_page.html' %}
-        {% else %}
-            {{ block.super }}
-            {% include 'content/ui_page.html' %}
-        {% endif %}
-        {% endcomment %}
-        
-        {{ block.super }}
-        {% include 'content/ui_page.html' %}
-        
+        {% include 'content/published_page.html' %}
         {% endblock content %}
         
     </div>
 
 
     <div class="ui five wide column">
-        
-        <div class="ui top right attached label"><a href="{{ currentNode.get_url }}consult/" >History</a></div>
         
         {% if currentNode.data %}
             {% if DEBUG %}
@@ -126,7 +107,7 @@
             <h4 class="ui header">Auteur(s)</h4>
             {% with contributor=currentNode.get_author %}
             <div class="item">
-                <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
+                <img class="ui avatar image" src="{{ contributor.get_image.url }}" >
                 <div class="content">
                     <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
                     <div class="content">
@@ -139,16 +120,16 @@
         {% endcomment %}
         
         {% with contributors=currentNode.get_contributors %}
-        {% if contributors|length > 1 %}
-        <div class="ui hidden divider"></div>
         <div class="ui item dividing" >
+        
+        
             <h4 class="ui header">Contributeurs ({{contributors|length}})</h4>
             <div class="ui list" >
                 {% for contributor in contributors %}
                 <div class="item">
-                    <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
+                    <img class="ui avatar image" src="{{ contributor.get_author.get_image.url }}" >
                     <div class="content">
-                        <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
+                        <a class="" href="{{ contributor.get_author.get_url }}" >{{ contributor.get_author.get_full_name }}</a>
                         <div class="content">
                           {% moment_from_now contributor.modified_date %}
                         </div>
@@ -156,9 +137,9 @@
                 </div>
                 {% endfor %}
             </div>
-            <a class="ui item mini spaced button" href="invite/" >Inviter</a>
+            
+            <div class="ui top right attached mini label"><a href="{{ currentNode.get_url }}consult/" >History ({{ currentNode.get_history|length }})</a></div>
         </div>
-        {% endif %}
         {% endwith %}
         
         
@@ -198,6 +179,7 @@
     </div>
 </div>
 
+{% block page_review %}
 <div class="ui row" >
     <div class="ui eleven wide column">
     <div class="ui item">
@@ -215,11 +197,11 @@
         {% for comment in currentNode.get_reviewers %}
             <div class="event">
                 <div class="label">
-                  <img class="ui avatar image" src="{{ comment.get_image.url }}">
+                  <img class="ui avatar image" src="{{ comment.get_author.get_image.url }}">
                 </div>
                 <div class="content">
                   <div class="summary">
-                    <a class="user" href="{{ comment.get_url }}" >
+                    <a class="user" href="{{ comment.get_author.get_url }}" >
                       {{ comment.get_full_name }}
                     </a>
                     <div class="ui label right" >{{ comment.status }}</div>
@@ -236,7 +218,6 @@
         {% endif %}
         {% include 'moderate/tags/review_form.html' %}
     </div>
-    
-    
+{% endblock page_review %}
 </div>
 {% endblock page_container %}
