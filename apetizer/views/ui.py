@@ -3,10 +3,10 @@ Created on 15 janv. 2013
 
 @author: rux
 '''
-from _codecs import decode
-import json
+
 import logging
 import os.path
+import traceback
 
 from django.contrib import messages
 from django.core.files.uploadedfile import UploadedFile
@@ -24,32 +24,36 @@ from apetizer.forms.content import ItemTranslateForm, ItemDeleteForm, \
     MultiUploadForm, ItemAddForm, ItemLocationForm, \
     ItemTimingForm, ItemDataForm, ItemRelatedForm, ItemImageForm, \
     ItemCodeForm, ItemRedirectForm, ItemPublishForm, ItemRenameForm, \
-    ItemReorderForm
+    ItemReorderForm, ItemFileForm
 from apetizer.models import Item, Translation, Moderation, get_new_uuid
+from apetizer.parsers.api_json import load_json, dump_json
 from apetizer.utils.compatibility import unicode3
 from apetizer.views.moderate import ModerateView
+from apetizer.views.notebook import NotebookView
 from apetizer.views.program import ProgramView
 from apetizer.views.visitor import VisitorView
 from apetizer.workers.hackpad import Hackpad
 from apetizer.workers.meetup import MeetupWorker
-from apetizer.parsers.json import load_json
 
 
 log = logging
 
-restricted_actions = ['delete', 'upload', 'image', 'program']
-
+#restricted_actions = ['image', 'upload', 'program', 'content']
+restricted_actions = []
 message_deactivated_action = _('Sorry, this action requires a fully registred login.')
 
-class UIView(ProgramView, ModerateView, VisitorView):
+class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
     
     view_name = 'ui'
     view_template = "ui/base.html"
 
-    class_actions = ['add', 'change', 'upload', 'translate', 'delete', 'data', 
-                     'image', 'code', 'search', 'location', 'timing', 
+    class_actions = ['add', 'change', 'file', 
+                     'translate', 'delete', 'data', 
+                     'image', 'content', 'search', 
+                     'location', 'timing', 
                      'redirect', 'publish', 'reorder', 
-                     'related', 'rename',]
+                     'rename', 'related'
+                     ]
 
     class_actions_forms = {
                     'add':(ItemAddForm,),
@@ -59,49 +63,53 @@ class UIView(ProgramView, ModerateView, VisitorView):
                     'location':(ItemLocationForm,),
                     'timing':(ItemTimingForm,),
                     'delete':(ItemDeleteForm,),
-                    'related':(ItemRelatedForm,),
+                    
                     'redirect':(ItemRedirectForm,),
+                    
                     'image':(ItemImageForm,),
+                    'file':(ItemFileForm,),
                     
                     'rename':(ItemRenameForm,),
 
                     'data':(ItemDataForm,),
-                    'code':(ItemCodeForm,),
+                    'content':(ItemCodeForm,),
                     
                     'publish':(ItemPublishForm,),
+                    'related':(ItemRelatedForm,),
                     }
     
     class_action_templates = {
-                        'add':'ui/change.html',
+                        'add':'ui/add.html',
                         
                         'change':'ui/change.html',
                         'translate':'ui/translate.html',
                         'redirect':'ui/change.html',
                         'image':'ui/change.html',
+                        'file':'ui/file.html',
                         'delete':'ui/change.html',
                         
                         'rename':'ui/change.html',
 
-
-                        'code':'ui/code.html',
-                        
                         'data':'ui/data.html',
                         'upload':'ui/upload.html',
                         'location':'ui/location.html',
                         'timing':'ui/timing.html',
-                        'related':'ui/related.html',
                         'publish':'ui/publish.html',
                         
                         'redirect':'ui/redirect.html',
                         
+                        'content':'ui/content.html',
+                              
                         'reorder':'ui/change.html',
+                        
+                        'related':'ui/related.html',
                         }
     
     def get_forms_instances(self, action, user_profile, kwargs):
         
         if action in UIView.class_actions:
             
-            if action in ('translate', 'redirect', 'code', 'rename'):
+            if action in ('translate', 'redirect', 'content', 'rename'):
                 
                 # load a new translation cloning the existing one
                 trans_data = model_to_dict(kwargs['node'])
@@ -154,14 +162,11 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 
                 item.path = parentNode.get_path()
                 
-                
                 item.related_id = item.id
                 
                 return (item,)
             else:
                 return (kwargs['node'],)
-                #kwargs['node'].get_url()
-                #return (Item.objects.get(id=kwargs['node'].id),)
         else:
             return super(UIView, self).get_forms_instances(action, user_profile, kwargs)
     
@@ -194,15 +199,17 @@ class UIView(ProgramView, ModerateView, VisitorView):
         """
         return self.manage_translation_pipe(request, user_profile, input_data, template_args, **kwargs)
     
+    
+    def process_content(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Edit an item translation content
+        """
+        return self.manage_translation_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+    
     def process_redirect(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Edit an item translation
-        """
-        return self.manage_translation_pipe(request, user_profile, input_data, template_args, **kwargs)
-    
-    def process_code(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        Edit an item translation code
         """
         return self.manage_translation_pipe(request, user_profile, input_data, template_args, **kwargs)
     
@@ -214,19 +221,6 @@ class UIView(ProgramView, ModerateView, VisitorView):
         """
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
 
-    
-    def process_pull(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        get a markdown repsresentation of the object and it's children
-        """
-        return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
-    
-    def process_push(self, request, user_profile, input_data, template_args, **kwargs):
-        """
-        apply a markdown as a group of object's children
-        """
-        return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
-    
     
     
     def process_change(self, request, user_profile, input_data, template_args, **kwargs):
@@ -250,6 +244,12 @@ class UIView(ProgramView, ModerateView, VisitorView):
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
     
     def process_image(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Upload an image to the selected item
+        """
+        return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+    def process_file(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Upload an image to the selected item
         """
@@ -335,11 +335,11 @@ class UIView(ProgramView, ModerateView, VisitorView):
     
             if request.FILES is None:
                 response_data = [{"error": _('Must have files attached!')}]
-                return HttpResponse(json.dumps(response_data))
+                return HttpResponse(dump_json(response_data))
     
             if not u'form_type' in request.POST:
                 response_data = [{"error": _("Error when detecting form type, form_type is missing")}]
-                return HttpResponse(json.dumps(response_data))
+                return HttpResponse(dump_json(response_data))
     
             signer = Signer()
     
@@ -347,7 +347,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 form_type = signer.unsign(request.POST.get(u"form_type"))
             except BadSignature:
                 response_data = [{"error": _("Tampering detected!")}]
-                return HttpResponse(json.dumps(response_data))
+                return HttpResponse(dump_json(response_data))
     
             form = MultiUploadForm(request.POST, request.FILES, form_type=form_type)
             
@@ -358,7 +358,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
                     error = form._errors["file"][0]
     
                 response_data = [{"error": error}]
-                return HttpResponse(json.dumps(response_data))
+                return HttpResponse(dump_json(response_data))
             
             rfile = request.FILES[u'file']
             wrapped_file = UploadedFile(rfile)
@@ -428,7 +428,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
                        "delete_url": delete_url,
                        "delete_type": "POST", }]
             
-            response_data = json.dumps(result)
+            response_data = dump_json(result)
             
             #checking for json data type
             #big thanks to Guy Shapiro
@@ -447,7 +447,8 @@ class UIView(ProgramView, ModerateView, VisitorView):
         
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
         return self.render(request, template_args, **kwargs)
-
+    
+    
     
     def process_related(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -473,27 +474,32 @@ class UIView(ProgramView, ModerateView, VisitorView):
                 #return self.render(request, template_args, **kwargs)
             
             elif node.related_url.startswith('https://hackpad.com/'):
+                
                 hackpad_id = node.related_url.split('-')[-1]
                 
                 # import hackpad content
                 HACKPAD_CLIENT_ID = 'vTuK1ArKv5m'
                 HACKPAD_CLIENT_SECRET = '5FuDkwdgc8Mo0y2OuhMijuzFfQy3ni5T'
+                
                 hackpad = Hackpad(consumer_key=HACKPAD_CLIENT_ID, consumer_secret=HACKPAD_CLIENT_SECRET)
                 
                 #node.description = ''
                 #node.description = hackpad.get_pad_content(hackpad_id, asUser='', response_format='md')
                 
                 hackpad_content = hackpad.get_pad_content(hackpad_id, asUser='', response_format='md')
+                
                 #node.description =  unicode3(decode(hackpad_content, 'latin1'))
+                print(hackpad_content)
                 try:
-                    node.get_translation().content = markdown_deux.markdown( unicode3(decode(hackpad_content, 'latin1')) )
-                    node.save()
+                    node.get_translation().content = markdown_deux.markdown(unicode3(hackpad_content.decode('latin1')))
+                    node.get_translation().save()
                 except:
-                    pass
+                    traceback.print_exc()
                 
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
 
 
+    
     
     def manage_translation_pipe(self, request, user_profile, input_data, template_args, **kwargs):
         
@@ -606,7 +612,7 @@ class UIView(ProgramView, ModerateView, VisitorView):
         mod.message = 'Wants to change'
         
         mod.action = kwargs['action']
-        mod.data = json.dumps(input_data)
+        mod.data = dump_json(input_data)
         
         mod.status = 'proposed'
         

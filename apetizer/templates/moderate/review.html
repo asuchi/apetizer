@@ -1,1 +1,36 @@
 {% extends 'moderate/comment.html' %}
+{% load momentjs %}
+{% block page_column %}
+
+<div class="ui item dividing">
+    
+    {% include 'moderate/tags/review_form.html' %}
+    
+    {% if currentNode.get_reviewers|length %}
+    <h4 class="ui header" >Votes</h4>
+    <div class="ui feed">
+    {% for comment in currentNode.get_reviewers %}
+        <div class="event">
+            <div class="label">
+              <img class="ui avatar image" src="{{ comment.get_author.get_image.url }}">
+            </div>
+            <div class="content">
+              <div class="summary">
+                <a class="user" href="{{ comment.get_author.get_url }}" >
+                  {{ comment.get_full_name }}
+                </a>
+                <div class="ui label right" >{{ comment.status }}</div>
+              </div>
+              <div class="extra text">
+                <div class="date">
+                  {% moment_from_now comment.modified_date %}
+                </div>
+              </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

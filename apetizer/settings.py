@@ -1,15 +1,27 @@
+import logging
 import os
+
+
 APPEND_SLASH = False
 DEBUG = True
 USE_TZ = True
 ROOT_URLCONF = "apetizer.urls"
 SECRET_KEY = "fsldjkhgljkfshfgnlcuqsngfiu"
-ALLOWED_HOSTS = [ "*"]
-WEB_ROOT = "www"
-STATIC_ROOT = "static"
-STATIC_URL = "/static/"
-MEDIA_ROOT = "media"
+ALLOWED_HOSTS = ["*"]
+
+STATIC_ROOT = os.getcwd()+"/static"
+STATIC_URL = "/static/apetizer/"
+
+MEDIA_ROOT = os.getcwd()+"/media"
 MEDIA_URL = "/media/"
+
+TEMPLATE_DIRS = (
+    os.getcwd()+'/theme/templates/',
+)
+STATICFILES_DIRS = (
+    os.getcwd()+'/theme/static/',
+)
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -24,7 +36,6 @@ INSTALLED_APPS = [
     "easy_thumbnails",
     "leaflet",
     "apetizer",
-    "dashboard",
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -36,28 +47,31 @@ MIDDLEWARE_CLASSES = [
     "django.middleware.locale.LocaleMiddleware", # Cookie-based, for anonymous users
     
     'apetizer.middleware.multisite.DynamicSitesMiddleware',
-    "apetizer.middleware.multilingual.MultilingualURLMiddleware",
+    #"apetizer.middleware.multilingual.MultilingualURLMiddleware",
     "apetizer.middleware.redirect.ItemRedirect",
     "apetizer.middleware.profiler.CProfileMiddleware",
 ]
 
+APETIZER_MULTILINGUAL = False
+APETIZER_MULTISITE = True
 
-SITES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sites')
+SITES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 't')
 
 DEFAULT_HOST = 'localhost'
 
 HOSTNAME_REDIRECTS = {
-     'planrecup.com': 'www.planrecup.com',
-}
-ENV_HOSTNAMES = {
-    'biodigitals.dev':    'biodigitals',
+#    'biodigitals.com':                  'www.biodigitals.com',
 }
 
-WSGI_APPLICATION = "wsgi.application"
+ENV_HOSTNAMES = {
+#    'biodigitals':                    'www.biodigitals.com',
+}
+
+WSGI_APPLICATION = "apetizer.wsgi.application"
 DATABASES = {
     'default':{
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'apetizer.db',
+        'NAME': os.getcwd()+'/apetizer.db',
      },
 }
 

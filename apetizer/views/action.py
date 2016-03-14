@@ -4,7 +4,6 @@ Created on 24 oct. 2013
 @author: rux
 '''
 import inspect
-import json
 import logging
 import re
 
@@ -19,7 +18,7 @@ from django.utils.translation import ugettext
 from django.views.generic.base import View
 
 from apetizer.forms.base import ActionModelForm, ActionPipeForm
-from apetizer.parsers.json import API_json_parser, load_json
+from apetizer.parsers.api_json import API_json_parser, load_json
 
 
 logger = logging.getLogger(__name__)
@@ -102,7 +101,7 @@ class ActionView(View):
         return cls.actions
     
     def manage_request(self, request):
-        request.path_info = '/'+request.META['HTTP_HOST'].split(':')[0]+request.path
+        request.path_info = '/'+request.domain+request.path
 
     def get(self, request, *args, **kwargs):
         """
@@ -192,8 +191,6 @@ class ActionView(View):
             data.update(load_json(request.body))
         else:
             data.update(request.POST.dict())
-        
-        
         
         # remove csrftoken
         if 'csrfmiddlewaretoken' in data:
@@ -340,7 +337,14 @@ class ActionView(View):
         Hook before processing the request
         Best place to make user/objects rights management
         """
-        action = kwargs.get('action', ActionView.default_action)
+        action = kwargs.get('action', self.default_action)
+        if action is None or not action:
+            action = ActionView.default_action
+            kwargs['action'] = action
+        
+        elif not action in self.actions:
+            logger.debug('Unknown action '+action)
+            raise Http404
         
         if not self.__getattribute__('process_'+action):
             # this should not happen
@@ -350,15 +354,6 @@ class ActionView(View):
         
         # get user profile object
         user_profile = self.get_user_profile(request, **kwargs)
-        
-        action = kwargs.get('action', None)
-        if action is None or not action:
-            action = ActionView.default_action
-            kwargs['action'] = action
-        
-        elif not action in self.actions:
-            logger.debug('Missing action '+action)
-            raise Http404
         
         template_args = self.get_context_dict(request, user_profile, input_data, **kwargs)
         

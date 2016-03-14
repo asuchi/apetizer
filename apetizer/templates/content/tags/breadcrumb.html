@@ -17,6 +17,7 @@
             {% comment %}<a href="{{ currentNode.get_url }}add/?label={{currentNode.label}}" ><i class="ui icon add"></i></a>{% endcomment %}
         {% endif %}
     {% endif %}
+        {% if currentNode.is_multilingual %}
         <i class="icon flag divider"></i>
         {% if LANGUAGE_CODE == 'en' %}
           <a href="/fr/{{currentNode.id}}/{{action}}/" class="small" >fr</a>
@@ -30,5 +31,5 @@
             <a href="/search/" class="small" ><i class="icon search"></i> Rechercher</a>
           {% endblock %}
         {% endcomment %}
-    
+        {% endif %}
 </div>

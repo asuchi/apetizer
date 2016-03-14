@@ -4,14 +4,10 @@ Created on 25 sept. 2015
 @author: biodigitals
 '''
 
-from copy import deepcopy
-import json
-import traceback
-
 from django.forms.models import model_to_dict
 
 from apetizer.models import DataPath
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.api_json import load_json, dump_json
 
 
 class ModelStore(object):
@@ -30,14 +26,14 @@ class ModelStore(object):
             params = {}
             params[self.hash_key] = hash_key
             params[self.range_key] = range_key
-            
-            data_object = self.model.objects.filter(**params).order_by('-ref_time')[0]
+            #data_object = self.model.objects.filter(**params).order_by('-ref_time')[0]
+            data_object = self.model.objects.filter(akey=hash_key, action=range_key, completed_date__isnull=True).order_by('-ref_time')[0]
             for key in data.keys():
-                if key == 'related':
-                    #data_object.model = data[key]
-                    pass
+                if key == 'data':
+                    data_object.__setattr__(key, dump_json(data[key]))
                 else:
                     data_object.__setattr__(key, data[key])
+            
             data_object.full_clean()
             data_object.save()
         
@@ -58,7 +54,7 @@ class ModelStore(object):
             new_object.action = range_key
             
             #
-            new_object.data = json.dumps(new_object.data, default=API_json_parser)
+            new_object.data = dump_json(new_object.data)
             
             #
             new_object.full_clean()
@@ -76,12 +72,14 @@ class ModelStore(object):
             obj_data = model_to_dict(data_obj)
             
             pipe_data.update(obj_data)
+            pipe_data['data'] = load_json(data_obj.data)
+            
             #try:
             #    pipe_data['data'] = json.loads(data_obj.data)
             #except:
             #    traceback.print_exc()
             #    pipe_data['data'] = {}
-            pipe_data['data'] = deepcopy(data_obj.data)
+            #pipe_data['data'] = deepcopy(data_obj.data)
             return pipe_data
         
         except IndexError:
@@ -94,7 +92,7 @@ class ModelStore(object):
         rkeys = self.model.objects.filter(akey=hash_key)
         range_list = []
         for rkey in rkeys:
-            range_list.append(rkey.data)
+            range_list.append(load_json(rkey.data))
         return range_list
 
     def set_range_obj(self, hash_key, data, range_keys=None):

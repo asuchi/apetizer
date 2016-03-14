@@ -2,8 +2,8 @@
 {% load i18n content_tags %}
 
 {% block page_column %}
-{% with item_form=action_forms.0 %}
-    {% include 'apetizer/tags/action_forms.html' %}
-{% endwith %}
+<div class="ui inverted dividing item">    
+{% include 'apetizer/tags/action_forms.html' %}
+</div>
 {{ block.super }}
 {% endblock %}

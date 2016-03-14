@@ -12,6 +12,7 @@
                 
                 {% if request.user.is_authenticated %}
                 <div class="ui secondary menu">
+                    <a class="icon item" href="{{ currentNode.parent.get_url }}view/" ><i class="icon arrow left"></i></a>
                     <a class="icon item" href="view/" ><i class="icon eye"></i></a>
                     <a class="icon item" href="translate/" ><i class="icon edit"></i></a>
                     <a class="icon item" href="publish/" ><i class="icon book"></i></a>
@@ -19,6 +20,7 @@
                     <a class="icon item" href="location/" ><i class="icon marker"></i></a>
                     <a class="icon item" href="image/" ><i class="icon picture"></i></a>
                     <a class="icon item" href="related/" ><i class="icon share square"></i></a>
+                    <a class="icon item" href="file/" ><i class="icon file"></i></a>
                 </div>
                 {% else %}
                 {% endif %}
@@ -53,7 +55,11 @@
                     </a>
                     {% if currentNode.related_url %}
                     <div class="ui tiny item">
+                        {% if action == related %}
                         <a href="{{ currentNode.related_url }}"  target="_blank" >{{ currentNode.related_url|truncatechars:"128" }}</a>
+                        {% else %}
+                        <a href="related/" >{{ currentNode.related_url|truncatechars:"128" }}</a>
+                        {% endif %}
                     </div>
                     {% else %}
                     {% endif %}
@@ -65,8 +71,6 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                
-                
                 <div class="row">
                     <div class="ui buttons" >
                         <a class="ui tiny label" href="follow/" ><i class="icon "></i> Suivre</a>
@@ -79,24 +83,28 @@
             </div>
         {% endblock page_head %}
         </div>
+        
+        {% if user_profile.validated %}
         <div class="ui sixteen wide column" style="opacity:0.7">
             <div class="ui secondary pointing bottom menu full width">
-                <a class="icon item" href="read/" ><i class="icon book"></i></a>
-                <a class="icon item" href="timeline/" ><i class="icon calendar"></i></a>
-                <a class="icon item" href="map/" ><i class="icon globe"></i></a>
+                {% if currentNode.geojson or currentNode.get_events %}<a class="icon item" href="read/" ><i class="icon book"></i></a>{% endif %}
+                {% if currentNode.get_events %}<a class="icon item" href="timeline/" ><i class="icon calendar"></i></a>{% endif %}
+                {% if currentNode.geojson %}<a class="icon item" href="map/" ><i class="icon globe"></i></a>{% endif %}
                 {% comment %}<a class="icon item" href="{{ currentNode.get_uid_url }}directory/" ><i class="icon sitemap"></i></a>{% endcomment %}
+        {% if request.user.is_authenticated %}
         {% if not currentNode.published or action != 'view' %}
-                <a class="icon item right" href="pull/" ><i class="icon arrow up"></i></a>
-                <a class="icon item" href="code/" ><i class="icon code"></i></a>
-                <a class="icon item" href="push/" ><i class="icon arrow down"></i></a>
+                <a class="icon item right" href="pull/" ><i class="icon arrow down"></i></a>
+                <a class="icon item" href="related/" ><i class="icon code"></i></a>
+                <a class="icon item" href="push/" ><i class="icon arrow up"></i></a>
         {% else %}
         {% endif %}
-                
                 <a class="icon item right" href="edit/" ><i class="icon list layout"></i></a>
                 <a class="icon item" href="describe/" ><i class="icon list"></i></a>
                 <a class="icon item" href="program/" ><i class="icon grid layout"></i></a>
             </div>
+        {% endif %}
         </div>
+        {% endif %}
         
     </div>
 

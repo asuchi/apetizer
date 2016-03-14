@@ -21,9 +21,9 @@ handler404 = 'apetizer.views.front.handler404'
 handler500 = 'apetizer.views.front.handler500'
 
 urlpatterns = patterns( '', 
-        
-        url(r'^sitemap\.xml$', sitemap, {'sitemaps':{'content': ContentSitemap()}},
-            name='django.contrib.sitemaps.views.sitemap'),
+        url(r'^admin/', include(admin.site.urls)),
+        #url(r'^sitemap\.xml$', sitemap, {'sitemaps':{'content': ContentSitemap()}},
+        #    name='django.contrib.sitemaps.views.sitemap'),
         
         # homepage
         url(r'^$',

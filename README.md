@@ -1,97 +1,93 @@
 # Apetizer
 
+Apetizer est une application d'interaction de flux.
+
 ## concepts
+
+Elle est concue sur la bes d'un modèle de donnée hiérarchisé, traductible, versionable.
+
+Chaque element est transversalement:
+
+un chemin vers des données
+l'expression d'un visiteur
+une modération de donnée
+une traduction de ces donénes
+un élément hiérarchique et opérationel
+
+On peut representer ainsi les formes principale de structure de données web.
+
+L'interface de base est pensée pour donner accès a un ensemble d'action par objet.
+
+Les actions forment le vocabulaire de l'application.
+Elle produisent des modérations, status résultant des actions.
+
+Ce moteur basé sur les evènements permet d'aggrèger par référence l'historique des actions.
+Avec un état constant, on peut facilement synchroniser des noeuds distribués par branche.
+
+De base, le visiteur a tous les droits.
+
+
 
 ## use
 
-## install
+Elle peut etre utilisée:
 
-### Installation
+comme une application autonome, 
+comme application django,
 
-Install python 2.7, virtualenv, libpython2.7-dev & postgresql-devel (libpq-dev in Debian/Ubuntu)
+comme une extension jupyter notebook, 
+comme une application tornado
 
-In the directory where you have cloned the repo,
+
+# install
+
+Install python from 2.7 to 3.5
+Looks like it works with django 1.5 to 1.10
+
+In the directory where you have your project repo,
 create a virtualenv to collect python packages
 
 
     virtualenv --no-site-packages .
+
 
 Enter the virtualenv context
 
 
     source bin/activate
 
+
 Install the required packages
 
 
-    pip install -r requirements.txt
+    pip install git+https://github.com/biodigitals/apetizer.git#egg=apetizer
 
 
 Create the database:
 
 
-    python manage.py migrate
+    apetizer migrate
 
-
-Import the instance code and documentation:
-
-
-    python manage.py apetizer_documentation
 
 Create a superuser:
 
 
-    python manage.py createsuperuser
+    apetizer createsuperuser
 
 
 Run the server localy:
 
-    python manage.py runserver
+    apetizer runserver
 
 
-# contribute
 
-## fork and get well
+# Develop
 
-what you don't learn in a closed source company context
+utilisée comme une extension jupyter,
+elle permet d'editer dans leur contexte les éléments de contenu
 
-it's a mater of organisation ... organisation like company, but also like organising your stuff
+le développeur peut alors créer des scripts de comportement et leur assigner une périodicité.
 
-get it, enhance it, pull it back ...
-
-this looks like very simple ... but how to explain this concept to the untechnical peoples ?
-we are not all masters of git ...
-we are not all used to github tools
-
-our purpose to help you so
-
-you have the power to make changes,
-to this,
-to their,
-to our !
-
-so here are the easiest ways to help !
-
--> edit file in github
--> pull the request 
-
-i think this is why we don't see much people explaining this
-nobody told me or explained me how to do ... i had to figure it out by myself
-
-
-creating a pull request from your fork
-
-
-## make it yours
-
-propose your changes back to the community
-
-creating a pull request from your fork
-
-## <s>do it yourself</s>
-
-let's make it together !
-
-
+a lot More comming about this ... keep in touch
 
 

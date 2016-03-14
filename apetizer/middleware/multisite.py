@@ -1,9 +1,11 @@
+import base64
 import logging
 import os
 
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.cache import cache
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -82,7 +84,7 @@ class BasicAuthMiddleware(object):
                 return None
 
         # Otherwise this request requires basic auth
-        if not request.META.has_key('HTTP_AUTHORIZATION'):    
+        if not request.META.get('HTTP_AUTHORIZATION'):    
             return self.unauthed()
         else:
             authentication = request.META['HTTP_AUTHORIZATION']
@@ -90,8 +92,10 @@ class BasicAuthMiddleware(object):
             
             if 'basic' != authmeth.lower():
                 return self.unauthed()
-            auth = auth.strip().decode('base64')
-            username, password = auth.split(':',1)
+            
+            auth = base64.b64decode(auth.strip())
+            print(str(auth))
+            username, password = auth.decode("utf-8").split(':',1)
 
             if not self.expected_username or not self.expected_password:
                 raise ValueError('BASICAUTH_USERNAME / BASICAUTH_PASSWORD are not set and must be.')
@@ -122,6 +126,8 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
         self.subdomain = None
         self.env_domain_requested = None
         
+        #self.request.domain = self.domain
+        
         #self._old_TEMPLATE_DIRS = getattr(settings, "TEMPLATE_DIRS", None)
         #self._old_STATICFILES_DIRS = getattr(settings, "STATICFILES_DIRS", None)
         # main loop - lookup the site by domain/subdomain, plucking
@@ -135,13 +141,18 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
                 self.subdomain, self.domain = self.domain.split('.', 1)
                 res = self.lookup()
             except ValueError:
+                
+                # the redirect middleware needs to be informed 
+                # of the domain currently requested 
+                # even if domain request fails
+                
+                self.request.domain = self.domain
+                
                 if self.domain_unsplit != settings.DEFAULT_HOST:
                     try:
                         self.logger.debug(
                             'no match found redirecting to default_host=%s',
                             settings.DEFAULT_HOST)
-                        if settings.DEBUG:
-                            return
                         return self.redirect(settings.DEFAULT_HOST)
                     except AttributeError:
                         raise Http404
@@ -313,7 +324,7 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
             SITE_ID.value = site_id
             try:
                 self.site = Site.objects.get(id=site_id)
-            except Site.DoesNotExist:
+            except ObjectDoesNotExist:
                 # This might happen if the Site object was deleted from the
                 # database after it was cached.  Remove from cache and act
                 # as if the cache lookup failed.
@@ -327,7 +338,7 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
                 'Checking database for domain=%s',
                 self.domain)
             self.site = Site.objects.get(id=Frontend.objects.get(domain=self.domain).site_ptr_id)
-        except Frontend.DoesNotExist:
+        except ObjectDoesNotExist:
             return False
         if not self.site:
             return False
@@ -406,6 +417,6 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
         return self._redirect(new_host, subdomain)
 
     def find_env_hostname(self, target_domain):
-        for k, v in self.ENV_HOSTNAMES.iteritems():
+        for k, v in list(self.ENV_HOSTNAMES.items()):
             if v == target_domain:
                 return k

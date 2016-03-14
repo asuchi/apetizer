@@ -97,6 +97,14 @@ class VisitorValidateForm(ActionPipeForm):
                                                                 _(u'xxxxxxxxxxxx')}
                                                          ))
 
+class VisitorPrivatizeForm(ActionPipeForm):
+    slug = 'register-privatize-form'
+    title = _("Copy paste the key you received to validate your email")
+
+    policy = fields.CharField(label=_(u'Privacy policy'),
+                                 widget=TextInput(attrs={'placeholder':
+                                                                _(u'xxxxxxxxxxxx')}
+                                                         ))
 
 
 class UserForm(ActionModelForm):
@@ -110,3 +118,5 @@ class UserForm(ActionModelForm):
         self.fields['first_name'].required = True
         self.fields['last_name'].required = True
 
+    def save(self):
+        return False

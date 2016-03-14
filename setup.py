@@ -7,7 +7,6 @@ setup(
     author='Nicolas Danjean',
     author_email='nicolas@biodigitals.com',
     packages=['apetizer',
-              'apetizer.dispatchers',
               'apetizer.forms',
               'apetizer.management',
               'apetizer.middleware',
@@ -41,4 +40,9 @@ setup(
         'django-leaflet',
         'easy_thumbnails',
     ],
+    entry_points = {
+        'console_scripts': [
+            'apetizer = manage:parse_command',                  
+        ],              
+    },
 )

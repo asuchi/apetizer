@@ -8,7 +8,9 @@ from apetizer.models import Item
 
 
 class ContentSitemap(Sitemap):
-    
+    """
+    TODO
+    """
     changefreq = "never"
     priority = 0.5
     

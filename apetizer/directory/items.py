@@ -12,13 +12,10 @@ from django.template.defaultfilters import slugify
 from django.utils.translation import get_language
 
 from apetizer.directory.drilldown import Drilldown
-from apetizer.dispatchers.async import AsyncDispatcher
 from apetizer.models import Item, get_new_uuid
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
 
-
 logger = logging.getLogger(__name__)
-
 
 class ItemDrilldown(Drilldown):
     '''
@@ -147,7 +144,6 @@ def get_default_drilldown():
         drilldown = get_memcache_drilldown()
     else:
         drilldown = get_dict_drilldown()
-    AsyncDispatcher.get_instance().spawn(drilldown.load_items, tuple(), {})
     return drilldown
 
 global _search_drilldown_cache

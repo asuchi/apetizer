@@ -3,11 +3,10 @@ Created on 2 mars 2014
 
 @author: rux
 '''
-import json
 import logging
 import zlib
 
-from apetizer.parsers.json import dump_json, load_json
+from apetizer.parsers.api_json import dump_json, load_json
 from apetizer.utils.compatibility import unicode3
 
 
@@ -77,7 +76,7 @@ class DictStorage():
         allowed_max_size = 4*(1024)
         
         for path in self.values.keys():
-            size = len( zlib.compress(json.dumps(self.values[path])) )
+            size = len( zlib.compress(dump_json(self.values[path])) )
             average_size = (float(average_size)+size)/2
             if size > max_size:
                 max_size = size

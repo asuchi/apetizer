@@ -3,7 +3,6 @@ Created on 12 janv. 2016
 
 @author: biodigitals
 '''
-import json
 
 from apetizer.forms.semantic import SemanticDescribeForm, SemanticEditForm
 from apetizer.views.content import ContentView
@@ -14,13 +13,12 @@ class SemanticView(ContentView):
     class_actions = ['describe', 'edit']
     
     class_action_templates = {'describe':'semantic/describe.html',
-                              'edit':'semantic/edit.html',}
-    
+                              'edit':'semantic/edit.html',
+                              }
     
     class_actions_forms = {'describe':(SemanticDescribeForm,),
-                          'edit':(SemanticEditForm,),
-                          }
-    
+                           'edit':(SemanticEditForm,),
+                           }
         
     def process_describe(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -45,6 +43,12 @@ class SemanticView(ContentView):
             item.save()
         
         template_args['class_attributes'] = class_attributes
+        
+        # TODO
+        # we can build a tree of datapath nodes related to this item
+        # we can also cycle over them to get indeep instances
+        # building a node tree of class and instances
+        # same thing for edit ...
         
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
     

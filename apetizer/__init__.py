@@ -41,5 +41,3 @@ _history_connector = None
 #from apetizer.nosql.dynamodb import DynamoTable
 #DynamoTable( table_name, hash_key, range_key, indexes )
 
-
-

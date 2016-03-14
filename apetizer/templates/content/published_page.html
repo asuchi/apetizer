@@ -12,7 +12,7 @@
         
     {% ifchanged node.label %}
         {% if not forloop.first %}</div></div>{% endif %}
-        <div class="ui">
+        <div class="item">
             <a class="anchor" id="{{node.label|slugify}}"></a>
             <div class="item" >
                 <h2 class="header">{{ node.label }}<a class="anchor" id="{{ node.label }}"></a>
@@ -23,10 +23,11 @@
                     {{ node.description|markdown }}
                     </div>
                 {% else %}
-                </h2>
+                    <a class="ui right floated button" href="{{ node.get_url }}" ><i class="right chevron icon"></i></a>
+                    </h2>
                 {% endif %}
             </div>
-        <div class="ui divided items">
+            <div class="ui divided items">
         {% endifchanged %}
         
         {% ifchanged node.label %}
@@ -46,35 +47,35 @@
             {% endif %}
             <div class="middle aligned content">
                 <a class="anchor" id="{{ node.slug }}"></a>
+                
                 {% if node.parent.id != currentNode.id %}
                 {% ifchanged node.parent %}
-                <div class="ui item" >
                     {% content_breadcrumb node %}
-                </div>
                 {% endifchanged %}
                 {% endif %}
                 {% if node.behavior == 'image' and node.image %}
-                    <div class="ui item">
-                        <img class="ui image full width" src="{{ node.get_image.url }}" />
-                    </div>
                 {% endif %}
-                <h4 class="header" ><a href="{{ node.get_url }}view/" class="header">{{ node.title }}
-                </a></h4>
+                
+                <h4 class="header" ><a href="{{ node.get_url }}view/" class="header">{{ node.title }}</a></h4>
                 <p class="meta ">{{ node.description|markdown }}</p>
+                
                 {% if node.behavior == 'image' and node.image %}
-                    
+                    <div class="ui item">
+                        <img class="ui extra large image" src="{{ node.get_image.url }}" />
+                    </div>
                 {% elif node.behavior == 'upload' and node.file %}
                     <div class="ui item">
                         <a class="ui right floated" href="{{ node.file.url }}" >Telecharger {{ node.title }}</a>
                     </div>
+                {% elif node.behavior == 'related' and node.related_url %}
+                    <div class="ui item">
+                        <iframe src="{{ node.related_url }}" width="100%" height="320" border="0" style="border:1px solid gray;" ></iframe>
+                        <a class="ui right floated primary button"  href="{{ node.get_url }}" >Lire plus <i class="right chevron icon"></i></a>
+                    </div>
                 {% elif not node.is_leaf_node %}
                     <a class="ui right floated primary button"  href="{{ node.get_url }}" >Lire plus <i class="right chevron icon"></i></a>
                 {% else %}
-                    {% if node.parent == currentNode %}
-                    <div class="description">
-                    {% content_render node.content %}
-                    </div>
-                    {% endif %}
+                    
                 {% endif %}
                 
             </div>

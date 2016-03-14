@@ -8,9 +8,6 @@ from django.http.response import HttpResponseRedirect
 
 from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
-from apetizer.models import get_new_uuid
-from apetizer.manager import CoreManager
-from apetizer.dispatchers.async import AsyncDispatcher
 
 
 class BusynessView(ApiView, ActionView):
@@ -47,18 +44,5 @@ class BusynessView(ApiView, ActionView):
         # ask data from running job ?
         return self.render(request, template_args, input_data, **kwargs)
     
-    
-    def start_job(self, pipe, func, args, kwargs):
-        # generate a processing key based on akey
-        key = get_new_uuid()
-        
-        core = CoreManager.get_core()
-        core.jobs[key] = AsyncDispatcher.get_instance().spawn(func, args, kwargs)
-        
-        return key
-
-    def stop_job(self, key):
-        pass
-
 
 

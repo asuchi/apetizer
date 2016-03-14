@@ -13,7 +13,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from apetizer.forms.register import AuthenticateLoginForm, AuthenticatePasswordForm, \
-   RegisterForm, AuthenticateAgreeForm, UserForm
+   RegisterForm, AuthenticateAgreeForm, UserForm, VisitorForm
 from apetizer.models import Visitor
 from apetizer.views.visitor import VisitorView
 
@@ -24,16 +24,19 @@ class UserView(VisitorView):
     """
     view_name = 'authenticate'
     view_template = 'register/view.html'
-    class_actions = ['register', 'login', 'logout',]
+    class_actions = ['register', 'login', 'logout', 'account', 'dashboard',]
     
     class_actions_forms = {'login': (AuthenticateLoginForm,),
                            'register': (UserForm, 
-                                        AuthenticatePasswordForm, 
+                                        AuthenticatePasswordForm,
                                         AuthenticateAgreeForm),
+                           'account': (UserForm, ),
                            }
     
     class_action_templates = {'register': 'register/register.html',
                               'login': 'register/login.html',
+                              'account': 'register/account.html',
+                              'dashboard': 'register/dashboard.html',
                               }
     
     def __init__(self, *args, **kwargs):
@@ -51,12 +54,6 @@ class UserView(VisitorView):
                                           ('last_name',
                                            {'class': self.__class__,
                                             'action': 'register'}),
-                                          ('password',
-                                           {'class': self.__class__,
-                                            'action': 'register'}),
-                                          ('validated',
-                                           {'class': self.__class__,
-                                            'action': 'validate'}),
                                           ])
         
         self.action_scenarios['register'] = main_scenario
@@ -108,8 +105,8 @@ class UserView(VisitorView):
                 user_profile.validated = now()
                 user_profile.save()
                 
-                # redirect
-                return HttpResponseRedirect(user_profile.get_url()+'next/')
+                # redirect to the current page
+                return HttpResponseRedirect(kwargs['node'].get_url()+'view/')
             else:
                 # Return an 'invalid login' error message.
                 messages.add_message(request, messages.WARNING, _("Wrong login or password"))
@@ -129,46 +126,67 @@ class UserView(VisitorView):
         Set a password for the current user
         """
         # profile must have username and email
-        if not user_profile.email:
+        if not user_profile.email or not user_profile.username:
             return HttpResponseRedirect(user_profile.get_url()+'profile/')
         
         if not user_profile.validated:
-            return HttpResponseRedirect(user_profile.get_url()+'profile/')
+            return HttpResponseRedirect(user_profile.get_url()+'validate/')
         
         #return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
         # is ther a user logged in ?
         if request.user.is_authenticated():
             # the user should be able to set it's password
             # ask him the current one to change to a anew one
-            return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+            return HttpResponseRedirect(user_profile.get_url()+'profile/')
         else:
-            # check for forms validity
-            #kwargs['pipe']['data']['username'] = user_profile.username
-            #kwargs['pipe']['data']['email'] = user_profile.email
+            try:
+                user = get_user_model().objects.get(username=user_profile.username)
+                messages.add_message(request, messages.WARNING, _("A user with this username already exists"))
+                return HttpResponseRedirect(user_profile.get_url()+'profile/')
+            except ObjectDoesNotExist:
+                return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+
+    def process_account(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Display full user account
+        """
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+
+    def process_dashboard(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Display user dashboard
+        """
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
         
-            # check for an existing user
+    def manage_action_completed(self, request, user_profile, template_args, **kwargs):
+        
+        if kwargs['action'] in ('register',):
             try:
                 user = get_user_model().objects.get(username=user_profile.username)
                 messages.add_message(request, messages.WARNING, _("A user with this username already exists"))
                 return HttpResponseRedirect(user_profile.get_url()+'login/')
-            except ObjectDoesNotExist:
-                # create a user
-                # set user password
-                if 'password' in request.POST and request.POST['password']:
-                    user, = self.get_forms_instances(kwargs['action'], user_profile, kwargs)
-                    user.set_password(request.POST['password'])
-                    user.save()
-                    
-                    # log the user in
-                    auth_user = authenticate(username=user.username,
-                                            password=request.POST['password'])
-                    login(request, auth_user)
-                    
-                    user_profile.username = auth_user.username
-                    user_profile.email = auth_user.email
-                    user_profile.save()
             
-            return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+            except ObjectDoesNotExist:
+                
+                if kwargs['action'] == 'register':
+                    # set user password
+                    if 'password' in request.POST and request.POST['password']:
+                        #print(kwargs)
+                        #print(request.POST)
+                        user = template_args['action_forms'][0].instance
+                        user.set_password(request.POST['password'])
+                        user.save()
+                        
+                        # log the user in
+                        auth_user = authenticate(username=user.username,
+                                                password=request.POST['password'])
+                        login(request, auth_user)
+                        
+                        user_profile.username = auth_user.username
+                        user_profile.email = auth_user.email
+                        user_profile.save()
         
-
-
+        return super(UserView, self).manage_action_completed(request, user_profile, template_args, **kwargs)

@@ -21,11 +21,27 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
     view_name = "front"
     view_template = 'index.html'
     
-    default_action = 'index'
+    default_action = 'default'
     
-    class_actions = ['index', 'home']
+    class_actions = ['default', 'index', 'home']
     class_action_templates = {'index':'index.html',
                               'home':'home.html'}
+    
+    
+    def process_default(self, request, user_profile, input_data, template_args, **kwargs):
+        
+        if kwargs['node'].behavior \
+            and kwargs['node'].behavior != kwargs['action'] \
+            and kwargs['node'].behavior in self.actions:
+            
+            kwargs['action'] = kwargs['node'].behavior
+            template_args['action'] = kwargs['action']
+        else:
+            kwargs['action'] = 'view'
+            template_args['action'] = 'view'
+        
+        return self.process(request, user_profile, {}, template_args, **kwargs)
+    
     
     def process_home(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -37,7 +53,7 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
             template_args['projects'] = template_args['currentNode'].parent.get_children().filter(visible=True).exclude(id=template_args['currentNode'].id)
         
         return self.render(request, template_args, **kwargs)
-    
+
     def process_index(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Display an index page

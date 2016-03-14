@@ -4,7 +4,6 @@ Created on 30 sept. 2015
 @author: biodigitals
 '''
 import datetime
-import json
 from os.path import os
 from pprint import pprint
 
@@ -63,8 +62,8 @@ class MeetupWorker(BaseWorker):
         item.latitude = data['venue'].get('lat')
         item.longitude = data['venue'].get('lon')
         
-        item.data = json.dumps(data)
-        item.geojson = json.dumps({'Features':[{"Properties":data['venue']}]})
+        item.data = dump_json(data)
+        item.geojson = dump_json({'Features':[{"Properties":data['venue']}]})
         
         
         pprint(data)

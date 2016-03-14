@@ -3,7 +3,6 @@ Created on Feb 19, 2015
 
 @author: nicolas
 '''
-import json
 import mimetypes
 import os
 import re
@@ -11,6 +10,7 @@ import re
 from django import forms
 from django.conf import settings
 from django.forms.fields import BooleanField, FloatField, DateTimeField
+from django.forms.widgets import Textarea
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
@@ -18,8 +18,8 @@ import apetizer.default_settings as DEFAULTS
 from apetizer.forms.base import ActionModelForm
 from apetizer.forms.base import ActionPipeForm
 from apetizer.models import Item, Translation, DATETIME_FORMATS
+from apetizer.parsers.api_json import API_json_parser, dump_json
 from apetizer.utils.upload import format_file_extensions
-from django.forms.widgets import Textarea
 
 
 class FormControlMixin(object):
@@ -77,6 +77,13 @@ class ItemImageForm(ActionModelForm):
     class Meta:
         model = Item
         fields = ('image',)
+
+class ItemFileForm(ActionModelForm):
+    slug = 'item_file'
+    title = _('Modify this item')
+    class Meta:
+        model = Item
+        fields = ('file',)
 
 class ItemCodeForm(ActionModelForm):
     slug = 'item_code'
@@ -193,12 +200,12 @@ class MultiUploadForm(forms.Form):
             'maxFileSize': multiuploader_settings[form_type]["MAX_FILE_SIZE"],
             'acceptFileTypes': format_file_extensions(multiuploader_settings[form_type]["FILE_TYPES"]),
             'maxNumberOfFiles': multiuploader_settings[form_type]["MAX_FILE_NUMBER"],
-            'allowedContentTypes': map(str.lower, multiuploader_settings[form_type]["CONTENT_TYPES"]),
+            'allowedContentTypes': list(map(str.lower, multiuploader_settings[form_type]["CONTENT_TYPES"])),
             'autoUpload': multiuploader_settings[form_type]["AUTO_UPLOAD"]
         }
 
         self._options = options
-        self.options = json.dumps(options)
+        self.options = dump_json(options)
 
         super(MultiUploadForm, self).__init__(*args, **kwargs)
 

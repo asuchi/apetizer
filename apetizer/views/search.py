@@ -4,19 +4,15 @@ Created on 24 oct. 2013
 @author: rux
 '''
 import datetime
-import json
 import logging
-import math
 import operator
 from time import time
-import traceback
 import unicodedata
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import EmptyPage, Paginator, Page
-from django.core.urlresolvers import reverse
 from django.db.models.query_utils import Q
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template.context import RequestContext
@@ -44,6 +40,7 @@ from apetizer.templatetags.drilldown_tags import drilldown_item_title
 from apetizer.templatetags.search_tags import get_applied_form_filters
 from apetizer.views.visitor import VisitorView
 from collections import OrderedDict
+from apetizer.parsers.api_json import dump_json
 
 
 logger = logging.getLogger(__name__)
@@ -1022,7 +1019,7 @@ class SearchSession():
             self.json_data['points'] = _search_key_points[self.search_key]
             del _search_key_points[self.search_key]
         
-        self.json_data_string = json.dumps(self.json_data)
+        self.json_data_string = dump_json(self.json_data)
         
         
     
@@ -1039,11 +1036,11 @@ class SearchSession():
         self.template_vars['search_path'] = self.path_key
         
         if settings.DEBUG:
-            self.template_vars['user_data_json'] = json.dumps(self.user_data)
+            self.template_vars['user_data_json'] = dump_json(self.user_data)
             
             self.template_vars['directory_update'] = 'now'
             self.template_vars['directory_path'] = self.path_key
-            self.template_vars['directory_json'] = json.dumps(self.data)
+            self.template_vars['directory_json'] = dump_json(self.data)
         
         self.template_vars['start_time'] = self.start_time_tz
         self.template_vars['end_time'] = self.end_time_tz

@@ -3,9 +3,8 @@ Created on 16 mai 2014
 
 @author: rux
 '''
-from collections import OrderedDict
 import copy
-import json
+import traceback
 import uuid
 
 from django.core.cache import cache as action_cache
@@ -17,7 +16,7 @@ import six
 
 from apetizer.forms.base import ActionModelForm
 from apetizer.models import DataPath
-from apetizer.parsers.json import API_json_parser, load_json
+from apetizer.parsers.api_json import load_json, dump_json
 from apetizer.storages.kvstore import KVStore
 from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
@@ -42,7 +41,7 @@ class ActionPipeView(ApiView, ActionView):
         'action': 'undefined', #-> status !
         # second range index
         'path': None,
-        'data': json.dumps({}),
+        'data': dump_json({}),
     }
     
     pipe_hash_key = 'akey'
@@ -142,9 +141,7 @@ class ActionPipeView(ApiView, ActionView):
         """
         # get actual user data
         akey = self.get_session_user_keys(request)
-        
         kwargs['pipe'] = self.update_actionpipe_data(request, input_data, akey, **kwargs)
-        
         response = super(ActionPipeView, self).pre_process(request, input_data, **kwargs)
         
         return self.finish(request, response, **kwargs)
@@ -246,7 +243,6 @@ class ActionPipeView(ApiView, ActionView):
             # instance data
             final_data = {}
             final_data.update(action_data['data'])
-            
             # add pipe data from the models to the data pipe
             for f in action_forms:
                 if isinstance(f,ActionModelForm):
@@ -267,6 +263,7 @@ class ActionPipeView(ApiView, ActionView):
             if is_finished:
                 action_data['completed_date'] = now()
                 action_data['data'].update(final_data)
+                #print('Finished')
                 self.save_actionpipe_data(request, action_data, action_data['akey'], **kwargs)
                 return self.manage_action_completed(request, user_profile, template_args, **kwargs)
             
@@ -354,7 +351,7 @@ class ActionPipeView(ApiView, ActionView):
             #    del data_dict['data'][field]
         
         # ensure json normalize
-        data_dict['data'] = load_json(json.dumps(data_dict['data']))
+        data_dict['data'] = load_json(dump_json(data_dict['data']))
         
         # markup
         data_dict['action'] = kwargs.get('action')
@@ -383,13 +380,14 @@ class ActionPipeView(ApiView, ActionView):
         self.pipe_table.put(akey, range_key, data_dict)
         
         # write to cache
-        data_dict['data'] = json.dumps(data_dict['data'], default=API_json_parser)
+        data_dict['data'] = dump_json(data_dict['data'])
         action_cache.set(self.get_action_cache_key(akey), data_dict)
 
         # restore uncompressed
         try:
             data_dict['data'] = load_json(data_dict['data'])
         except:
+            traceback.print_exc()
             data_dict['data'] = {}
 
         return data_dict

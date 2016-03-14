@@ -32,9 +32,7 @@
 {% block page_container %}
 <div class="ui row" >
     <div class="ui eleven wide column">
-        
         {% block content %}
-        
         {% if action == 'view' and currentNode.content %}
         <div class="ui vertical segment">
             {% autoescape off %}
@@ -42,15 +40,13 @@
             {% endautoescape %}
         </div>
         {% endif %}
-        
-        {% include 'content/published_page.html' %}
+        {% include 'content/published_page.html' %}        
         {% endblock content %}
-        
+        <a class="anchor" id="bottom" />
     </div>
 
-
     <div class="ui five wide column">
-        
+        {% block page_column %}
         {% if currentNode.data %}
             {% if DEBUG %}
             {% if action == 'data' %}
@@ -60,8 +56,53 @@
             {% endif %}
             {% endif %}
         {% endif %}
+        {% with contributors=currentNode.get_contributors %}
+        <div class="ui item dividing" >
+            <h4 class="ui header">Contributeurs ({{contributors|length}})</h4>
+            <div class="ui list" >
+                {% for contributor in contributors %}
+                <div class="item">
+                    <img class="ui avatar image" src="{{ contributor.get_author.get_image.url }}" >
+                    <div class="content">
+                        <a class="" href="{{ contributor.get_author.get_url }}" >{{ contributor.get_author.get_full_name }}</a>
+                        <div class="content">
+                          {% moment_from_now contributor.modified_date %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="ui top right attached mini label">
+                <a href="{{ currentNode.get_url }}consult/" >History ({{ currentNode.get_history|length }})</a>
+            </div>
+        </div>
+        {% endwith %}
+        
+        {% if request.user.is_authenticated %}
+        <div class="ui hidden divider"></div>
+        <div class="ui item">
+            <div class="header">{{ currentNode.get_visits|length }} visites</div>
+            <div class="header">{{ currentNode.get_visitors|length }} visiteurs</div>
+        </div>
+        {% endif %}
         
         {% comment %}
+        <div class="ui hidden divider"></div>
+        <div class="ui item dividing" >
+            <h4 class="ui header">Auteur(s)</h4>
+            {% with contributor=currentNode.get_author %}
+            <div class="item">
+                <img class="ui avatar image" src="{{ contributor.get_image.url }}" >
+                <div class="content">
+                    <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
+                    <div class="content">
+                      <span class="date">{% moment_from_now contributor.modified_date %}</span>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+        
         <div class="ui dividing item" >
             <h4 class="ui header">{{ nodes.0.parent.title }}</h4>
         {% if nodes|length > 1 %}
@@ -74,7 +115,6 @@
                         </a>
                         {% endifchanged %}
                     {% endfor %}
-                
                 {% else %}
                 {% for node in nodes %}
                 {% if not node.is_leaf_node and node.label != node.title %}
@@ -100,55 +140,27 @@
             <a class="ui item mini spaced button" href="follow/" >Suivre</a>
         </div>
         {% endcomment %}
+        {% endblock %}
+    </div>
+</div>
+
+{% block page_review %}
+<div class="row" >
+    <div class="ui eleven wide column">
+        <div class="ui vertical segment">
+            {% include 'moderate/tags/comments.html' %}
+            {% include 'moderate/tags/comment_form.html' %}
+        </div>
+    </div>
+    
+    <div class="ui five wide column">
         
         {% comment %}
         <div class="ui hidden divider"></div>
-        <div class="ui item dividing" >
-            <h4 class="ui header">Auteur(s)</h4>
-            {% with contributor=currentNode.get_author %}
-            <div class="item">
-                <img class="ui avatar image" src="{{ contributor.get_image.url }}" >
-                <div class="content">
-                    <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
-                    <div class="content">
-                      <span class="date">{% moment_from_now contributor.modified_date %}</span>
-                    </div>
-                </div>
-            </div>
-            {% endwith %}
+        <div class="ui item dividing">
+            <h4 class="ui header" >Note</h4>
+            {% moderate_average_evaluation currentNode %}
         </div>
-        {% endcomment %}
-        
-        {% with contributors=currentNode.get_contributors %}
-        <div class="ui item dividing" >
-        
-        
-            <h4 class="ui header">Contributeurs ({{contributors|length}})</h4>
-            <div class="ui list" >
-                {% for contributor in contributors %}
-                <div class="item">
-                    <img class="ui avatar image" src="{{ contributor.get_author.get_image.url }}" >
-                    <div class="content">
-                        <a class="" href="{{ contributor.get_author.get_url }}" >{{ contributor.get_author.get_full_name }}</a>
-                        <div class="content">
-                          {% moment_from_now contributor.modified_date %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            
-            <div class="ui top right attached mini label"><a href="{{ currentNode.get_url }}consult/" >History ({{ currentNode.get_history|length }})</a></div>
-        </div>
-        {% endwith %}
-        
-        
-        <div class="ui hidden divider"></div>
-        <div class="ui item">
-            <div class="header">{{ currentNode.get_visits|length }} visites</div>
-            <div class="header">{{ currentNode.get_visitors|length }} visiteurs</div>
-        </div>
-        
         
         {% with subscribers=currentNode.get_subscribers %}
         {% if subscribers|length > 1 %}
@@ -168,56 +180,9 @@
         </div>
         {% endif %}
         {% endwith %}
-        
-        {% comment %}
-        <div class="ui hidden divider"></div>
-        <div class="ui item dividing">
-            <h4 class="ui header" >Note</h4>
-            {% moderate_average_evaluation currentNode %}
-        </div>
         {% endcomment %}
     </div>
 </div>
-
-{% block page_review %}
-<div class="ui row" >
-    <div class="ui eleven wide column">
-    <div class="ui item">
-            {% include 'moderate/tags/comments.html' %}
-            {% include 'moderate/tags/comment_form.html' %}
-        </div>
-    </div>
-    <div class="ui five wide column">
-
-    <div class="ui hidden divider"></div>
-    <div class="ui item dividing">
-        {% if currentNode.get_reviewers|length %}
-        <h4 class="ui header" >Votes</h4>
-        <div class="ui feed">
-        {% for comment in currentNode.get_reviewers %}
-            <div class="event">
-                <div class="label">
-                  <img class="ui avatar image" src="{{ comment.get_author.get_image.url }}">
-                </div>
-                <div class="content">
-                  <div class="summary">
-                    <a class="user" href="{{ comment.get_author.get_url }}" >
-                      {{ comment.get_full_name }}
-                    </a>
-                    <div class="ui label right" >{{ comment.status }}</div>
-                  </div>
-                  <div class="extra text">
-                    <div class="date">
-                      {% moment_from_now comment.modified_date %}
-                    </div>
-                  </div>
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-        {% endif %}
-        {% include 'moderate/tags/review_form.html' %}
-    </div>
 {% endblock page_review %}
-</div>
+
 {% endblock page_container %}

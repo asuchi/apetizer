@@ -26,7 +26,8 @@ class ItemRedirect(object):
             return
         
         try:
-            node_path = '/'+request.META['HTTP_HOST'].split(':')[0]+request.path
+            #node_path = '/'+request.META['HTTP_HOST'].split(':')[0]+request.path
+            node_path = '/'+request.domain+request.path
             item = Item.objects.get_at_url(node_path, exact=True)
         except ObjectDoesNotExist:
             return

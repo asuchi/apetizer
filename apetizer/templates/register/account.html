@@ -1,0 +1,243 @@
+{% extends 'register/base.html' %}
+{% load momentjs %}
+
+{% block page_container %}
+<div class="ui padded grid">
+<div class="ui sixteen wide column" >
+    <div class="ui secondary pointing menu" >
+        <a class="active item" href="profile/" >Apercu</a>
+        <a class="active item right" href="view/" >Profile</a>
+        <a class="item" href="privatize/" >Privatize</a>
+        {% comment %}
+        <a class="item" href="profile/?status=" >Activité ()</a>
+        <a class="item" href="profile/?status=folowing" >Suivi ()</a>
+        <a class="item" href="profile/?status=modified" >Contributions ()</a>
+        <a class="item" href="profile/?status=commented" >Commentaires ()</a>
+        <a class="item" href="profile/?status=contact" >Messages ()</a>
+        {% endcomment %}
+    </div>
+</div>
+{% comment %}
+<div class="row">
+    <div class="ui sixteen wide column">
+        <div class="ui vertical segment">
+            <div class="ui five columns grid">
+                {% with moderations=user_profile.get_contributions %}
+                <div class="column">
+                    <h3 class="header">{{ moderations|length }} contributions</h3>
+                </div>
+                {% endwith %}
+                {% with moderations=user_profile.get_proposed %}
+                <div class="column ">
+                    <h3 class="header">{{ moderations|length }} propositions</h3>
+                </div>
+                {% endwith %}
+                {% with moderations=user_profile.get_votes %}
+                <div class=" column ">
+                    <h3 class="header">{{ moderations|length }} votes</h3>
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endcomment %}
+
+<div class="row" >
+    <div class="ui ten wide column">
+        <div class="ui vertical segment">        
+            <div class="ui dividing item">
+                <h3 class="header">Acitvité</h3> {{ user_profile.get_feed|length }} intéractions
+            </div>
+        </div>
+        <div class="ui vertical segment">
+            <div class="ui feed">
+            {% for comment in user_profile.get_feed %}
+            
+            {% ifchanged comment.status or comment.related or comment.email or comment.action %}
+                <div class="event">
+                
+                    <div class="label">
+                    {% ifchanged comment.email %}
+                      <img src="{{ comment.get_image.url }}" />
+                    {% endifchanged %}
+                    </div>
+                    
+                    <div class="content {% if comment.status == 'proposed' %}ui message warning
+                                        {% elif comment.status == 'accepted' %}ui message success
+                                        {% elif comment.status == 'rejected' %}ui message error{% endif %}">
+                        <div class="summary">
+                            {% if comment.email and comment.get_hash == user_profile.get_hash %}
+                                You {{ comment.status }}
+                            {% else %}
+                                <a class="user" href="{{ comment.visitor.get_uid_url }}" >
+                                  {{ comment.get_full_name }}
+                                </a> 
+                                 {{ comment.subject }}
+                            {% endif %}
+                            <a class="ui right floated" href="{{ comment.related.get_uid_url }}" >
+                                {{ comment.related.title|default:comment.path }}
+                            </a>
+                            <div class="date">{% moment_from_now comment.modified_date %}</div>
+                        </div>
+                        
+                        <div class="extra text">
+                            {% with image_related=comment.related.get_image %}
+                            {% if comment.action == 'image' and image_related %}
+                                <img class="ui tiny image" src="{{ image_related.url }}" />
+                            {% endif %}
+                            {% endwith %}
+                            {% if DEBUG %}
+                            <p>{{ comment.data }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="meta">
+                        </div>
+                    </div>
+                
+                </div>
+                {% endifchanged %}
+                
+                {% if forloop.last %}
+                {% endif %}
+                
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="ui six wide column">
+        
+        {% with messages=user_profile.get_messages %}
+        {% if messages|length %}
+        <div class="ui vertical segment">
+            <div class="header">
+                <h3>Messages ({{ messages|length }})</h3>
+                <div class="ui feed">
+                    {% for message in messages %}
+                        <div class="event">
+                            <div class="label">                                
+                                <div class="ui image avatar" ><img src="{{ message.get_image.url }}" /></div>
+                            </div>
+                            <div class="content">
+                                <div class="summary">   
+                                    <a href="{{ message.visitor.get_url }}" >{{ message.get_full_name }}</a>, 
+                                    <div class="date" >{% moment_from_now message.modified_date %}</div>
+                                </div>
+                                <div class="extra text">
+                                    <div class="ui sub header">{{ message.subject }}</div>
+                                    <div class="">{{ message.message }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% comment %}
+        <div class="ui center aligned container">
+            <h4 class="ui inverted header">Mes groupes</h4>
+            <div class="ui horizontal list">
+                {% for membership in user_profile.get_memberships %}
+                  <a class="item" href="{{ membership.get_url }}">
+                    {% if membership.image %}
+                        <img class="ui item mini image" src="{{ membership.image.url }}" />
+                    {% else %}
+                        <img class="ui item mini image" src="{% static 'images/logo-apetizer.png' %}" />
+                    {% endif %}
+                    <span>
+                     {{ membership.title }}
+                     </span>
+                  </a>
+                {% endfor %}
+            </div>
+            <div class="ui inverted section divider"></div>
+        </div>
+        {% endcomment %}
+        
+        {% with moderations=user_profile.get_contributions %}
+        {% if moderations|length %}
+        <div class="ui vertical segment">
+            <h3 class="header">{{ moderations|length }} contributions</h3>
+            <ul class="ui list">
+            {% for moderation in moderations %}
+                <li class="item"><a href="{{ moderation.get_url }}">{{ moderation.related.label }} - {{ moderation.related.title }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% with moderations=user_profile.get_proposed %}
+        {% if moderations|length %}
+        <div class="ui vertical segment">
+            <h3 class="header">{{ moderations|length }} propositions</h3>
+            <ul class="ui list">
+            {% for moderation in moderations %}
+                {% if moderation.status == 'accepted' or moderation.status == 'rejected' %}
+                
+                {% else %}
+                <li class="item"><a href="{{ moderation.get_url }}">{{ moderation.related.label }} - {{ moderation.related.title }}</a></li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% with moderations=user_profile.get_subscriptions %}
+        {% if moderations|length %}
+        <div class="ui vertical segment">
+            <h3 class="header">{{ moderations|length }} souscriptions</h3>
+            <ul class="ui list">
+            {% for moderation in moderations %}
+                <li class="item"><a href="{{ moderation.get_url }}">{{ moderation.related.label }} - {{ moderation.related.title }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="ui sixteen wide column">
+        <h4>Suivi</h4>
+        <div class="ui seven cards doubling">
+        {% for node in user_profile.get_followings %}
+            <div class="ui card">
+              <div class="tiny image">
+                <img src="{{ node.related.get_image.url }}">
+              </div>
+              <div class="content">
+                <a class="header" href="{{ node.related.get_url }}" >{{ node.related.title }}</a>
+                <div class="meta">
+                  <span class="date">{{ node.related.label }}</span>
+                </div>
+                {% comment %}
+                <div class="description">
+                  {{ node.related.description }}
+                </div>
+                {% endcomment %}
+              </div>
+              {% comment %}
+              <div class="extra content">
+                <a>
+                  <i class="user icon"></i>
+                  22 Friends
+                </a>
+              </div>
+              {% endcomment %}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+    
+</div>
+
+</div>
+{% endblock %}

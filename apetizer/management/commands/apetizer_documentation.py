@@ -18,10 +18,11 @@ from apetizer.views.front import FrontView
 can_import_settings = True
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
-
-    #def add_arguments(self, parser):
-    #    parser.add_argument('poll_id', nargs='+', type=int)
+    """
+    This command is meant to build the documentation root of the server
+    It will be deprecated when automated import/export of documentation notebooks
+    """
+    help = 'Parses code documentation'
 
     def handle(self, *args, **options):
         

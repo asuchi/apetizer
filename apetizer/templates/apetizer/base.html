@@ -51,20 +51,6 @@
 
     });
 
-    $(document).ready(function(){
-    
-        $('.ui.sticky')
-          .sticky({
-            context: '#body',
-            pushing: true,
-          })
-        ;
-        
-        $('.ui.accordion').accordion();
-    
-    });
-    
-    
 
 </script>
 
@@ -157,66 +143,152 @@
 </style>
 
 <body >
-{% block page_body %}
 
+{% block page_body %}
 <div class="env" ></div>
+
 <div id="body" class="started pushable" ontouchstart="">
-<div class="pusher">
-    <div class="ui full height" style="">
-    
-        <div class="article">
-        <div class="ui large secondary pointing menu" >
-            <a href="/" class="active item">Accueil</a>
-           
-            <form class="ui fluid item form" action="" method="get" rol="form" >
-                <div class="ui large category search">
-                  <div class="ui left icon transparent input">
-                    <i class="search icon"></i>
-                    <input class=" prompt" name="keyword" placeholder="Search keyword ..." type="text">
-                  </div>
-                  <div class="results"></div>
-                </div>
-            </form>
-            
-            <div class="right item">
-              {% if user_profile.email %}
-                    {% if not user_profile.validated %}
-                        <a class="ui button" href="{{ user_profile.get_url }}validate/" ><i class="icon warning-sign"></i>Valider ma session</a>
-                    {% else %}
-                        <a class="ui button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
-                        {% if user_profile.get_image %}
-                        {% endif %}
-                    {% endif %}
-                {% else %}
-                    <a class="ui inverted button" href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
-                {% endif %}
-            </div>
-            
-                {% comment %}
-            {% if request.user.is_authenticated %}
-                <a href="{{ user_profile.get_url }}register/" class="item" >{% if request.user.is_authenticated %}{{ request.user.username }}{% endif %}
-                <a href="{{ user_profile.get_url }}logout/" class="item" ><i class="icon remove"></i></a>
+
+    <div class="ui sidebar inverted vertical menu">
+        
+       <div class="item">
+           <a class="ui mini image" href="{{ rootNode.get_url }}">
+           {% if rootNode.image %}
+               <img class="icon image" src="{{ rootNode.image.url }}" />
             {% else %}
-                <a href="{{ user_profile.get_url }}reset/" class="item" ><i class="icon recycle"></i></a>
+                {% comment %}<img src="{% static 'images/logo-apetizer.png' %}" />{% endcomment %}
             {% endif %}
-                {% endcomment %}
+          </a><br />
+          <a href="{{ rootNode.get_url }}view/"><b>{{ rootNode.label }}</b></a>
         </div>
         
-        {% block page_message %}
-        <div id="messages">
-        {% for message in messages %}
-            {% if not debug or 'debug' not in message.tags %}
-                <div class="ui warning message">
-                  <i class="close icon"></i>
-                  <div class="header">
-                    {{ message.title }}
-                  </div>
-                  {{ message|safe }}
-                </div>
+        {% for node in roots %}
+            {% ifchanged node.label %}
+            <div class="item">
+                <a class="" href="{{ node.get_url }}view/">
+                  <b>{{ node.label }}</b>
+                </a>
+                {% if user_profile.validated %}
+                <a class="ui circular mini label" href="{{ node.get_url }}add/"> <b>+</b></a>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="menu">
+            <a class="item" href="{{ node.get_url }}view/">{{ node.title }}</a>
+            </div>
+            {% endifchanged %}
+            {% if not node.is_leaf_node %}
+            <div class="menu">
+            {% with cnodes=node.get_children %}
+              {% regroup cnodes|dictsort:"label" by label as label_list %}
+              {% for l in label_list %}
+                {% with child=l.list.0 %}
+                  {% if child.is_leaf_node %}
+                  <a class="item" href="{{ child.parent.get_url }}view/#{{ child.slug }}">{{ child.label }} </a>
+                  {% else %}
+                  <a class="item" href="{{ child.get_url }}view/"><b>{{ child.label }}</b> </a>
+                  {% endif %}
+                 {% endwith %}
+              {% endfor %}
+            {% endwith %}
+            </div>
             {% endif %}
         {% endfor %}
+        
+        {% if user_profile.validated %}
+        <div class="item divider">
+            <a class="" href="{{ rootNode.get_url }}add/">
+              <i class="icon add"></i> Ajouter un chapitre
+            </a>
         </div>
-        {% endblock %}
+        {% endif %}
+
+    </div>
+
+<div class="pusher">
+    <div class="ui full height" style="">
+        <div class="article">
+            
+            <div class="ui large secondary pointing menu" >
+            
+                <a href="/" class="active item">Accueil</a>
+            
+                <div id="navigate" class="ui big launch button item">
+                   <i class="content icon"></i>
+                   <span class="text">Menu</span>
+                </div>
+                
+                <form class="ui fluid item form" action="search/" method="get" rol="form" >
+                    <div class="ui large category search">
+                      <div class="ui left icon transparent input">
+                        <i class="search icon"></i>
+                        <input class=" prompt" name="keyword" placeholder="Search keyword ..." type="text">
+                      </div>
+                      <div class="results"></div>
+                    </div>
+                </form>
+                
+                <div class="right menu">
+                    
+                    {% comment %}
+                    {% if request.user.is_authenticated %}
+                    <div class="item">
+                    {% if user_profile.email %}
+                        {% if not user_profile.validated %}
+                            <a class="ui " href="{{ user_profile.get_url }}validate/" ><i class="icon warning-sign"></i>Valider ma session</a>
+                        {% else %}
+                            <a class="ui " href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
+                            {% if user_profile.get_image %}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <a class="ui " href="{{ user_profile.get_url }}profile/" ><i class="icon user"></i> {{ user_profile.get_full_name }}</a>
+                    {% endif %}
+                        <a href="{{ user_profile.get_url }}logout/" class="mini" ><i class="icon remove"></i></a>
+                    </div>
+                    {% endif %}
+                    {% endcomment %}
+                    
+                    {% if not request.user.is_authenticated %}
+                    <div class="item">
+                        <a class="ui primary button" href="login/" >Se connecter</a>
+                      </div>
+                    {% else %}
+                      <div class="item">
+                          {% if request.user.is_staff %}
+                            <a class="ui button" href="/admin/" >Admin</a>
+                          {% endif %}
+                        <a class="ui primary button" href="dashboard/" >Tableau de bord</a>
+                      </div>
+                    {% endif %}
+                    
+                </div>
+                
+                    {% comment %}
+                {% if request.user.is_authenticated %}
+                    <a href="{{ user_profile.get_url }}register/" class="item" >{% if request.user.is_authenticated %}{{ request.user.username }}{% endif %}
+                    <a href="{{ user_profile.get_url }}logout/" class="item" ><i class="icon remove"></i></a>
+                {% else %}
+                    <a href="{{ user_profile.get_url }}reset/" class="item" ><i class="icon recycle"></i></a>
+                {% endif %}
+                    {% endcomment %}
+            </div>
+        
+            {% block page_message %}
+            <div id="messages">
+            {% for message in messages %}
+                {% if not debug or 'debug' not in message.tags %}
+                    <div class="ui warning message">
+                      <i class="close icon"></i>
+                      <div class="header">
+                        {{ message.title }}
+                      </div>
+                      {{ message|safe }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            </div>
+            {% endblock %}
         
         {% block page_article %}
             <div class="ui masthead vertical segment" >
@@ -238,39 +310,19 @@
     </div>
     
     <div class="ui black inverted vertical footer segment">
-        {% comment %}
-        <div class="ui center aligned container">
-            <h4 class="ui inverted header">Mes groupes</h4>
-            <div class="ui horizontal list">
-                {% for membership in user_profile.get_memberships %}
-                  <a class="item" href="{{ membership.get_url }}">
-                    {% if membership.image %}
-                        <img class="ui item mini image" src="{{ membership.image.url }}" />
-                    {% else %}
-                        <img class="ui item mini image" src="{% static 'images/logo-apetizer.png' %}" />
-                    {% endif %}
-                    <span>
-                     {{ membership.title }}
-                     </span>
-                  </a>
-                {% endfor %}
-            </div>
-            <div class="ui inverted section divider"></div>
-        </div>
-        {% endcomment %}
-    
-    
-        {% block toc %}
+    {% block page_footer %}
+       
+       {% comment %}
         <div class="ui vertical padded segment inverted container">
               
               <div class="ui six columns doubling grid">
                   
-              <div class="column">
-                <a class="ui mini image" href="{{ rootNode.get_url }}">
-                    <img class="icon image" src="{{ rootNode.get_image.url }}" />
-                  </a><br />
-                  <a href="{{ rootNode.get_url }}view/"><b>{{ rootNode.label }}</b></a>
-              </div>
+                  <div class="column">
+                    <a class="ui mini image" href="{{ rootNode.get_url }}">
+                        <img class="icon image" src="{{ rootNode.get_image.url }}" />
+                      </a><br />
+                      <a href="{{ rootNode.get_url }}view/"><b>{{ rootNode.label }}</b></a>
+                  </div>
             
                 {% for node in roots %}
                 
@@ -310,9 +362,9 @@
                 
               </div>
         </div>
-        {% endblock toc %}
+        {% endcomment %}
     
-    {% block page_footer %}
+    
         <div class="ui center aligned container">
             <div class="ui stackable inverted grid">
               <div class="three wide column">
@@ -336,13 +388,6 @@
               <div class="seven wide right floated column">
                 <h4 class="ui inverted teal header">Aider à péréniser ce projet</h4>
                 <p> Le soutien du développement Apetizer vient directement de la communauté.</p>
-                {% comment %}
-                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                  <input type="hidden" name="cmd" value="_s-xclick">
-                  <input type="hidden" name="hosted_button_id" value="7ZAF2Q8DBZAQL">
-                  <button type="submit" class="ui large teal button">Faites un don aujourd'hui</button>
-                </form>
-                {% endcomment %}
                 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
                 <input type="hidden" name="cmd" value="_donations">
                 <input type="hidden" name="business" value="nicolas.danjean@free.fr">
@@ -351,44 +396,50 @@
                 <input type="hidden" name="no_note" value="0">
                 <input type="hidden" name="currency_code" value="EUR">
                 <input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
-                <input type="image" src="{% static 'images/btn_donate_LG.gif' %}" border="0" name="submit" alt="PayPal - la solution de paiement en ligne la plus simple et la plus sécurisée !">
+                <input type="image" src="{% static 'images/btn_donate_LG.gif' %}" border="0" name="submit" alt="Faire un don avec PayPal">
                 </form>
-        
               </div>
             </div>
             <div class="ui inverted section divider"></div>
             <img src="{% static 'images/logo-apetizer.png' %}" class="ui centered mini image">
-            {% comment %}
             <div class="ui horizontal inverted small divided link list">
-              <a class="item" href="http://biodigitals.mit-license.org/" target="_blank">Gratuit et Open Source (MIT)(CC)</a>
+              <a class="item" href="http://biodigitals.mit-license.org/" target="_blank">Gratuit et Open Source (MIT)(A-GPL)(CC)</a>
             </div>
-            {% endcomment %}
           </div>
         </div>
         {% endblock page_footer %}
     </div>
-    
-  </div>
-  
 </div>
-
 {% endblock %}
 
 {% block extra-scripts %}
-<script type="text/javascript">
-$(document).ready(function () {
-    var ws = new WebSocket("ws:{{ currentNode.get_root.slug }}:8000/{{ currentNode.id }}.ws");
-    ws.onmessage = function(event) {
-       var message = JSON.parse(event.data);
-       console.log(event.data);
-       $('#messages').append('<div class="ui warning message"><i class="close icon"></i><div class="header">'+message['subject']+'</div>'+message['message']+'</div>');
-    }
-});
-</script>
-
+{{ block.super }}
 
 <script>
+
+    $(document).ready(function(){
     
+        $('.ui.accordion').accordion();
+        
+        $('#navigate').click(function(){
+            $('.ui.sidebar')
+            .sidebar('toggle')
+        ;});
+        
+        $('.ui.sticky')
+          .sticky({
+            context: '#body',
+            pushing: true,
+          })
+        ;
+    });
+    
+</script>
+
+<script type="text/javascript">
+$(document).ready(function () {
+
+    {% if user_profile.validated %}
     $('.ui.search')
       .search({
         debug: true,
@@ -415,10 +466,18 @@ $(document).ready(function () {
         
       })
     ;
+    {% endif %}
+    
+    {% if request.user.is_authenticated %}
+    var ws = new WebSocket("ws:{{ currentNode.get_root.slug }}:{{request.META.SERVER_PORT}}/{{ currentNode.id }}.ws");
+    ws.onmessage = function(event) {
+       var message = JSON.parse(event.data);
+       console.log(event.data);
+       $('#messages').append('<div class="ui warning message"><i class="close icon"></i><div class="header">'+message['status']+'</div>'+message['message']+'</div>');
+    }
+    {% endif %}
+});
 </script>
-
-{{ block.super }}
 {% endblock %}
-
 {% include "content/assets/scripts.html" %}
 </body></html>

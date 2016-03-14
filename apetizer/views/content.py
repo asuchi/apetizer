@@ -100,10 +100,6 @@ class ContentView(ApiView, ActionView):
         elif request_path.endswith(action):
             request_path = request_path[:-len(action)]
         
-        # check for pagination pattern in end of path
-        # my-slug-[1,2,3 ... 
-        # my-slug-[A,B,C,D ...
-        
         template_args = super(ContentView, self).get_context_dict(request, user_profile, input_data, **kwargs)
         
         item_path = Item.objects.get_clean_path(request_path)
@@ -156,6 +152,11 @@ class ContentView(ApiView, ActionView):
         if page:
             
             rootNode = page.get_root()
+            if user_profile.get_hash() == rootNode.slug:
+                rootNode = Item.objects.get_at_url(request.path_info, exact=False).get_root()
+            else:
+                rootNode = page.get_root()
+                
             roots = rootNode.get_children().filter(visible=True).order_by('order')
             
             if page.parent:
@@ -192,20 +193,9 @@ class ContentView(ApiView, ActionView):
         return super(ContentView, self).process(request, user_profile, input_data, template_args, **kwargs)
     
     def process_view(self, request, user_profile, input_data, template_args, **kwargs):
-        
         if kwargs['node'].redirect_url and kwargs['node'].visible == False:
             return HttpResponseRedirect(kwargs['node'].redirect_url)
-        
-        if kwargs['node'].behavior \
-            and kwargs['node'].behavior != 'view' \
-            and kwargs['node'].behavior in self.actions:
-            
-            kwargs['action'] = kwargs['node'].behavior
-            template_args['action'] = kwargs['action']
-            
-            return self.process(request, user_profile, {}, template_args, **kwargs)
-        else:
-            return self.render(request, template_args, **kwargs)
+        return self.render(request, template_args, **kwargs)
     
     def process_read(self, request, user_profile, input_data, template_args, **kwargs):
         return self.render(request, template_args, **kwargs)
@@ -352,7 +342,7 @@ class ContentView(ApiView, ActionView):
 
                 page_template = current_frontend.folder_name+'/pages/'+template_args['currentNode'].slug+'.html'
                 templates.insert(0, page_template)
-            
+       
             #elif template_args['currentNode'].visible:
 
             

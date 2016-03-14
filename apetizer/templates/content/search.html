@@ -1,56 +1,18 @@
-{% extends "apetizer/base.html" %}
+{% extends "content/page.html" %}
 {% load i18n content_tags content_ui_tags %}
 
-{% block search-form %}
-<form class="ui fluid item form" action="" method="get" rol="form" >
-  	<div class="ui large category search">
-      <div class="ui left icon transparent input">
-        <i class="search icon"></i>
-        <input class=" prompt" name="keyword" placeholder="Search keyword ..." type="text">
-      </div>
-      <div class="results"></div>
-    </div>
-</form>
-{% endblock %}
-
-{% block content %}
+{% block page_head %}
+<div class="ui padded vertical segment" >
 {% if nodes|length > 0 %}
     <div>{{ nodes|length }} {% trans "results" %}</div>
 {% else %}
     <div>{% trans "No result" %}</div>
 {% endif %}
-{{ block.super }}
+</div>
 {% endblock %}
 
-{% block extra-scripts %}
-{{ block.super }}
-<script>
-    
-    $('.ui.search')
-      .search({
-        debug: true,
-        type:'category',
-        minCharacters : 3,
-        
-        searchFullText: false,
-        
-        onSelect:function(data){
-          window.location.href = data['url']+'view/';
-        },
-        
-        apiSettings:{
-            url: '{{rootNode.get_url}}query.json?query={query}',
-            successTest: function(response) {
-              // test whether a JSON response is valid
-              return response.success == true;
-            },
-            onResponse : function(directoryResponse) {
-                //console.log(directoryResponse.payload)
-                return directoryResponse.payload;
-            },
-        },
-        
-      })
-    ;
-</script>
+{% block page_container %}
+<div class="ui sixteen wide column">
+    {% include 'content/published_page.html' %}
+</div>
 {% endblock %}

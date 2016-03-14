@@ -67,7 +67,11 @@ def get_thumbnail(img, thumb_size, quality=80, format='JPG'):
     return thumb_url.replace(settings.MEDIA_ROOT, settings.MEDIA_URL).replace('//', '/')
 
 #Getting files here
+
 def format_file_extensions(extensions):
+    return '/.+$/i'
+    return ".(jpg|png)$"
+    return  "^\.*\\.(%s)+$" % "|".join(extensions)
     return  ".(%s)$" % "|".join(extensions)
 
 

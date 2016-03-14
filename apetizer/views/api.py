@@ -4,7 +4,6 @@ Created on 24 oct. 2013
 @author: rux
 '''
 import inspect
-import json
 import logging
 import os.path
 
@@ -12,9 +11,8 @@ from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 
 from apetizer.models import Item
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.api_json import API_json_parser, dump_json
 from apetizer.views.action import ActionView
-from django.forms.models import model_to_dict
 
 
 logger = logging.getLogger(__name__)
@@ -111,7 +109,7 @@ class ApiView(ActionView):
                        'status': status,
                        'payload': payload}
 
-        json_string = json.dumps(json_result, default=self.json_parser)
+        json_string = dump_json(json_result)
 
         return HttpResponse(json_string, content_type='application/json')
     

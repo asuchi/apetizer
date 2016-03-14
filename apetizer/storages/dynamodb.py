@@ -10,7 +10,7 @@ import traceback
 
 from django.conf import settings
 
-from apetizer.parsers.json import load_json
+from apetizer.parsers.api_json import load_json
 import boto.dynamodb2
 from boto.dynamodb2.fields import HashKey, RangeKey
 from boto.dynamodb2.table import Table

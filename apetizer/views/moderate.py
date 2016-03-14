@@ -4,7 +4,6 @@ Created on 6 juil. 2015
 @author: rux
 '''
 from collections import OrderedDict
-import json
 
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
@@ -17,7 +16,7 @@ from apetizer.forms.moderate import ModerateInviteForm, ModerateCommentForm, \
 from apetizer.models import Moderation, get_new_uuid
 from apetizer.views.content import ContentView
 from apetizer.views.pipe import ActionPipeView
-from apetizer.parsers.json import load_json
+from apetizer.parsers.api_json import load_json
 
 
 class ModerateView(ContentView, ActionPipeView):
@@ -51,8 +50,8 @@ class ModerateView(ContentView, ActionPipeView):
                     'accept':'moderate/accept.html',
                     'reject': 'moderate/reject.html',
                     
-                    'follow':'ui/change.html',
-                    'unfollow': 'ui/change.html',
+                    'follow':'moderate/invite.html',
+                    'unfollow': 'moderate/invite.html',
                     }
     
     comment_auto_invite = False

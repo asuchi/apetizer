@@ -5,8 +5,10 @@
 
 import logging
 import sys
+import traceback
 
 from requests_oauthlib import OAuth1Session
+
 
 logger = logging.getLogger(__name__)
 
@@ -124,9 +126,9 @@ class Hackpad(object):
     hackpad = {}
     try:
       if self.sub_domain:
-        path = '/'.join('https://%s.hackpad.com/api/1.0/' % self.sub_domain, path)
+        path = '/'.join( (('https://%s.hackpad.com/api/1.0' % self.sub_domain), path) )
       else:
-        path = '/'.join('https://hackpad.com/api/1.0/', path)
+        path = '/'.join( ('https://hackpad.com/api/1.0', path) )
 
       params = {
         'client_key': self.consumer_key,
@@ -139,18 +141,17 @@ class Hackpad(object):
       hackpad_api = OAuth1Session(**params)
 
       if method == 'POST':
-
         r = hackpad_api.post(path, data=body)
         hackpad = r.json()
       else:
         r = hackpad_api.get(path)
-
         try:
             hackpad = r.json()
         except:
             hackpad = r.content
     except:
-      logger.debug(sys.exc_info()[0])
-
+        traceback.print_exc()
+        logger.debug(sys.exc_info()[0])
+    print(path)
     return hackpad
 

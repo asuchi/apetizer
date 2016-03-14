@@ -7,7 +7,6 @@ from collections import OrderedDict
 from datetime import datetime
 from hashlib import sha1
 import hashlib
-import json
 import logging
 import math
 import operator
@@ -37,7 +36,8 @@ from geopy.distance import EARTH_RADIUS
 
 import apetizer.default_settings as DEFAULTS
 from apetizer.forms.frontend import FolderNameField, SubdomainListField
-from apetizer.parsers.json import API_json_parser, load_json, dump_json
+from apetizer.manager import CoreManager
+from apetizer.parsers.api_json import API_json_parser, load_json, dump_json
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
 from apetizer.utils.compatibility import unicode3
 
@@ -139,35 +139,25 @@ def get_distincts(object_list, key):
     
 
 def upload_to(instance, filename):
-    upload_path = getattr(settings, 'MULTIUPLOADER_FILES_FOLDER', 
-                          DEFAULTS.MULTIUPLOADER_FILES_FOLDER)
+    """
+    instance.get_root().id / instance.id . filename
     
-    if upload_path[-1] != '/':
-        upload_path += '/'
+    # originally
+    #fhash = sha1(str(time.time())).hexdigest()
+    upload_path = getattr(settings, 'MEDIA_ROOT', 'media')
+    """
     
-    filename = get_valid_filename(os.path.basename(filename))
-    filename, ext = os.path.splitext(filename)
-    fhash = sha1(str(time.time())).hexdigest()
-    fullname = os.path.join(upload_path, "%s.%s%s" % (filename, fhash, ext))
+    if instance.parent:
+        upload_path = instance.get_root().id
+    else:
+        upload_path = instance.id
     
-    return fullname
-
-def upload_to_domain(instance, filename):
-    upload_path = getattr(settings, 'MULTIUPLOADER_FILES_FOLDER', 
-                          DEFAULTS.MULTIUPLOADER_FILES_FOLDER)
-    
-    if upload_path[-1] != '/':
-        upload_path += '/'
-    
-    folderpath = instance.get_path()
-
-    upload_path = folderpath
+    fhash = instance.id
     
     filename = get_valid_filename(os.path.basename(filename))
     filename, ext = os.path.splitext(filename)
-    fhash = sha1(str(time.time())).hexdigest()
     
-    fullname = os.path.join(upload_path, "%s.%s%s" % (filename, fhash, ext))
+    fullname = os.path.join(upload_path, "%s.%s%s" % (fhash, filename, ext))
     
     return fullname
 
@@ -221,7 +211,7 @@ class DataPath(AuditedModel):
     
     # instance class
     type = models.CharField(max_length=65, default='Thing')
-    data = TextField(default={}, blank=True, null=True)
+    data = TextField(default='{}', blank=True, null=True)
     
     locale = models.CharField(max_length=6)
 
@@ -240,11 +230,18 @@ class DataPath(AuditedModel):
         if not 'related' in exclude:
             exclude.append('related')
         
+        if type(self.data) not in (type(u''),):
+            raise Error
+        
         super(DataPath, self).full_clean(exclude=exclude, validate_unique=validate_unique)
     
     def save(self, *args, **kwargs):
-        if type(self.data) not in (type(''), type(u'')):
-            self.data = json.dumps(self.data, default=API_json_parser)
+        if type(self.data) not in (type(u''),):
+            print('Before ?')
+            print(repr(self.data))
+            self.data = dump_json(self.data)
+            print('After ?')
+            print(repr(self.data))
         self.full_clean()
         super(DataPath, self).save(*args, **kwargs)
 
@@ -339,17 +336,15 @@ class Visitor(DataPath):
     
     def get_token(self):
         # returns a hash based on the user email if exists
-        if self.email:
-            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey+self.email.encode('utf-8')).hexdigest()).hexdigest()
-        else:
-            return hashlib.md5(hashlib.sha1(settings.SECRET_KEY+self.akey.encode('utf-8')).hexdigest()).hexdigest()
+        tok = hashlib.sha1(settings.SECRET_KEY.encode('utf-8')+self.akey.encode('utf-8')).hexdigest().encode('utf-8')
+        return hashlib.md5(tok).hexdigest()
 
     def get_hash(self):
         # returns a hash based on the user email if valid
         if self.email and self.validated:
-            return hashlib.md5(settings.SECRET_KEY+self.email.encode('utf-8')).hexdigest()
+            return hashlib.md5(self.email.encode('utf-8')).hexdigest()
         else:
-            return hashlib.md5(u'').hexdigest()
+            return hashlib.md5(u''.encode('utf-8')).hexdigest()
 
     def is_valid_token(self, token):
         return self.get_token() == token
@@ -544,7 +539,18 @@ class Moderation(Visitor):
         super(Moderation, self).full_clean(exclude=exclude, validate_unique=validate_unique)
         
     def save(self, *args, **kwargs):
-        super(Moderation, self).save(*args, **kwargs)
+        super(Moderation, self).save(*args, **kwargs)    
+        for socket in CoreManager.get_core().wsockets:
+            socket.write_message(dump_json({'akey':self.akey,
+                                             'username':self.username,
+                                             'status':self.status,
+                                             'action':self.action,
+                                             'subject':self.subject,
+                                             'message':self.message,
+                                             'data':self.data,
+                                             'label':self.related.label,
+                                             'title':self.related.title,
+                                             }))
     
     def get_author(self):
         return self.visitor_ptr
@@ -1041,8 +1047,8 @@ class Item(Translation):
         
         #return
         #
-        #data = model_to_dict(self)
-        data = {}
+        data = model_to_dict(self)
+        #data = {}
         data['name'] = self.id
         
         if self.parent:
@@ -1143,8 +1149,12 @@ class Item(Translation):
                 parent_dict = {parent_key:self.id}
                 parent_keys.append(parent_key)
             
-            qgroup = reduce(operator.or_,
-                            (Q(**{fieldname: self.id}) for fieldname in parent_keys))
+            try:
+                from functools import reduce
+            except:
+                pass
+            
+            qgroup = reduce(operator.or_, (Q(**{fieldname: self.id}) for fieldname in parent_keys))
             
             qs = qs.filter(qgroup, visible=True)
             
@@ -1267,6 +1277,7 @@ class Item(Translation):
             return self
 
         node_data = self.get_cache_data()
+        
         try:
             return node_data['translations'][locale]
         except:
@@ -1304,27 +1315,28 @@ class Item(Translation):
         if root_node.visible == False or root_node.slug == root_node.get_hash():
             return self.get_uid_url(language)
         
+        if not language and self.__url__:
+            return self.__url__
+        
         if language == None:
             language = self.locale
         
         path = self.get_path()
         
-        if not language and self.__url__:
-            return self.__url__
-        
         if getattr(settings, 'APETIZER_ABSOLUTE', True) == False:
             return path
         
-        #if not language:
-        #    return '//'+path+'/'
-        #else:
         parts = path.split('/')
         domain = parts[0]
-        
+        port = str(os.environ.get('APETIZER_PORT', 8000))
         if settings.DEBUG:
-            domain = domain+':'+URLS_PORT
+            domain = domain+':'+port
         
-        path = '//'+domain+'/'+language+'/'
+        if getattr(settings, 'APETIZER_MULTILINGUAL', False):
+            path = '//'+domain+'/'+language+'/'
+        else:
+            path = '//'+domain+'/'
+        
         if len(parts) > 1:
             path += '/'.join(parts[1:])+'/'
         
@@ -1467,7 +1479,7 @@ class Frontend(Site):
     
     # enhance django site model
     folder_name = FolderNameField(blank=True)
-    subdomains = SubdomainListField(blank=True)
+    subdomains = TextField(blank=True)
     
     published = BooleanField(default=False)
     

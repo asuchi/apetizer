@@ -4,34 +4,33 @@ Created on 8 oct. 2015
 @author: biodigitals
 '''
 from collections import OrderedDict
-import json
 
-from django.conf import settings
-from django.forms.models import model_to_dict
 from django.http import HttpResponseRedirect
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, get_language
 
-from apetizer.dispatchers.async import AsyncDispatcher
-from apetizer.forms.register import VisitorValidateForm, VisitorForm
+from apetizer.forms.register import VisitorValidateForm, VisitorForm, \
+    VisitorPrivatizeForm
 from apetizer.models import Visitor
-from apetizer.parsers.json import API_json_parser
+from apetizer.parsers.api_json import API_json_parser, dump_json
 from apetizer.storages.model import ModelStore
 from apetizer.views.api import ApiView
 from apetizer.views.pipe import ActionPipeView
 
 
-class VisitorView(ActionPipeView, ApiView):
+class VisitorView(ActionPipeView):
     
     view_name = 'visitor'
     view_template = 'register/view.html'
     
-    class_actions = ['validate', 'profile']
+    class_actions = ['validate', 'privatize', 'profile']
     class_actions_forms = {'profile': (VisitorForm,),
+                           'privatize': (VisitorPrivatizeForm,),
                            'validate': (VisitorValidateForm,),}
     
     class_action_templates = {'validate': 'register/validate.html',
-                              'profile': 'register/profile.html',}
+                              'profile': 'register/profile.html',
+                              'privatize': 'ui/base.html',}
     
     pipe_table = ModelStore()
     
@@ -49,6 +48,9 @@ class VisitorView(ActionPipeView, ApiView):
                                   ('validated',
                                    {'class': self.__class__,
                                     'action': 'validate'}),
+                                  ('policy',
+                                   {'class': self.__class__,
+                                    'action': 'privatize'}),
                                   ])
         
         #for k,e in user_pipe.items():
@@ -71,7 +73,7 @@ class VisitorView(ActionPipeView, ApiView):
             visitor = Visitor(akey=new_key)
             visitor.locale = get_language()
             visitor.action = 'home'
-            visitor.data = json.dumps(kwargs['pipe']['data'], default=API_json_parser)
+            visitor.data = dump_json(kwargs['pipe']['data'])
             visitor.path = request.path_info
             visitor.full_clean()
             visitor.save()
@@ -100,16 +102,27 @@ class VisitorView(ActionPipeView, ApiView):
         """
         Display full user profile
         """
-        
         # check for an existing user account
-        
         #if not user_profile.validated and template_args['currentNode'].validated:
         #    return HttpResponseRedirect(template_args['currentNode'].get_url()+'view/')
-        
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
 
 
-    
+    def process_privatize(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Define a privacy policy for this item
+        
+        usualy based on the user policy
+        
+        first thing on a new projet would be to set my profile privacy policy
+        
+        item, action allow group, user, item ...
+        item, action deny group, user, item ... 
+        """
+        
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+        
+            
     def process_validate(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Check for email token activation
@@ -170,13 +183,11 @@ class VisitorView(ActionPipeView, ApiView):
     
 
     def send_validation_link(self, user_profile):
-        
         title = 'Email de validation'
         text = user_profile.get_url()
         html = '<a href=>'+text+'</a>'
         
-        async_dispatcher = AsyncDispatcher.get_instance()
-        async_dispatcher.spawn(send_validation_email, [title,text,html], {})
+        send_validation_email(title,text,html)
 
 def send_validation_email(title, text, html):
     # call the email api

@@ -1,10 +1,22 @@
 {% extends 'content/page.html' %}
 
+
 {% block body %}
 {% include 'apetizer/tags/action_forms.html' %}
 {% endblock %}
 
 {% block page_container %}
+<div class="ui sixteen wide column vertical segment" style="padding:0px;margin:0px">
+{% if currentNode.file %}
+<iframe id="_apetizer_code" name="_apetizer_code" src="//{{ request.get_host }}/notebooks/.{{ currentNode.file.name }}" width="100%" height="800" border="0" style="border:0px solid gray;" ></iframe>
+{% else %}
+<iframe src="//{{ request.get_host }}/tree" width="100%" height="1024" border="0" style="border:0px solid gray;" ></iframe>
+{% endif %}
+</div>
+{% endblock %}
+
+
+{% block Zpage_container %}
 {% if currentNode.related_url and 'hackpad' in currentNode.related_url %}
     <script src="{{ currentNode.related_url }}.js"></script><noscript>
     <div>View <a href="{{ currentNode.related_url }}">{{ currentNode.title }}</a> on Hackpad.</div>
@@ -22,6 +34,7 @@
     <iframe src="{{ currentNode.related_url }}" width="100%" height="720" border="0" style="border:1px solid gray;" ></iframe>
     </div>
 {% else %}
+
 {% endif %}
 {{ block.super }}
 {% endblock %}

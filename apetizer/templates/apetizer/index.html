@@ -1,5 +1,5 @@
 {% extends 'apetizer/base.html' %}<!DOCTYPE html>
-{% load markdown_deux_tags content_tags i18n leaflet_tags %}
+{% load static markdown_deux_tags content_tags i18n leaflet_tags %}
 
 {% block extra-styles %}
 {{ block.super }}
@@ -122,16 +122,27 @@
 
 {% block page_body %}
 <!-- Following Menu -->
-<div class="ui large top fixed hidden menu">
+<div class="ui large top fixed hidden menu" style="z-index:1000">
   <div class="ui container">
     <a class="active item">Accueil</a>
     <div class="right menu">
+    {% if not request.user.is_authenticated %}
       <div class="item">
         <a class="ui button" href="login/" >Log in</a>
       </div>
       <div class="item">
         <a class="ui primary button" href="register/" >Sign Up</a>
       </div>
+    {% else %}
+      {% if user.is_staff %}
+      <div class="item">
+        <a class="ui button" href="/admin/" >Admin</a>
+      </div>
+      {% endif %}
+      <div class="item">
+        <a class="ui primary button" href="profile/" >Tableau de bord</a>
+      </div>
+    {% endif %}
     </div>
   </div>
 </div>
@@ -146,6 +157,7 @@
 
 <!-- Page Contents -->
 <div class="pusher">
+{% block page_index %}
   <div class="ui inverted vertical masthead center aligned segment">
     {% block page_push %}
     <div style="position:absolute;
@@ -226,26 +238,9 @@
     </div>
   </div>
 
-{% comment %}
-  <div class="ui vertical stripe quote segment">
-    <div class="ui equal width stackable internally celled grid">
-      <div class="center aligned row">
-        <div class="column">
-          <h3>{{ currentNode.get_contributors|length }} contributeurs</h3>
-          <p>{{ currentNode.get_visitors|length }} visiteurs</p>
-        </div>
-        <div class="column">
-          <h3>{{ currentNode.get_descendants_count }} articles</h3>
-          <p>{{ currentNode.words }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-{% endcomment %}
-
   <div class="ui vertical stripe segment">
     <div class="ui text container">
-        {% for node in projects %}
+        {% for node in roots %}
             <h4 class="ui horizontal header divider">
                 <a href="#">{{ node.label }}</a>
               </h4>
@@ -285,16 +280,18 @@
     </div>
     {% endblock %}
   </div>
+{% endblock %}
 </div>
 {% endblock %}
 
-<script src="/static/components/semantic/dist/assets/library/jquery.min.js"></script>
-<script src="/static/components/semantic/dist/components/visibility.js"></script>
-<script src="/static/components/semantic/dist/components/sidebar.js"></script>
-<script src="/static/components/semantic/dist/components/transition.js"></script>
 
 {% block extra-scripts %}
 {{ block.super }}
+<script src="{% static "components/semantic/dist/components/visibility.js" %}"></script>
+<script src="{% static "components/semantic/dist/components/sidebar.js" %}"></script>
+<script src="{% static "components/semantic/dist/components/transition.js" %}"></script>
+<script src="{% static "components/semantic/dist/components/accordion.js" %}"></script>
+<script src="{% static "components/semantic/dist/components/sticky.js" %}"></script>
 <script>
 $(document)
   .ready(function() {
