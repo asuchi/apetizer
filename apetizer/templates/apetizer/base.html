@@ -19,8 +19,18 @@
 <meta name="description" content="{{ currentNode.description|linebreaks }}">
 <meta name="keywords" content="{{ currentNode.keywords }}">
 
+{% comment %}
+{% block canonical-link %}{% endblock canonical-link %}
+{% block alternate-hreflang-link %}
+  {% for sup_lang in LANGUAGES %}
+    {% if sup_lang.0 != LANGUAGE_CODE %}
+      <link rel="alternate" hreflang="{{ sup_lang.0 }}" href="http://{{ request.get_host }}/{{ sup_lang.0 }}{{ request.get_full_path }}" />
+    {% endif %}
+  {% endfor %}
+{% endblock alternate-hreflang-link %}
+{% endcomment %}
+
 <link rel="stylesheet" type="text/css" class="ui" href="{% static 'components/semantic/dist/semantic.css' %}">
-{% include "content/assets/styles.html" %}
 
 <script src="{% static 'components/semanticui/jquery.min.js' %}"></script>
 <script src="{% static 'components/semantic/dist/semantic.js' %}"></script>
