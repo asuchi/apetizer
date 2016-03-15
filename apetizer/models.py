@@ -5,7 +5,6 @@ Created on 15 janv. 2013
 '''
 from collections import OrderedDict
 from datetime import datetime
-from hashlib import sha1
 import hashlib
 import logging
 import math
@@ -34,7 +33,6 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, get_language
 from geopy.distance import EARTH_RADIUS
 
-import apetizer.default_settings as DEFAULTS
 from apetizer.forms.frontend import FolderNameField, SubdomainListField
 from apetizer.manager import CoreManager
 from apetizer.parsers.api_json import API_json_parser, load_json, dump_json
@@ -230,8 +228,8 @@ class DataPath(AuditedModel):
         if not 'related' in exclude:
             exclude.append('related')
         
-        if type(self.data) not in (type(u''),):
-            raise Error
+        #if type(self.data) not in (type(u''),):
+        #    raise ValueError
         
         super(DataPath, self).full_clean(exclude=exclude, validate_unique=validate_unique)
     
@@ -558,9 +556,21 @@ class Moderation(Visitor):
 
 class Translation(Moderation):
     
+    
+    def __getattribute__(self, attr):
+        # avoid looping on attribute
+        if attr in ('__dict__', ):
+            return super(Translation, self).__getattribute__(attr)
+        elif attr in ('label', ):
+            if not self.__dict__['label']:
+                return self.title
+            return super(Translation, self).__getattribute__(attr)
+        else:
+            return super(Translation, self).__getattribute__(attr)
+
     slug = models.CharField(max_length=128, default='', blank=False)
     
-    label = models.CharField(max_length=65)
+    label = models.CharField(max_length=65, blank=True, null=False)
     title = models.CharField(max_length=156)
     
     description = models.TextField(blank=True)
@@ -957,9 +967,6 @@ class Item(Translation):
         ordering = ('order',)
     
     def __getattribute__(self, attr):
-        
-        #return super(Item, self).__getattribute__(attr)
-        
         # avoid looping on attribute
         if attr in ('__localizable__', '__inited__', '__dict__'):
             return super(Item, self).__getattribute__(attr)
