@@ -235,11 +235,7 @@ class DataPath(AuditedModel):
     
     def save(self, *args, **kwargs):
         if type(self.data) not in (type(u''),):
-            print('Before ?')
-            print(repr(self.data))
             self.data = dump_json(self.data)
-            print('After ?')
-            print(repr(self.data))
         self.full_clean()
         super(DataPath, self).save(*args, **kwargs)
 

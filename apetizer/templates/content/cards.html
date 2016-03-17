@@ -1,5 +1,5 @@
 {% extends 'content/base.html' %}
-{% load content_tags momentjs thumbnail %}
+{% load content_tags momentjs %}
 
 {% block body %}
 {{ block.super }}
@@ -36,7 +36,7 @@
             <div class="ui list" >
                 {% for contributor in contributors %}
                 <div class="item">
-                    <img class="ui avatar image" src="{% if contributor.get_image %}{% thumbnail contributor.get_image 64x64 %}{% else %}/static/components/semantic/dist/assets/images/home-avatar.png{% endif %}" >
+                    <img class="ui avatar image" src="{{ contributor.get_image.url }}" >
                     <div class="content">
                         <a class="" href="{{ contributor.get_url }}" >{{ contributor.get_full_name }}</a>
                         <div class="content">

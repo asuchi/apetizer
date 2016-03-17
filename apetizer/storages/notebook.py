@@ -41,21 +41,18 @@ def get_or_create_notebook(node):
             'type': 'notebook',
             'writable': True,
         }
-
         nb = Notebook(
                 **{u'metadata': {},
                 u'nbformat': 4,
                 u'nbformat_minor': 0,
                 u'cells': []}
                 )
-
-        save_notebook(nb, node)
-    
-    # read the file
-    with io.open(fname, 'r', encoding='utf-8') as f:
-        #nb = current.read(f, 'json')
-        nb = json.loads(f.read(), object_hook=API_json_loader)
-        f.close()
+    else:
+        # read the file
+        with io.open(fname, 'r', encoding='utf-8') as f:
+            #nb = current.read(f, 'json')
+            nb = json.loads(f.read(), object_hook=API_json_loader)
+            f.close()
     
     return nb
 
@@ -74,5 +71,5 @@ def save_notebook(nb, node):
     fname = os.getcwd()+'/resource/'+node.id+'.ipynb'
     # write changes
     with io.open(fname, 'w', encoding='utf-8') as f:
-        f.write(json.dumps(nb, default=API_json_parser))
+        f.write(json.dumps(nb, default=API_json_parser).decode('utf-8'))
         f.close()

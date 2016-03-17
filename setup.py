@@ -38,7 +38,6 @@ setup(
         "six>=1.8.0",
         'django-jsonfield',
         'django-leaflet',
-        'easy_thumbnails',
     ],
     entry_points = {
         'console_scripts': [

@@ -29,10 +29,7 @@ def check_permission(request, mode_name, app_label, model_name):
 
 
 def get_thumbnail(img, thumb_size, quality=80, format='JPG'):
-    from django.db.models import ImageField
-    from django.db.models.fields.files import ImageFieldFile
     from PIL import Image, ImageOps
-    from django.forms import forms
     from django.core.files.base import ContentFile
     from django.utils.encoding import smart_str
     import cStringIO

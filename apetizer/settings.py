@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     "django.contrib.sitemaps",
     "django.contrib.staticfiles",
     "markdown_deux",
-    "easy_thumbnails",
     "leaflet",
     "httpproxy",
     "apetizer",
