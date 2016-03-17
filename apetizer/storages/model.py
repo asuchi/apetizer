@@ -10,6 +10,53 @@ from apetizer.models import DataPath
 from apetizer.parsers.api_json import load_json, dump_json
 
 
+class ModelIndex():
+    '''
+    Default basic memory storage for drilldown
+    
+    It handle the in memory drilldown
+    
+    the keys are serialized and stored using their unicode representation
+    and key as strings are forced to unicode internaly
+    
+    '''
+    
+    prefix = ''
+    
+    # 
+    def __init__(self):
+        self.values = {}
+    
+    def has_key(self, key):
+        return self._conform_key(key) in self.values
+    
+    def get_key_data(self, key):
+        return self.values[self._conform_key(key)]
+    
+    def set_key_data(self, key, value):
+        self.values[self._conform_key(key)] = value
+        return True
+    
+    def remove_key_data(self, key):
+        if key in self.values:
+            del self.values[self._conform_key(key)]
+            return True
+        else:
+            return False
+    
+    def _conform_key(self,key):
+        return key
+        if type(key) == type(''):
+            key = unicode3(key)
+        key = repr(key)
+        return self.prefix+key
+    
+    def lock(self):
+        self.is_locked = True
+    
+    def flush(self):
+        self.is_locked = False
+
 class ModelStore(object):
     """
     Key value store for action pipe data

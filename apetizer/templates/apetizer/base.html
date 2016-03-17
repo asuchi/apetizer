@@ -1,4 +1,4 @@
-{% load static content_tags content_ui_tags thumbnail momentjs moderate_tags %}<!DOCTYPE html>
+{% load static content_tags content_ui_tags momentjs moderate_tags %}<!DOCTYPE html>
 <html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -179,7 +179,7 @@
                   <b>{{ node.label }}</b>
                 </a>
                 {% if user_profile.validated %}
-                <a class="ui circular mini label" href="{{ node.get_url }}add/"> <b>+</b></a>
+                <a class="ui circular mini label" href="{{ node.get_url }}add/#add"> <b>+</b></a>
                 {% endif %}
             </div>
             {% else %}
@@ -266,7 +266,7 @@
                     {% else %}
                       <div class="item">
                           {% if request.user.is_staff %}
-                            <a class="ui button" href="/admin/" >Admin</a>
+                            <a class="ui button" href="/admin/" target="_admin" >Admin</a>
                           {% endif %}
                         <a class="ui primary button" href="dashboard/" >Tableau de bord</a>
                       </div>

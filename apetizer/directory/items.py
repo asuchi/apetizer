@@ -14,6 +14,8 @@ from django.utils.translation import get_language
 from apetizer.directory.drilldown import Drilldown
 from apetizer.models import Item, get_new_uuid
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
+from apetizer.storages.model import ModelStore, ModelIndex
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +35,6 @@ class ItemDrilldown(Drilldown):
                           'status':'imported',
                           'path':'/localhost'
                           }
-        
-        # TODO
-        # manage better indexing for production
-        if not settings.DEBUG:
-            return
         
         items = Item.objects.filter(visible=True,).order_by('parent')
         
@@ -120,10 +117,16 @@ SEARCH_DRILLDOWN_INDEXES = { 'keyword': {
                                }
             
 
-def get_dict_drilldown():
+def Zget_dict_drilldown():
     drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
                                                  DictStorage(), 
                                                  DictStorage())
+    return drilldown
+
+def get_dict_drilldown():
+    drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
+                                                 ModelIndex(), 
+                                                 ModelIndex())
     return drilldown
 
 

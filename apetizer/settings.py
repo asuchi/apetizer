@@ -1,6 +1,4 @@
-import logging
 import os
-
 
 APPEND_SLASH = False
 DEBUG = True
@@ -35,6 +33,7 @@ INSTALLED_APPS = [
     "markdown_deux",
     "easy_thumbnails",
     "leaflet",
+    "httpproxy",
     "apetizer",
 ]
 

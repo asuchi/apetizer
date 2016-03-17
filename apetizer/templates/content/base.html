@@ -1,5 +1,5 @@
 {% extends 'apetizer/base.html' %}
-{% load static content_tags content_ui_tags thumbnail momentjs moderate_tags markdown_deux_tags %}
+{% load static content_tags content_ui_tags momentjs moderate_tags markdown_deux_tags %}
 
 {% block page_article %}
     <div id="masthead" class="ui vertical segment">
@@ -66,7 +66,7 @@
                     {% for node in paginator.object_list %}
                         {% if node.behavior == 'file' %}
                         <div class="ui mini spaced image" >
-                            <img src="{% thumbnail ufile.file 64x64 %}" />
+                            <img src="{{ ufile.file.url }}" />
                         </div>
                         {% endif %}
                     {% endfor %}

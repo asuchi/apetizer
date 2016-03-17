@@ -84,7 +84,7 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
                         'change':'ui/change.html',
                         'translate':'ui/translate.html',
                         'redirect':'ui/change.html',
-                        'image':'ui/change.html',
+                        'image':'ui/image.html',
                         'file':'ui/file.html',
                         'delete':'ui/change.html',
                         
@@ -495,7 +495,7 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
                     node.get_translation().save()
                 except:
                     traceback.print_exc()
-                
+        
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
 
 

@@ -101,6 +101,7 @@ class ActionView(View):
         return cls.actions
     
     def manage_request(self, request):
+        
         request.path_info = '/'+request.domain+request.path
 
     def get(self, request, *args, **kwargs):
@@ -253,8 +254,16 @@ class ActionView(View):
                     if issubclass(form_class, ActionModelForm) and \
                         isinstance(model_instance, form_class.Meta.model):
                         
-                        form_data = model_to_dict(model_instance)
+                        form_data = model_to_dict(model_instance, exclude=('translation_ptr',
+                                                                           'moderation_ptr',
+                                                                           'visitor_ptr',
+                                                                           'datapath_ptr',
+                                                                            ))
+                        # transaction ?
+                        #for key in input_data:
+                        #    form_data[key] = input_data[key]
                         form_data.update(input_data)
+                        
                         if bound_forms:
                             form_instance = form_class(form_data,
                                                        instance=model_instance,

@@ -48,16 +48,13 @@ var macroEditor = CodeMirror(document.getElementById('program-editor'), {
 <div class="row" style="margin:0px;padding:0px;">
     <div id="program_table" style="position:relative;overflow:hidden;background:gray;width:100%;height:auto" ></div>
 </div>
+{% comment %}
 <div class="ui sixteen wide column" style="position:relative;">
-    
     <div class="ui vertical segment">
         <div class="ui form" id="program-editor" ></div>
         <input type="hidden" name="macros" id="id_macros" value="" />
     </div>
-    <div class="ui vertical segments">
-    </div>
 </div>
-{% comment %}
 <div class="ui six wide column" style="position:relative;">
     <div class="ui segment">
         <a href="download/" class="ui button" >download</a>

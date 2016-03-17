@@ -1,7 +1,7 @@
 {% load i18n %}
 
     
-<form class="ui form" method="post" action="{{ action }}/" 
+<form class="ui form {{ action }}" method="post" action="{{ action }}/" 
     target="{{ action_target|default:'_self' }}"
     enctype="multipart/form-data">
     {% csrf_token %}

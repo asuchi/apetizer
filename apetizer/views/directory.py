@@ -76,6 +76,7 @@ class DirectoryView(ActionView):
         
     def process_directory(self, request, user_profile, input_data, template_args, **kwargs):
         
+        _search_drilldown_cache.load_items()
         
         #path = '/'.join(kwargs['path'].split('/')[1:-1])
         path = kwargs['path']
@@ -99,8 +100,6 @@ class DirectoryView(ActionView):
                 template_args['nodes'] = []
         else:
             logger.debug('No path '+path)
-            if settings.DEBUG:
-                logger.debug(_search_drilldown_cache.data_map.values.keys()[:100])
-            raise Http404
+            #raise Http404
         
-        return self.render(request, template_args, data, **kwargs)
+        return self.render(request, template_args, {}, **kwargs)

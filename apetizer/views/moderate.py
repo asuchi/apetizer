@@ -125,14 +125,15 @@ class ModerateView(ContentView, ActionPipeView):
         request.method = 'POST'
         
         proposal_transfer = input_data.get('transfer','no')
-        
+        new_input_data = load_json(load_json(proposal.data))
         if proposal_transfer != 'no':
-            input_data = load_json(proposal.data)
+            #input_data = load_json(proposal.data)
             input_data.email = proposal.email
             input_data.username = proposal.username
-            response = self.process(request, user_profile, input_data, template_args, **kwargs)
+            response = self.process(request, user_profile, new_input_data, template_args, **kwargs)
         else:
-            response = self.process(request, user_profile, load_json(proposal.data), template_args, **kwargs)
+            #print(repr(load_json(load_json(proposal.data))))
+            response = self.process(request, user_profile, new_input_data, template_args, **kwargs)
         
         proposal.status = 'accepted'
         proposal.save()
