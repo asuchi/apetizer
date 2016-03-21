@@ -29,8 +29,11 @@ class SemanticView(ContentView):
         
         """
         item = kwargs['node']
+        item_data = item.get_data()
         
-        class_attributes = item.get_data().get('attributes',[])
+        print('GOT',item_data)
+        
+        class_attributes = item_data.get('attributes',[])
         
         if input_data.get('attribut_name') and input_data.get('attribut_type'):
             class_attributes.append({'name':input_data.get('attribut_name'),

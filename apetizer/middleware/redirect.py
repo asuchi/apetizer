@@ -3,10 +3,12 @@ Created on 5 fevr. 2013
 
 @author: rux
 '''
-from django.core.exceptions import ObjectDoesNotExist
-from django.http.response import HttpResponsePermanentRedirect
+from multiprocessing.process import Process
 
-from apetizer.models import Item
+from django.core.exceptions import ObjectDoesNotExist
+from django.http.response import HttpResponsePermanentRedirect, Http404
+
+from apetizer.models import Item, Translation, object_tree_cache, AuditedModel
 
 
 REDRIRECT_URL_PATTERNS = []
@@ -16,10 +18,6 @@ class ItemRedirect(object):
     Middleware to handle item url redirects
     """
     def process_request(self, request):
-        
-        # check if redirection is active
-        #if not settings.CONTENT_DO_REDIRECT:
-        #    return
         
         # bypass the redirect for the staff users
         if request.user and request.user.is_staff:
@@ -36,4 +34,13 @@ class ItemRedirect(object):
             return HttpResponsePermanentRedirect(item.redirect_url)
 
 
-    
+    def process_response(self, request, response):
+        
+        # dispacth caching
+        object_tree_cache.purge()
+        
+        # dispatch indexing
+        
+        return response
+
+        

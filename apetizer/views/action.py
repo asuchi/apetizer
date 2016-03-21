@@ -17,7 +17,7 @@ from django.template.context import RequestContext
 from django.utils.translation import ugettext
 from django.views.generic.base import View
 
-from apetizer.forms.base import ActionModelForm, ActionPipeForm
+from apetizer.forms.base import ActionModelForm, ActionPipeForm 
 from apetizer.parsers.api_json import API_json_parser, load_json
 
 
@@ -101,7 +101,6 @@ class ActionView(View):
         return cls.actions
     
     def manage_request(self, request):
-        
         request.path_info = '/'+request.domain+request.path
 
     def get(self, request, *args, **kwargs):

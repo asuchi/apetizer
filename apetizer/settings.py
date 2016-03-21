@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "markdown_deux",
     "leaflet",
-    "httpproxy",
     "apetizer",
 ]
 
@@ -45,7 +44,7 @@ MIDDLEWARE_CLASSES = [
     "django.middleware.locale.LocaleMiddleware", # Cookie-based, for anonymous users
     
     'apetizer.middleware.multisite.DynamicSitesMiddleware',
-    #"apetizer.middleware.multilingual.MultilingualURLMiddleware",
+    "apetizer.middleware.multilingual.MultilingualURLMiddleware",
     "apetizer.middleware.redirect.ItemRedirect",
     "apetizer.middleware.profiler.CProfileMiddleware",
 ]
@@ -75,7 +74,8 @@ DATABASES = {
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-URLS_WITHOUT_LANGUAGE_REDIRECT = ('/sitemap.xml',
+URLS_WITHOUT_LANGUAGE_REDIRECT = ('/',
+                                  '/sitemap.xml',
                                   '/robots.xml',
                                   '/humans.txt',
                                   '/favicon.ico',
@@ -98,14 +98,9 @@ ZTEMPLATES = [
     }]
 
 # Expiration time in seconds, one hour as default
-
 # from django.conf import settings
-
 # TIME_ZONE = settings.TIME_ZONE
 # LOGGING_CONFIG = settings.LOGGING_CONFIG
-
-URLS_WITHOUT_LANGUAGE_REDIRECT = ('/sitemap.xml','/robots.xml','/humans.txt', '/admin/')
-
 
 MULTIUPLOADER_FILE_EXPIRATION_TIME = 3600
 

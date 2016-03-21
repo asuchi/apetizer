@@ -39,28 +39,8 @@ class ItemDrilldown(Drilldown):
         items = Item.objects.filter(visible=True,).order_by('parent')
         
         for item in items:
-            # unindex key if already exists
-            if self.has_object('item', item.id):
-                self.remove_object('item', item.id)
-            
-            keywords = []
-            
-            #
-            if item.label:
-                keywords.append(item.label)
-                for w in item.label.split(' '):
-                    keywords.append(slugify(w))
-            
-            if item.title:
-                for w in item.title.split(' '):
-                    keywords.append(slugify(w))
-            
-            if item.description:
-                for w in item.description.split(' '):
-                    keywords.append(slugify(w))
-            
-            self.add_item_data(item.id, item.get_path(), item.label, keywords, item.latitude, item.longitude)
-            
+            self.index_item(item)
+        
         if settings.DEBUG:
             logger.debug('\nParsed '+str(len(items))+' items in '+str()+' seconds\n')
             return
@@ -68,6 +48,31 @@ class ItemDrilldown(Drilldown):
                 self.data_map.print_stats()
             except:
                 pass
+    
+    def index_item(self, item):
+        
+        # unindex key if already exists
+        if self.has_object('item', item.id):
+            self.remove_object('item', item.id)
+        
+        keywords = []
+        
+        #
+        if item.label:
+            keywords.append(item.label)
+            for w in item.label.split(' '):
+                keywords.append(slugify(w))
+        
+        if item.title:
+            for w in item.title.split(' '):
+                keywords.append(slugify(w))
+        
+        if item.description:
+            for w in item.description.split(' '):
+                keywords.append(slugify(w))
+        
+        self.add_item_data(item.id, item.get_path(), item.label, keywords, item.latitude, item.longitude)
+        
     
     def add_item_data(self, uid, path, label, keywords, lat, lng):
         
@@ -117,23 +122,23 @@ SEARCH_DRILLDOWN_INDEXES = { 'keyword': {
                                }
             
 
-def Zget_dict_drilldown():
+def get_dict_drilldown():
     drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
                                                  DictStorage(), 
                                                  DictStorage())
     return drilldown
 
-def get_dict_drilldown():
+def get_item_drilldown():
     drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
-                                                 ModelIndex(), 
-                                                 ModelIndex())
+                                                 ModelStore(), 
+                                                 ModelStore())
     return drilldown
 
 
 def get_memcache_drilldown():
     mem_storage = MemcacheStorage(drilldown_cache)
     drilldown = ItemDrilldown( SEARCH_DRILLDOWN_INDEXES, 
-                                                 mem_storage, 
+                                                 mem_storage,
                                                  mem_storage )
     
     return drilldown
@@ -144,9 +149,10 @@ def get_default_drilldown():
     :return: Drilldown object
     """
     if os.environ.get('DJANGO_ENV', 'dev' ) == 'production':
-        drilldown = get_memcache_drilldown()
+        drilldown = get_item_drilldown()
     else:
         drilldown = get_dict_drilldown()
+    
     return drilldown
 
 global _search_drilldown_cache

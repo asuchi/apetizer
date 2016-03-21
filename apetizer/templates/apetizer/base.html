@@ -449,7 +449,6 @@
 <script type="text/javascript">
 $(document).ready(function () {
 
-    {% if user_profile.validated %}
     $('.ui.search')
       .search({
         debug: true,
@@ -476,16 +475,13 @@ $(document).ready(function () {
         
       })
     ;
-    {% endif %}
     
-    {% if request.user.is_authenticated %}
     var ws = new WebSocket("ws:{{ currentNode.get_root.slug }}:{{request.META.SERVER_PORT}}/{{ currentNode.id }}.ws");
     ws.onmessage = function(event) {
        var message = JSON.parse(event.data);
        console.log(event.data);
        $('#messages').append('<div class="ui warning message"><i class="close icon"></i><div class="header">'+message['status']+'</div>'+message['message']+'</div>');
     }
-    {% endif %}
 });
 </script>
 {% endblock %}

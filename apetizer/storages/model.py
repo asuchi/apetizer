@@ -57,7 +57,10 @@ class ModelIndex():
     def flush(self):
         self.is_locked = False
 
-class ModelStore(object):
+
+
+
+class ModelStore(ModelIndex):
     """
     Key value store for action pipe data
     """

@@ -15,8 +15,10 @@ from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from django.utils.timezone import now
 
-from apetizer.models import Item, Translation, timestamp_to_datetime, Frontend
+from apetizer.models import Item, Translation, timestamp_to_datetime, Frontend, \
+    object_tree_cache, AuditedModel
 from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
 from apetizer.views.search import ItemPaginator
@@ -124,9 +126,6 @@ class ContentView(ApiView, ActionView):
         
             try:
                 page = Item.objects.get_at_url(item_path, exact=False)
-                if not action in ('directory', ):
-                    raise Http404
-            
             except ObjectDoesNotExist:
                 # this means the root item haven't been created yet
                 # ensure we have a root page corresponding
@@ -142,6 +141,8 @@ class ContentView(ApiView, ActionView):
                                 action=kwargs['pipe']['action'],
                                 path=kwargs['pipe']['path'],
                                 locale=kwargs['pipe']['locale'],
+                                published=False,
+                                visible=False,
                                 status='added')
                     page.related_id = page.id
                     page.save()

@@ -19,18 +19,18 @@ class ApetizerSocket(websocket.WebSocketHandler):
     def open(self, path):
         apetizer_core = CoreManager.get_core()
         apetizer_core.wsockets.append(self)
-        #print "WebSocket opened"
+    
+    def check_origin(self, origin):
+        print(origin)
+        return True
+        return bool(re.match(r'^.*?\.mydomain\.com', origin))
     
     def on_message(self, message):
-        # post to django app using json data dict ?
-        # 
-        #print message
         pass
-        
+
     def on_close(self):
         apetizer_core = CoreManager.get_core()
         apetizer_core.wsockets.remove(self)
-        #print "WebSocket closed"
 
 
 def load_jupyter_server_extension(nb_server_app):

@@ -47,12 +47,6 @@ except:
 
 logger = logging.getLogger(__name__)
 
-global URLS_PORT
-try:
-    URLS_PORT = '8000'
-except:
-    pass
-
 def get_default_storage():
     """
     :return: Drilldown object
@@ -68,7 +62,9 @@ def get_cached_key(key):
     return str(key)
 
 class ObjectTree(dict):
-    
+        
+    last_ref_time = 0
+
     def __init__(self, storage):
         self.storage = storage
         self.__dict__['instances'] = {}
@@ -94,10 +90,44 @@ class ObjectTree(dict):
         else:
             return False
             return self.storage.has_key(get_cached_key(key))
-
+    
+    def remove(self, key):
+        if key in self.__dict__['instances']:
+            del self.__dict__['instances'][key]
+        
+    
+    
+    def purge(self):
+        """
+        Purge the tree from invalid instances
+        """
+        # before this point we have to check for cached items invalidation
+        new_items = list(set(Translation.objects.filter(ref_time__gt=object_tree_cache.last_ref_time).values_list('related_id', flat=True)))
+        if new_items:
+            new_uids = list(set(new_items))
+            print(object_tree_cache.last_ref_time, 'Purged ', new_items)
+            print(object_tree_cache.__dict__['instances'].keys())
+            for uid in new_uids:
+                uid_path = u'/'+uid
+                object_tree_cache.remove(uid_path)
+                print ('removing cached ', uid_path)
+                
+        # we check for item parents too
+        parent_items = Item.objects.filter(id__in=new_items).values_list('parent_id', flat=True)
+        if parent_items:
+            parent_ids = list(set())
+            print(object_tree_cache.last_ref_time, 'Purged ', parent_ids)
+            for uid in parent_ids:
+                if '/'+uid in object_tree_cache:
+                    del object_tree_cache['/'+uid]['children_qs']
+                    del object_tree_cache['/'+uid]['children_count']
+        
+        object_tree_cache.last_ref_time = AuditedModel.get_ref_time()
+    
 global object_tree_cache
 object_tree_cache = ObjectTree(get_default_storage())
 #object_tree_cache = CoreManager.get_core()
+
 
 def object_tree_default(path, name, data):
     #return object_tree_cache.getGidDefault(path, name, data)
@@ -234,7 +264,7 @@ class DataPath(AuditedModel):
         super(DataPath, self).full_clean(exclude=exclude, validate_unique=validate_unique)
     
     def save(self, *args, **kwargs):
-        if type(self.data) not in (type(u''),):
+        if type(self.data) not in (type(u''), type('')):
             self.data = dump_json(self.data)
         self.full_clean()
         super(DataPath, self).save(*args, **kwargs)
@@ -1239,7 +1269,21 @@ class Item(Translation):
         """
         return the data conbtained in item as a python object
         """
-        return load_json(self.data)
+        
+        if self.data == '"{}"':
+            return {}
+        
+        if isinstance(self.data, str) \
+            or type(self.data) == type(u''):
+            dt = load_json(self.data)
+        else:
+            dt = self.data
+        
+        # 
+        if dt == '{}' or dt == u'{}':
+            return {}
+        
+        return dt
     
     def set_data(self, value):
         """
@@ -1331,8 +1375,8 @@ class Item(Translation):
         
         parts = path.split('/')
         domain = parts[0]
-        port = str(os.environ.get('APETIZER_PORT', 8000))
-        if settings.DEBUG:
+        port = str(os.environ.get('APETIZER_PORT', None))
+        if port:
             domain = domain+':'+port
         
         if getattr(settings, 'APETIZER_MULTILINGUAL', False):
