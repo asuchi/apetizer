@@ -94,7 +94,6 @@ class BasicAuthMiddleware(object):
                 return self.unauthed()
             
             auth = base64.b64decode(auth.strip())
-            print(str(auth))
             username, password = auth.decode("utf-8").split(':',1)
 
             if not self.expected_username or not self.expected_password:
@@ -171,9 +170,9 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
             
             try:
                 frontend = Frontend.objects.get(site_ptr_id=site.id)
+                request.site = frontend
             except:
                 frontend = None
-            
             # check to make sure the subdomain is supported
             if frontend and frontend.has_subdomains:
                 gotta_redirect = False
@@ -418,5 +417,6 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
 
     def find_env_hostname(self, target_domain):
         for k, v in list(self.ENV_HOSTNAMES.items()):
+            print 'ENV_HOSTNAME'
             if v == target_domain:
                 return k
