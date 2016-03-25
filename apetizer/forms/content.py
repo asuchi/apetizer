@@ -14,11 +14,11 @@ from django.forms.widgets import Textarea
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-import apetizer.default_settings as DEFAULTS
+import apetizer.settings as DEFAULTS
 from apetizer.forms.base import ActionModelForm
 from apetizer.forms.base import ActionPipeForm
 from apetizer.models import Item, Translation, DATETIME_FORMATS
-from apetizer.parsers.api_json import API_json_parser, dump_json
+from apetizer.parsers.api_json import dump_json
 from apetizer.utils.upload import format_file_extensions
 
 

@@ -3,7 +3,6 @@ Created on 28 fevr. 2016
 
 @author: biodigitals
 '''
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
 
@@ -85,7 +84,7 @@ class NotebookView(ContentView):
         
         #
         if not node.file:
-            node.file = 'resource/'+node.id+'.ipynb'
+            node.file = node.id+'.ipynb'
             node.save()
         
         return HttpResponseRedirect(node.get_url()+'view/')
@@ -126,7 +125,7 @@ class NotebookView(ContentView):
         
         #
         if not node.file:
-            node.file = 'resource/'+node.id+'.ipynb'
+            node.file = node.id+'.ipynb'
             node.save()
         
         return HttpResponseRedirect(node.get_url()+'file/')

@@ -125,7 +125,7 @@ class ModerateView(ContentView, ActionPipeView):
         request.method = 'POST'
         
         proposal_transfer = input_data.get('transfer','no')
-        new_input_data = load_json(load_json(proposal.data))
+        new_input_data = load_json(proposal.data)
         if proposal_transfer != 'no':
             #input_data = load_json(proposal.data)
             input_data.email = proposal.email
@@ -246,8 +246,6 @@ class ModerateView(ContentView, ActionPipeView):
         """
         invite a group of user to join the commenting
         """
-        akey = self.get_session_user_keys(request)
-        action_data = kwargs['pipe']
         action = kwargs.get('action')
         emails = input_data.get('emails')
        
@@ -292,8 +290,6 @@ class ModerateView(ContentView, ActionPipeView):
         post a user comment with or without vote
         """
         # filter posted data and update
-        akey = self.get_session_user_keys(request)
-        action_data = kwargs['pipe']
         action = kwargs.get('action')
 
         # fill forms

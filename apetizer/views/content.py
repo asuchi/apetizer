@@ -15,10 +15,8 @@ from django.http import Http404
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.timezone import now
 
-from apetizer.models import Item, Translation, timestamp_to_datetime, Frontend, \
-    object_tree_cache, AuditedModel
+from apetizer.models import Item, Translation, timestamp_to_datetime, Frontend
 from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
 from apetizer.views.search import ItemPaginator

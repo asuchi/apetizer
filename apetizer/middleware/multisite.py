@@ -1,6 +1,5 @@
 import base64
 import logging
-import os
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -417,6 +416,5 @@ class DynamicSitesMiddleware(BasicAuthMiddleware):
 
     def find_env_hostname(self, target_domain):
         for k, v in list(self.ENV_HOSTNAMES.items()):
-            print 'ENV_HOSTNAME'
             if v == target_domain:
                 return k

@@ -59,7 +59,7 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
                     'add':(ItemAddForm,),
                     
                     'reorder':(ItemReorderForm,),
-                    'translate':(ItemTranslateForm,),
+                    'translate':(ItemTranslateForm),
                     'location':(ItemLocationForm,),
                     'timing':(ItemTimingForm,),
                     'delete':(ItemDeleteForm,),

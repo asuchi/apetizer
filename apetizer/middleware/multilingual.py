@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
-import inspect
 import logging
 import re
-import urllib
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.utils import translation
 
 from apetizer.utils.compatibility import unicode3
-from apetizer.views.action import ActionView
-from apetizer.views.api import get_class_that_defined_method
 
 
 logger = logging.getLogger(__name__)

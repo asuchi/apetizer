@@ -3,12 +3,10 @@ Created on 5 fevr. 2013
 
 @author: rux
 '''
-from multiprocessing.process import Process
-
 from django.core.exceptions import ObjectDoesNotExist
-from django.http.response import HttpResponsePermanentRedirect, Http404
+from django.http.response import HttpResponsePermanentRedirect
 
-from apetizer.models import Item, Translation, object_tree_cache, AuditedModel
+from apetizer.models import Item, object_tree_cache
 
 
 REDRIRECT_URL_PATTERNS = []

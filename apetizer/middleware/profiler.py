@@ -4,6 +4,7 @@ Created on 11 dec. 2015
 @author: biodigitals
 '''
 import sys
+
 try:
     from StringIO import StringIO
 except ImportError:

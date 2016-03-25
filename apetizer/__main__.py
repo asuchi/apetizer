@@ -7,8 +7,6 @@ def parse_command():
     
     # add cwd to path
     sys.path.appen(os.getcwd())
-
-    print os.getcwd()
-
+    
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)

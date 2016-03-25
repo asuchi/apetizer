@@ -33,9 +33,9 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, get_language
 from geopy.distance import EARTH_RADIUS
 
-from apetizer.forms.frontend import FolderNameField, SubdomainListField
+from apetizer.forms.frontend import FolderNameField
 from apetizer.manager import CoreManager
-from apetizer.parsers.api_json import API_json_parser, load_json, dump_json
+from apetizer.parsers.api_json import load_json, dump_json
 from apetizer.storages.memcached import MemcacheStorage, DictStorage
 from apetizer.utils.compatibility import unicode3
 
@@ -168,17 +168,9 @@ def get_distincts(object_list, key):
 
 def upload_to(instance, filename):
     """
-    instance.get_root().id / instance.id . filename
-    
-    # originally
-    #fhash = sha1(str(time.time())).hexdigest()
-    upload_path = getattr(settings, 'MEDIA_ROOT', 'media')
+    Path and filename to upload to
     """
-    
-    if instance.parent:
-        upload_path = instance.get_root().id
-    else:
-        upload_path = instance.id
+    upload_path = ''
     
     fhash = instance.id
     
