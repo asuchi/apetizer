@@ -8,7 +8,7 @@ SECRET_KEY = "fsldjkhgljkfshfgnlcuqsngfiu"
 ALLOWED_HOSTS = ["*"]
 
 STATIC_ROOT = os.getcwd()+"/static"
-STATIC_URL = "/static/apetizer/"
+STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.getcwd()+"/media"
 MEDIA_URL = "/media/"
