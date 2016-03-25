@@ -1,10 +1,30 @@
-{% extends "content/page.html" %}
+{% extends "apetizer/base.html" %}
 
 {% block page_head %}
+<div class="ui sixteen wide column" >
+    <div class="ui secondary pointing menu" >
+        <a class="active item" href="{{ user_profile.get_url }}profile/" >Mon activité</a>
+        <a class="item right" href="{{ user_profile.get_url }}profile/" >Mon profile</a>
+        {% if request.user.is_authenticated %}
+        <a class="item" href="{{ user_profile.get_url }}account/" >Mon Compte</a>
+        {% else %}
+        <a class="item" href="{{ user_profile.get_url }}account/" >M'enregistrer</a>
+        {% endif%}
+        <a class="active right item" href="{{ user_profile.get_url }}dashboard/" >Tableau de bord</a>
+        {% comment %}
+        <a class="item" href="privatize/" >Privatize</a>
+        <a class="item" href="profile/?status=" >Activité ()</a>
+        <a class="item" href="profile/?status=folowing" >Suivi ()</a>
+        <a class="item" href="profile/?status=modified" >Contributions ()</a>
+        <a class="item" href="profile/?status=commented" >Commentaires ()</a>
+        <a class="item" href="profile/?status=contact" >Messages ()</a>
+        {% endcomment %}
+    </div>
+</div>
+
 <div class="ui sixteen wide column">
     <div class="ui warning message">
     {% include 'apetizer/tags/action_forms.html' %}
     </div>
 </div>
-{{ block.super }}
 {% endblock %}

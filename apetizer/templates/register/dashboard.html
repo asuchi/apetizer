@@ -1,4 +1,4 @@
-{% extends 'content/page.html' %}
+{% extends 'register/base.html' %}
 {% load momentjs %}
 
 
@@ -22,21 +22,6 @@
 
 {% block page_container %}
 
-<div class="ui sixteen wide column" >
-    <div class="ui secondary pointing menu" >
-        <a class="active item" href="profile/" >Apercu</a>
-        <a class="item right" href="view/" >Profile</a>
-        <a class="item" href="account/" >Account</a>
-        {% comment %}
-        <a class="item" href="privatize/" >Privatize</a>
-        <a class="item" href="profile/?status=" >Activité ()</a>
-        <a class="item" href="profile/?status=folowing" >Suivi ()</a>
-        <a class="item" href="profile/?status=modified" >Contributions ()</a>
-        <a class="item" href="profile/?status=commented" >Commentaires ()</a>
-        <a class="item" href="profile/?status=contact" >Messages ()</a>
-        {% endcomment %}
-    </div>
-</div>
 {% comment %}
 <div class="row">
     <div class="ui sixteen wide column">

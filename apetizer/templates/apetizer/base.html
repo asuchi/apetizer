@@ -378,21 +378,22 @@
         <div class="ui center aligned container">
             <div class="ui stackable inverted grid">
               <div class="three wide column">
-                <h4 class="ui inverted header">Reseau</h4>
+                <h4 class="ui inverted header">Réseau</h4>
                 <div class="ui inverted link list">
-                  <a class="item" href="/contribute/" target="_blank">Contribuer</a>
-                  {% comment %}
-                  <a class="item" href="/search/" ><i class="icon search"></i> Rechercher</a>
-                  <a class="item" href="/register/" target="_blank">Devenir membre</a>
-                  <a class="item" href="/acteurs/" target="_blank">Devenir acteur</a>
-                  {% endcomment %}
+                {% if not request.user.is_authenticated %}
+                  <a class="item" href="/login/" >Te connecter</a>
+                  <a class="item" href="/register/" >Devenient membre !</a>
+                {% else %}
+                  <a class="item" href="/account/" >Ton compte</a>
+                  <a class="item" href="/logout/" >Te déconnecter</a>
+                {% endif %}
                 </div>
               </div>
               <div class="three wide column">
                 <h4 class="ui inverted header">Plateforme</h4>
                 <div class="ui inverted link list">
-                  <a href="http://apetizer.biodigitals.com" class="item">Documentation</a>
-                  <a href="doc/" class="item">Api</a>
+                  <a href="/doc/" class="item">Documentation</a>
+                  <a href="/api/" class="item">Api</a>
                 </div>
               </div>
               <div class="seven wide right floated column">

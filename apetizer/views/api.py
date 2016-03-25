@@ -117,9 +117,6 @@ class ApiView(ActionView):
     def process_api(self, request, user_profile, input_data, template_args,
                     **kwargs):
         
-        if not request.user.is_staff:
-            return HttpResponseRedirect(Item.objects.get_at_url('/localhost/', exact=True))
-        
         api_action = input_data.get('action', ApiView.default_action)
         
         kwargs['action'] = api_action
