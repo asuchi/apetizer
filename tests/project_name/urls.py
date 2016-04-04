@@ -5,8 +5,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 admin.autodiscover()
 
-#handler404 = 'apetizer.views.front.handler404'
-#handler500 = 'apetizer.views.front.handler500'
+handler404 = 'apetizer.views.front.handler404'
+handler500 = 'apetizer.views.front.handler500'
 
 urlpatterns = patterns('',
      url(r'^admin/', include(admin.site.urls)),

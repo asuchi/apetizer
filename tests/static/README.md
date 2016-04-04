@@ -1,0 +1,1 @@
+The static folder to collect statics

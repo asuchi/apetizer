@@ -1,0 +1,1 @@
+The template folder to collect and override jupyter templates
