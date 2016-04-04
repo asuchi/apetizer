@@ -24,7 +24,7 @@ from apetizer.views.search import ItemPaginator
 
 log = logging
 
-class ContentView(ApiView, ActionView):
+class ContentView(ApiView):
     view_name = 'content'
     view_template = "content/page.html"
 
@@ -272,30 +272,32 @@ class ContentView(ApiView, ActionView):
         """
         http://quepy.machinalis.com/
         """
-        keyword = request.GET.get('keyword')
-        
-        if keyword is None:
-            keyword = request.POST.get('keyword', '')
-        
-        fieldnames = ['title__contains', 'description__contains',
-                      'content__contains', 'label__contains', 'slug__contains']
+        keyword = input_data.get('keyword')
+        search_global = input_data.get('keyword', False)
+        nodes = []
         if keyword:
+            fieldnames = ['title__contains', 'description__contains', 'label__contains', 'slug__contains']
             qgroup = reduce(operator.or_,
                             (Q(**{fieldname: keyword}) for fieldname in fieldnames))
-            translations = Translation.objects.filter(qgroup, related__visible=True).order_by('-modified_date')
+            if search_global == True:
+                translations = Translation.objects.filter(qgroup, related__visible=True).order_by('-modified_date')
+                for translation in translations:
+                    if translation.related and not translation.related in nodes:
+                        nodes.append(translation.related)
+            else:
+                qgroup = reduce(operator.or_,
+                    (Q(**{fieldname: keyword}) for fieldname in fieldnames))
+                
+                nodes = kwargs['node'].get_descendants().filter(qgroup)
             #.exclude(related__published=False).order_by('-modified_date')
+            template_args.update({'nodes':nodes, 'keyword':keyword })
         else:
             translations = []
         
         #if translations:
         #    translations.filter(related__published=True)
-        nodes = []
-        for translation in translations:
-            if translation.related and not translation.related in nodes:
-                if translation.related.visible:
-                    nodes.append(translation.related)
         
-        template_args.update({'nodes':nodes, 'keyword':keyword })
+        
         
         return self.render(request, template_args, **kwargs)
     

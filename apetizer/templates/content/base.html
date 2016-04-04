@@ -1,29 +1,62 @@
 {% extends 'apetizer/base.html' %}
 {% load static content_tags content_ui_tags momentjs moderate_tags markdown_deux_tags %}
 
+{% block extra-scripts %}
+{{ block.super }}
+{% if user_profile.validated %}
+<script type="text/javascript">
+
+    $(document).ready(function() {
+         $('.elabel').editable('translate/', {
+             name : 'label',
+         });
+         $('.etitle').editable('translate/', {
+             name : 'title',
+         });
+         $('.edescription').editable('translate/', {
+             name : 'description',
+             type:'textarea',
+             rows:5,
+         });
+     });
+    
+</script>
+{% endif %}
+{% endblock %}
+
+
 {% block page_article %}
     <div id="masthead" class="ui vertical segment">
         <div class="ui stackable padded grid">
         {% block page_head %}
         
             <div class="ui ten wide column">
-                <a class="icon item" href="index/" ><i class="icon arrow up"></i></a>{% content_breadcrumb currentNode %}
-                <h1 class="ui dividing header">{{ currentNode.title }}</h1>
+                <a class="icon item" href="index/" ><i class="icon arrow up"></i></a>
+                {% content_breadcrumb currentNode %}
+                {% if action != 'view' and action != 'translate' %}
+                {% else %}
+                    <div class="ui right floated secondary menu" style="position:relative;z-index:1">
+                        <a class="icon item right" href="change/" ><i class="icon edit"></i></a>
+                    </div>
+                {% endif %}
+                <h1 class="ui dividing header"><span class="etitle full width">{{ currentNode.title }}</span>
                 
-                {% if request.user.is_authenticated %}
+                {% if request.user.is_authenticated and action != 'view' %}
                 <div class="ui secondary menu">
                     <a class="icon item" href="{{ currentNode.parent.get_url }}view/" ><i class="icon arrow left"></i></a>
-                    <a class="icon item" href="view/" ><i class="icon eye"></i></a>
-                    <a class="icon item" href="translate/" ><i class="icon edit"></i></a>
+                    <a class="icon item right" href="view/" ><i class="icon eye"></i></a>
+                    <a class="icon item" href="translate/" data-content="Editer les textes" data-variation="inverted" ><i class="icon edit"></i></a>
                     <a class="icon item" href="publish/" ><i class="icon book"></i></a>
                     <a class="icon item" href="timing/" ><i class="icon clock"></i></a>
                     <a class="icon item" href="location/" ><i class="icon marker"></i></a>
                     <a class="icon item" href="image/" ><i class="icon picture"></i></a>
+                    <a class="icon item" href="content/" ><i class="icon code"></i></a>
                     <a class="icon item" href="related/" ><i class="icon share square"></i></a>
-                </div>
-                {% else %}
-                {% endif %}
                     
+                </div>                
+                {% endif %}
+                </h1>
+                
                 <div class="ui left aligned">
                 {% block ui-form %}
                 {% endblock %}
@@ -34,34 +67,53 @@
                     {% if not currentNode.description %}
                         <a class="ui small label" href="translate/" >Completer la description ...</a>
                     {% else %}
-                        <div class="ui header">{{ currentNode.description|markdown }}</div>
+                        <div class="ui info edescription">{{ currentNode.description|markdown }}</div>
                     {% endif %}
                 </div>
                 {% endblock %}
-                
             </div>
             
                 
             <div class="ui center aligned six wide column">
                 
-                <div class="ui items" >
+                <div class="row">
+                    <div class="ui buttons" >
+                        <form action="follow/" method="POST">
+                            <button class="ui tiny label" href="follow/" ><i class="icon plus"></i> Suivre</button>
+                            {% csrf_token %}
+                        </form>
+                        <a class="ui tiny label" href="discuss/" ><i class="icon comment"></i>Discuter</a>
+                        <a class="ui tiny label" href="review/" ><i class="icon call"></i>Réviser</a>
+                        <a class="ui tiny label" href="invite/" ><i class="icon share"></i>Partager</a>
+                    </div>
+                </div>
+                
+                
+                <div class="row">
                     <a class="ui medium image" href="{{ currentNode.get_url }}image/" >
                     {% if currentNode.image %}
                         <img src="{{ currentNode.image.url }}" />
                     {% else %}
-                        <img src="{% static 'components/semantic/dist/assets/images/image-16by9.png' %}" />
+                        {% if request.user.is_authenticated %}
+                        <span class="ui padded disabled button"><i class="ui big icon picture" ></i></span>
+                        {% endif %}
                     {% endif %}
                     </a>
+                </div>
+                <div class="row">
                     {% if currentNode.related_url %}
                     <div class="ui tiny item">
-                        {% if action == related %}
-                        <a href="{{ currentNode.related_url }}"  target="_blank" >{{ currentNode.related_url|truncatechars:"128" }}</a>
+                        {% if action == 'related' %}
+                        <a href="{{ currentNode.related_url }}" target="{{ currentNode.id }}" ><i class="icon globe"></i>{{ currentNode.related_url|truncatechars:"128" }}</a>
                         {% else %}
-                        <a href="related/" >{{ currentNode.related_url|truncatechars:"128" }}</a>
+                        <a href="related/" class="ui label" >{{ currentNode.related_url|truncatechars:"128" }}</a>
                         {% endif %}
                     </div>
                     {% else %}
                     {% endif %}
+                </div>
+                
+                <div class="padded row">
                     {% for node in paginator.object_list %}
                         {% if node.behavior == 'file' %}
                         <div class="ui mini spaced image" >
@@ -70,31 +122,40 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                <div class="row">
-                    <div class="ui buttons" >
-                        <a class="ui tiny label" href="follow/" ><i class="icon "></i> Suivre</a>
-                        <a class="ui tiny label" href="discuss/" ><i class="icon comment"></i>Discuter</a>
-                        <a class="ui tiny label" href="review/" ><i class="icon call"></i>Réviser</a>
-                        <a class="ui tiny label" href="invite/" ><i class="icon share"></i>Partager</a>
-                    </div>
-                </div>
-                
+                {% if not currentNode.published %}
+                <form action="publish/" method="POST">
+                    <input type="hidden" value="behavior" name="{{ currentNode.published }}" >
+                    <input type="hidden" value="2" name="published" >
+                    <button class="ui tiny label" href="publish/" ><i class="icon plus"></i> Publier</button>
+                    {% csrf_token %}
+                </form>
+                {% else %}
+                <form action="publish/" method="POST">
+                    <input type="hidden" value="behavior" name="{{ currentNode.published }}" >
+                    <input type="hidden" value="3" name="published" >
+                    <button class="ui tiny label" href="publish/" ><i class="icon minus"></i> De-Publier</button>
+                    {% csrf_token %}
+                </form>
+                {% endif %}
             </div>
         {% endblock page_head %}
         </div>
-        
-        {% if request.user.is_staff %}
+        {% block page_toolbar %}
+        {% if request.user.is_authenticated and action != 'view'%}
         <div class="ui sixteen wide column" style="opacity:0.7">
             <div class="ui secondary pointing bottom menu full width">
-                {% if currentNode.geojson or currentNode.get_events %}<a class="icon item" href="read/" ><i class="icon book"></i></a>{% endif %}
-                {% if currentNode.get_events %}<a class="icon item" href="timeline/" ><i class="icon calendar"></i></a>{% endif %}
-                {% if currentNode.geojson %}<a class="icon item" href="map/" ><i class="icon globe"></i></a>{% endif %}
+                {% if currentNode.geojson or currentNode.get_events %}<a class="icon item" href="read/" ><i class="icon book"></i></a>{% else %}
+                <a class="icon item" href="read/" ><i class="icon book"></i></a>{% endif %}
+                {% if currentNode.get_events %}<a class="icon item" href="timeline/" ><i class="icon calendar"></i></a>{% else %}
+                <a class="icon item" href="timeline/" ><i class="icon calendar"></i></a>{% endif %}
+                {% if currentNode.geojson %}<a class="icon item" href="map/" ><i class="icon globe"></i></a>{% else %}
+                <a class="icon item" href="map/" ><i class="icon globe"></i></a>{% endif %}
                 {% comment %}<a class="icon item" href="{{ currentNode.get_uid_url }}directory/" ><i class="icon sitemap"></i></a>{% endcomment %}
         {% if request.user.is_authenticated %}
-        {% if not currentNode.published or action != 'view' %}
                 <a class="icon item right" href="pull/" ><i class="icon arrow down"></i></a>
                 <a class="icon item" href="file/" ><i class="icon file"></i></a>
                 <a class="icon item" href="push/" ><i class="icon arrow up"></i></a>
+        {% if not currentNode.published or action != 'view' %}
         {% else %}
         {% endif %}
                 <a class="icon item right" href="edit/" ><i class="icon list layout"></i></a>
@@ -104,7 +165,7 @@
         {% endif %}
         </div>
         {% endif %}
-        
+        {% endblock %}
     </div>
 
     <div class="ui main stackable internally divided padded grid">      

@@ -1,11 +1,12 @@
 {% extends 'content/page.html' %}
 {% load momentjs %}
 
-{% block content %}
-<div class="ui vertical segment">
+{% block page_container %}
+<div class="ui sixteen wide column">
+<div class="ui vertical segment" >
 <h3>Discussion</h3>
 </div>
-<div class="ui vertical segment" style="min-height:320px;" >
+<div class="ui vertical segment" style="" >
     <div class="ui grid" >
         {% for message in currentNode.get_discussion %}
             {% ifchanged  message.get_author.get_hash %}
@@ -32,6 +33,7 @@
 </div>
 <div class="ui vertical segment">
     {% include 'apetizer/tags/action_forms.html' %}
+</div>
 </div>
 {% endblock %}
 

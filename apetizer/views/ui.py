@@ -6,7 +6,6 @@ Created on 15 janv. 2013
 
 import logging
 import os.path
-import traceback
 
 from django.contrib import messages
 from django.core.files.uploadedfile import UploadedFile
@@ -18,8 +17,6 @@ from django.template.context import RequestContext
 from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, get_language
-import markdown_deux
-
 from apetizer.forms.content import ItemTranslateForm, ItemDeleteForm, \
     MultiUploadForm, ItemAddForm, ItemLocationForm, \
     ItemTimingForm, ItemDataForm, ItemRelatedForm, ItemImageForm, \
@@ -32,8 +29,6 @@ from apetizer.views.moderate import ModerateView
 from apetizer.views.notebook import NotebookView
 from apetizer.views.program import ProgramView
 from apetizer.views.visitor import VisitorView
-from apetizer.workers.hackpad import Hackpad
-from apetizer.workers.meetup import MeetupWorker
 
 
 log = logging
@@ -52,7 +47,7 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
                      'image', 'content', 'search', 
                      'location', 'timing', 
                      'redirect', 'publish', 'reorder', 
-                     'rename', 'related'
+                     'rename', 'related', 'upload'
                      ]
 
     class_actions_forms = {
@@ -81,7 +76,7 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
     class_action_templates = {
                         'add':'ui/add.html',
                         
-                        'change':'ui/change.html',
+                        'change':'content/page.html',
                         'translate':'ui/translate.html',
                         'redirect':'ui/change.html',
                         'image':'ui/image.html',
@@ -184,6 +179,12 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
     def process_add(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Add a new item
+        """
+        return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
+    
+    def process_put(self, request, user_profile, input_data, template_args, **kwargs):
+        """
+        Put data to existing or new item
         """
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
     
@@ -452,50 +453,8 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
     
     def process_related(self, request, user_profile, input_data, template_args, **kwargs):
         """
-        Displays and manages the item related_url behavior
-        Her is the switch for external services integration
+        Displays and manages the item related_url
         """
-        # check if related-url is set
-        # and switch depending on the service it represents
-        # it's much more like an embed
-        # 
-        
-        # check for url
-        node = kwargs['node']
-        
-        if node.related_url:
-            
-            if node.related_url.startswith('http://www.meetup.com'):
-                # and 
-                #input_data.get('keyword'):
-                wk = MeetupWorker(user_profile, kwargs['node'], input_data, kwargs)
-                items = wk.prepare()
-                template_args['nodes'] = items
-                #return self.render(request, template_args, **kwargs)
-            
-            elif node.related_url.startswith('https://hackpad.com/'):
-                
-                hackpad_id = node.related_url.split('-')[-1]
-                
-                # import hackpad content
-                HACKPAD_CLIENT_ID = 'vTuK1ArKv5m'
-                HACKPAD_CLIENT_SECRET = '5FuDkwdgc8Mo0y2OuhMijuzFfQy3ni5T'
-                
-                hackpad = Hackpad(consumer_key=HACKPAD_CLIENT_ID, consumer_secret=HACKPAD_CLIENT_SECRET)
-                
-                #node.description = ''
-                #node.description = hackpad.get_pad_content(hackpad_id, asUser='', response_format='md')
-                
-                hackpad_content = hackpad.get_pad_content(hackpad_id, asUser='', response_format='md')
-                
-                #node.description =  unicode3(decode(hackpad_content, 'latin1'))
-                print(hackpad_content)
-                try:
-                    node.get_translation().content = markdown_deux.markdown(unicode3(hackpad_content.decode('latin1')))
-                    node.get_translation().save()
-                except:
-                    traceback.print_exc()
-        
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
 
 

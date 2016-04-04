@@ -1,85 +1,217 @@
-{% extends 'register/base.html' %}
-{% load momentjs %}
+{% extends 'register/profile.html' %}
+{% load static momentjs %}
 
-
-{% comment %}
-  <div class="ui vertical stripe quote segment">
-    <div class="ui equal width stackable internally celled grid">
-      <div class="center aligned row">
-        <div class="column">
-          <h3>{{ currentNode.get_contributors|length }} contributeurs</h3>
-          <p>{{ currentNode.get_visitors|length }} visiteurs</p>
-        </div>
-        <div class="column">
-          <h3>{{ currentNode.get_descendants_count }} articles</h3>
-          <p>{{ currentNode.words }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-{% endcomment %}
-
+{% block extra-styles %}
+<style type="text/css">
+<!--
+    .following {
+        position:absolute;
+        top:0px;
+        left:0px;
+        width:100%;
+        height:200px;
+        background-repeat:no-repeat;
+        background-size: cover;
+        background-position:50% 50%;
+        opacity:0.1;
+        background-color:#888;
+        }
+-->
+</style>
+{% endblock %}
 
 {% block page_container %}
-
-{% comment %}
-<div class="row">
-    <div class="ui sixteen wide column">
-        <div class="ui vertical segment">
-            <div class="ui five columns grid">
-                {% with moderations=user_profile.get_contributions %}
-                <div class="column">
-                    <h3 class="header">{{ moderations|length }} contributions</h3>
-                </div>
-                {% endwith %}
-                {% with moderations=user_profile.get_proposed %}
-                <div class="column ">
-                    <h3 class="header">{{ moderations|length }} propositions</h3>
-                </div>
-                {% endwith %}
-                {% with moderations=user_profile.get_votes %}
-                <div class=" column ">
-                    <h3 class="header">{{ moderations|length }} votes</h3>
-                </div>
-                {% endwith %}
-            </div>
-        </div>
+<div class="ui two columns padded stackable grid" >
+{% for following in user_profile.get_followings %}
+{% with node=following.related %}
+<div class="ui column grid">
+    <div class="ui four wide column" >
+        <img class="ui small image" src="{% if not node.image %}{{ node.get_root.get_image.url }}{% else %}{{node.get_image.url}}{% endif %}" />
     </div>
-</div>
-{% endcomment %}
-
-<div class="row">
-    <div class="ui sixteen wide column">
-        <h4>Suivi</h4>
-        <div class="ui seven cards doubling">
-        {% for node in user_profile.get_followings %}
-            <div class="ui card">
-              <div class="tiny image">
-                <img src="{{ node.related.get_image.url }}">
-              </div>
-              <div class="content">
-                <a class="header" href="{{ node.related.get_url }}" >{{ node.related.title }}</a>
-                <div class="meta">
-                  <span class="date">{{ node.related.label }}</span>
+    <div class="ui twelve wide column" >
+        <h3 class="ui header" >{{ node.title }}</h3>
+        
+        <div class="ui feed">
+        {% for comment in node.get_last_events %}
+        
+        {% ifchanged comment.status or comment.related or comment.email or comment.action %}
+            <div class="event">
+            
+                <div class="label">
+                {% ifchanged comment.email %}
+                  <img src="{{ comment.get_image.url }}" />
+                {% endifchanged %}
                 </div>
-                {% comment %}
-                <div class="description">
-                  {{ node.related.description }}
+                
+                <div class="content {% if comment.status == 'proposed' %}ui message warning
+                                    {% elif comment.status == 'accepted' %}ui message success
+                                    {% elif comment.status == 'rejected' %}ui message error{% endif %}">
+                    <div class="summary">
+                        {% if comment.email and comment.get_hash == user_profile.get_hash %}
+                            You {{ comment.status }}
+                        {% else %}
+                            <a class="user" href="{{ comment.visitor.get_uid_url }}" >
+                              {{ comment.get_full_name }}
+                            </a> 
+                             {{ comment.subject }}
+                        {% endif %}
+                        <a class="ui right floated" href="{{ comment.related.get_uid_url }}" >
+                            {{ comment.related.title|default:comment.path }}
+                        </a>
+                        <div class="date">{% moment_from_now comment.modified_date %}</div>
+                    </div>
+                    
+                    <div class="extra text">
+                        {% with image_related=comment.related.get_image %}
+                        {% if comment.action == 'image' and image_related %}
+                            <img class="ui tiny image" src="{{ image_related.url }}" />
+                        {% endif %}
+                        {% endwith %}
+                        {% if DEBUG %}
+                        <p>{{ comment.data }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="meta">
+                    </div>
                 </div>
-                {% endcomment %}
-              </div>
-              {% comment %}
-              <div class="extra content">
-                <a>
-                  <i class="user icon"></i>
-                  22 Friends
-                </a>
-              </div>
-              {% endcomment %}
+            
             </div>
+            {% endifchanged %}
+            
+            {% if forloop.last %}
+            {% endif %}
+            
         {% endfor %}
         </div>
     </div>
 </div>
+{% endwith %}
+{% endfor %}
+</div>
+{% endblock %}
+
+
+
+{% block column %}
+
+{% if request.user.is_staff %}
+<div class="ui padded segment">
+    <a class="ui button" href="/admin/" target="_admin" >Admin</a>
+    <a class="ui button" href="/tree" target="_admin" >Files</a>
+</div>
+{% endif %}
+
+
+{% comment %}
+<div class="ui vertical stripe quote segment">
+  <div class="ui equal width stackable internally celled grid">
+    <div class="center aligned row">
+      <div class="column">
+        <h3>{{ currentNode.get_contributors|length }} contributeurs</h3>
+        <p>{{ currentNode.get_visitors|length }} visiteurs</p>
+      </div>
+      <div class="column">
+        <h3>{{ currentNode.get_descendants_count }} articles</h3>
+        <p>{{ currentNode.words }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+  
+<div class="ui vertical padded segment">
+    <h4>Suivi</h4>
+    <div class="ui two cards doubling">
+    {% for node in user_profile.get_followings %}
+        <div class="ui card">
+          <div class="tiny image">
+            <img src="{{ node.related.get_image.url }}">
+          </div>
+          <div class="content">
+            <a class="header" href="{{ node.related.get_url }}" >{{ node.related.title }}</a>
+            <div class="meta">
+              <span class="date">{{ node.related.label }}</span>
+            </div>
+            <div class="description">
+              {{ node.related.description }}
+            </div>
+          </div>
+          <div class="extra content">
+            <a>
+              <i class="user icon"></i>
+              22 Friends
+            </a>
+          </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+{% endcomment %}
+
+{{ block.super }}
+
+
+        <div class="ui center aligned container">
+            <h4 class="ui inverted header">Mes groupes</h4>
+            <div class="ui horizontal list">
+                {% for membership in user_profile.get_memberships %}
+                  <a class="item" href="{{ membership.get_url }}">
+                    {% if membership.image %}
+                        <img class="ui item mini image" src="{{ membership.image.url }}" />
+                    {% else %}
+                        <img class="ui item mini image" src="{% static 'images/logo-apetizer.png' %}" />
+                    {% endif %}
+                    <span>
+                     {{ membership.title }}
+                     </span>
+                  </a>
+                {% endfor %}
+            </div>
+            <div class="ui inverted section divider"></div>
+        </div>
+        
+        {% with moderations=user_profile.get_contributions %}
+        {% if moderations|length %}
+        <div class="ui vertical segment">
+            <h3 class="header">{{ moderations|length }} contributions</h3>
+            <ul class="ui list">
+            {% for moderation in moderations %}
+                <li class="item"><a href="{{ moderation.get_url }}">{{ moderation.related.label }} - {{ moderation.related.title }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% with moderations=user_profile.get_proposed %}
+        {% if moderations|length %}
+        <div class="ui vertical segment">
+            <h3 class="header">{{ moderations|length }} propositions</h3>
+            <ul class="ui list">
+            {% for moderation in moderations %}
+                {% if moderation.status == 'accepted' or moderation.status == 'rejected' %}
+                
+                {% else %}
+                <li class="item"><a href="{{ moderation.get_url }}">{{ moderation.related.label }} - {{ moderation.related.title }}</a></li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% with moderations=user_profile.get_subscriptions %}
+        {% if moderations|length %}
+        <div class="ui vertical segment">
+            <h3 class="header">{{ moderations|length }} souscriptions</h3>
+            <ul class="ui list">
+            {% for moderation in moderations %}
+                <li class="item"><a href="{{ moderation.get_url }}">{{ moderation.related.label }} - {{ moderation.related.title }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% endwith %}
+        
 
 {% endblock %}

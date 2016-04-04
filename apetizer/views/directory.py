@@ -16,11 +16,12 @@ from apetizer.directory.items import _search_drilldown_cache
 from apetizer.forms.search import DirectoryQueryForm
 from apetizer.models import Item
 from apetizer.views.action import ActionView
+from apetizer.views.api import ApiView
 
 
 logger = logging.getLogger(__name__)
 
-class DirectoryView(ActionView):
+class DirectoryView(ApiView):
     
     class_actions = ['directory', 'query']
     class_actions_forms = {'query':(DirectoryQueryForm,)}
@@ -33,10 +34,15 @@ class DirectoryView(ActionView):
             return self.render(request, template_args, {}, 'Missing query string', 'error', **kwargs)
         
         result_keys = []
+        
+        i = 0
         # check for words starting with query
         for key in _search_drilldown_cache.data_map.values.keys():
             if key.startswith(query):
+                i+=1
                 result_keys.append(key)
+                if i > 25:
+                    break
         
         results = {}
         for key in result_keys:
@@ -76,7 +82,7 @@ class DirectoryView(ActionView):
         
     def process_directory(self, request, user_profile, input_data, template_args, **kwargs):
         
-        _search_drilldown_cache.load_items()
+        #_search_drilldown_cache.load_items()
         
         #path = '/'.join(kwargs['path'].split('/')[1:-1])
         path = kwargs['path']

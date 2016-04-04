@@ -105,25 +105,36 @@ class ObjectTree(dict):
         new_items = list(set(Translation.objects.filter(ref_time__gt=object_tree_cache.last_ref_time).values_list('related_id', flat=True)))
         if new_items:
             new_uids = list(set(new_items))
-            print(object_tree_cache.last_ref_time, 'Purged ', new_items)
-            print(object_tree_cache.__dict__['instances'].keys())
+            #print(object_tree_cache.last_ref_time, 'Purged ', new_items)
+            #print(object_tree_cache.__dict__['instances'].keys())
             for uid in new_uids:
                 uid_path = u'/'+uid
                 object_tree_cache.remove(uid_path)
-                print ('removing cached ', uid_path)
+                if uid in TreeManager.tree_map:
+                    for p in TreeManager.tree_map[uid]:
+                        if p in TreeManager.tree_cache:
+                            del TreeManager.tree_cache[p]
+                    del TreeManager.tree_map[uid]
+                #print ('removing cached ', uid_path)
                 
         # we check for item parents too
         parent_items = Item.objects.filter(id__in=new_items).values_list('parent_id', flat=True)
         if parent_items:
             parent_ids = list(set())
-            print(object_tree_cache.last_ref_time, 'Purged ', parent_ids)
+            #print(object_tree_cache.last_ref_time, 'Purged ', parent_ids)
             for uid in parent_ids:
                 if '/'+uid in object_tree_cache:
                     del object_tree_cache['/'+uid]['children_qs']
                     del object_tree_cache['/'+uid]['children_count']
+                if uid in TreeManager.tree_map:
+                    for p in TreeManager.tree_map[uid]:
+                        if p in TreeManager.tree_cache:
+                            del TreeManager.tree_cache[p]
+                    del TreeManager.tree_map[uid]
         
         object_tree_cache.last_ref_time = AuditedModel.get_ref_time()
-    
+
+
 global object_tree_cache
 object_tree_cache = ObjectTree(get_default_storage())
 #object_tree_cache = CoreManager.get_core()
@@ -165,22 +176,6 @@ def get_distincts(object_list, key):
     
     return objects
     
-
-def upload_to(instance, filename):
-    """
-    Path and filename to upload to
-    """
-    upload_path = ''
-    
-    fhash = instance.id
-    
-    filename = get_valid_filename(os.path.basename(filename))
-    filename, ext = os.path.splitext(filename)
-    
-    fullname = os.path.join(upload_path, "%s.%s%s" % (fhash, filename, ext))
-    
-    return fullname
-
 
 class AuditedModel(models.Model):
     '''
@@ -415,7 +410,7 @@ class Visitor(DataPath):
     
     def get_followings(self):
         """
-        Get my creation list
+        Get my followed item list
         """
         proposal_status = ('following',)
         if self.email and self.validated:
@@ -423,7 +418,12 @@ class Visitor(DataPath):
         else:
             proposals = Moderation.objects.filter(akey=self.akey, status__in=proposal_status).order_by('-modified_date')
         return proposals
+        
+    def get_last_events(self):
+        comments = Moderation.objects.filter(related=self, visible=True).exclude(status__in=('contact','told')).order_by('ref_time')
+        return comments[:10]
     
+
     def get_proposals(self):
         """
         Get my creation list
@@ -491,11 +491,11 @@ class Visitor(DataPath):
         """
         Get my messages
         """
-        messages_status = ('contact',)
+        messages_status = ('contact', 'contacted')
         if self.email and self.validated:
-            contribs = Moderation.objects.filter(related__email=self.email, status__in=messages_status).order_by('-modified_date')
+            contribs = Moderation.objects.filter(email=self.email, status__in=messages_status).order_by('-modified_date')
         else:
-            contribs = Moderation.objects.filter(related__akey=self.akey, status__in=messages_status).order_by('-modified_date')
+            contribs = Moderation.objects.filter(akey=self.akey, status__in=messages_status).order_by('-modified_date')
         return contribs
 
 
@@ -637,6 +637,7 @@ class Translation(Moderation):
 class TreeManager(Manager):
     
     tree_cache = {}
+    tree_map = {}
     
     def fixCase(self, st):
         return ' '.join(''.join([w[0].upper(), w[1:].lower()]) for w in st.split())
@@ -712,10 +713,13 @@ class TreeManager(Manager):
         if item is None:
             raise ObjectDoesNotExist()
         
+        # set to tree cache
         TreeManager.tree_cache[cleanUrl] = item
         TreeManager.tree_cache[item.get_path()] = item
         TreeManager.tree_cache[item.get_url()] = item
         TreeManager.tree_cache[item.get_uid_url()] = item
+        
+        TreeManager.tree_map[item.id] = (item.get_path(), item.get_url(), item.get_uid_url())
         
         return item
 
@@ -910,6 +914,42 @@ def get_default_language():
 
 DATETIME_FORMATS = (('%Y-%m-%d %H:%M:%S'),)
 
+def upload_to(instance, filename):
+    return upload_to_media(instance, filename)
+
+
+def upload_to_media(instance, filename):
+    """
+    Path and filename to upload to
+    """
+    filename, ext = os.path.splitext(filename)
+    
+    upload_path = 'media'
+    
+    fhash = instance.id
+    
+    filename = get_valid_filename(os.path.basename(filename))
+    
+    fullname = os.path.join(upload_path, "%s.%s%s" % (fhash, filename, ext))
+    
+    return fullname
+
+def upload_to_resource(instance, filename):
+    """
+    Path and filename to upload to
+    """
+    filename, ext = os.path.splitext(filename)
+    
+    upload_path = 'resource'
+    
+    fhash = instance.id
+    
+    filename = get_valid_filename(os.path.basename(filename))
+    
+    fullname = os.path.join(upload_path, "%s.%s%s" % (fhash, filename, ext))
+    
+    return fullname
+
 class Item(Translation):
     """
     The model for a content item
@@ -920,8 +960,8 @@ class Item(Translation):
     parent = models.ForeignKey('self', editable=True, blank=True, null=True, related_name='children')
     
     geojson = models.TextField(verbose_name=_('GeoJSON data field'), null=True, blank=True)
-    image = ImageField(upload_to=upload_to, blank=True, null=True)
-    file = models.FileField(upload_to=upload_to, max_length=255, blank=True, null=True)
+    image = ImageField(upload_to=upload_to_media, blank=True, null=True)
+    file = models.FileField(upload_to=upload_to_resource, max_length=255, blank=True, null=True)
     
     # representation
     behavior = models.CharField(max_length=65, default='view')
@@ -1100,6 +1140,9 @@ class Item(Translation):
     def get_root(self):
         if self.parent_id == None:
             return self
+        else:
+            return self.parent.get_root()
+        
         if not self.__root__:
             self.__root__ = self.parent.get_root()
         return self.__root__
@@ -1344,6 +1387,9 @@ class Item(Translation):
     
     def get_url(self, language=None):
         
+        return self.get_uid_url(language)
+        #if not self.published == True:
+        
         if self.parent_id == None:
             return self.get_uid_url(language)
         
@@ -1367,9 +1413,9 @@ class Item(Translation):
         
         parts = path.split('/')
         domain = parts[0]
-        port = str(os.environ.get('APETIZER_PORT', None))
+        port = os.environ.get('APETIZER_PORT', None)
         if port:
-            domain = domain+':'+port
+            domain = domain+':'+str(port)
         
         if getattr(settings, 'APETIZER_MULTILINGUAL', False):
             path = '//'+domain+'/'+language+'/'

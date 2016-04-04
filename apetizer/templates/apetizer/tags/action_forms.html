@@ -1,11 +1,25 @@
 {% load i18n %}
-
-    
-<form class="ui form {{ action }}" method="post" action="{{ action }}/" 
+<p>{{ action }}</p>
+{% if request.GET.modal %}
+<div class="ui modal">
+<div class="ui secondary menu">
+    <a class="icon item right" href="view/" ><i class="icon eye"></i></a>
+    <a class="icon item" href="translate/" data-content="Editer les textes" data-variation="inverted" ><i class="icon edit"></i></a>
+    <a class="icon item" href="publish/" ><i class="icon book"></i></a>
+    <a class="icon item" href="timing/" ><i class="icon clock"></i></a>
+    <a class="icon item" href="location/" ><i class="icon marker"></i></a>
+    <a class="icon item" href="image/" ><i class="icon picture"></i></a>
+    <a class="icon item" href="content/" ><i class="icon code"></i></a>
+    <a class="icon item" href="related/" ><i class="icon share square"></i></a>
+</div>
+{% endif %}
+<form class="ui form message info {{ action }}" method="post" action="{{ action }}/" 
     target="{{ action_target|default:'_self' }}"
     enctype="multipart/form-data">
+    <div class="ui right floated secondary menu" style="position:relative;z-index:1">
+        <a class="icon item right" href="view/" ><i class="icon close"></i></a>
+    </div>
     {% csrf_token %}
-    
     <div class="ui padded vertical segment">
         {% for action_form in action_forms %}
             {% for field in action_form %}
@@ -27,3 +41,6 @@
         </div>
     </div>
 </form>
+{% if request.GET.modal %}
+</div>
+{% endif  %}

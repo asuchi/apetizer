@@ -1,7 +1,7 @@
 {% extends "content/page.html" %}
 {% load i18n content_tags content_ui_tags %}
 
-{% block page_head %}
+{% block content %}
 <div class="ui padded vertical segment" >
 {% if nodes|length > 0 %}
     <div>{{ nodes|length }} {% trans "results" %}</div>
@@ -9,10 +9,5 @@
     <div>{% trans "No result" %}</div>
 {% endif %}
 </div>
-{% endblock %}
-
-{% block page_container %}
-<div class="ui sixteen wide column">
-    {% include 'content/published_page.html' %}
-</div>
+{{ block.super }}
 {% endblock %}

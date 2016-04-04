@@ -17,7 +17,6 @@ setup(
               'apetizer.test',
               'apetizer.utils',
               'apetizer.views',
-              'apetizer.workers',
               ],
     package_data={'apetizer': ['apetizer/templates/*']},
     scripts=[],

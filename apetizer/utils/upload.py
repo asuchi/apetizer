@@ -66,9 +66,9 @@ def get_thumbnail(img, thumb_size, quality=80, format='JPG'):
 #Getting files here
 
 def format_file_extensions(extensions):
-    return '/.+$/i'
-    return ".(jpg|png)$"
-    return  "^\.*\\.(%s)+$" % "|".join(extensions)
+    #return '/.+$/i'
+    #return ".(jpg|png)$"
+    #return  "^\.*\\.(%s)+$" % "|".join(extensions)
     return  ".(%s)$" % "|".join(extensions)
 
 

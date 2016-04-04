@@ -30,19 +30,48 @@
 {% endblock %}
 
 {% block page_container %}
-<div class="ui row" >
+<div class="row" >
     <div class="ui eleven wide column">
-        {% block content %}
-        {% if action == 'view' and currentNode.content %}
+        {% if currentNode.content %}
         <div class="ui vertical segment">
             {% autoescape off %}
             {% content_render currentNode.content %}
             {% endautoescape %}
         </div>
+        {% endif %} 
+        {% block content %}
+        {% if currentNode.published %}
+            {% include 'content/published_page.html' %}
+        {% else %}
+            {% include 'content/ui_page.html' %}
         {% endif %}
-        {% include 'content/published_page.html' %}        
-        {% endblock content %}
         <a class="anchor" id="bottom" />
+        {% endblock content %}
+        
+        {% if request.user.is_authenticated %}
+        
+        {% if not input_data.label and request.GET.order != '-1'  %}
+            {% if action == 'upload' %}
+                <div class="ui segment">{% include 'ui/tags/upload.html' %}</div>
+            {% endif %}
+        {% endif %}
+        
+        {% if parentNodes|length %}
+        <div class="ui hidden divider"></div>
+        {% for node in parentNodes %}
+            {% if node.parent != node.parent %}
+                <div class="{{ node.get_url }}" >{{ node.get_url }}</div>
+            {% endif %}
+        {% endfor %}
+        {% endif %}
+        
+        <div class="ui horizontal list">
+            <a class="ui item " href="upload/#bottom" title="Ajouter"><i class="ui icon upload"></i> Ajouter des images, fichiers</a>
+        </div>
+        <div class="ui vertical segment">
+            <a class="ui mini button" href="add/?modal=1&order={{ node.order|add:'1' }}#bottom" >Ajouter un article</a>
+        </div>
+        {% endif %}
     </div>
 
     <div class="ui five wide column">
@@ -56,8 +85,20 @@
             {% endif %}
             {% endif %}
         {% endif %}
-        {% with contributors=currentNode.get_contributors %}
+        
         <div class="ui item dividing" >
+        {% if keyword.items|length %}
+        {% for key, value in keyword.items %}
+          <a href="/{{ key|directory_key_url }}"  ><label>{{ key|drilldown_key_label:'keyword' }} <span>({{ key|drilldown_key_count:'keyword' }})</span>
+        </label></a>{% endfor %}
+        {% endif %}
+        </div>
+        
+        <div class="ui hidden divider" >
+        </div>
+        
+        <div class="ui item dividing" >
+        {% with contributors=currentNode.get_contributors %}
             <h4 class="ui header">Contributeurs ({{contributors|length}})</h4>
             <div class="ui list" >
                 {% for contributor in contributors %}
@@ -72,11 +113,13 @@
                 </div>
                 {% endfor %}
             </div>
+            <a class="ui item mini spaced button" href="contact/" >Contacter</a>
+        {% endwith %}
+            
             <div class="ui top right attached mini label">
                 <a href="{{ currentNode.get_url }}consult/" >History ({{ currentNode.get_history|length }})</a>
             </div>
         </div>
-        {% endwith %}
         
         {% if request.user.is_authenticated %}
         <div class="ui hidden divider"></div>
@@ -140,19 +183,19 @@
             <a class="ui item mini spaced button" href="follow/" >Suivre</a>
         </div>
         {% endcomment %}
-        {% endblock %}
-    </div>
-</div>
-
-{% block page_review %}
-<div class="row" >
-    <div class="ui eleven wide column">
+        
+        {% if currentNode.get_comments|length > 0 %} 
         <div class="ui vertical segment">
             {% include 'moderate/tags/comments.html' %}
             {% include 'moderate/tags/comment_form.html' %}
         </div>
+        {% else %}
+            <a class="ui item mini spaced button" href="comment/" >Laisser un commentaire</a>
+        {% endif %}
+        {% endblock %}
     </div>
-    
+
+{% block page_review %}
     <div class="ui five wide column">
         
         {% comment %}
@@ -161,7 +204,6 @@
             <h4 class="ui header" >Note</h4>
             {% moderate_average_evaluation currentNode %}
         </div>
-        
         {% with subscribers=currentNode.get_subscribers %}
         {% if subscribers|length > 1 %}
         <div class="ui hidden divider"></div>
@@ -182,7 +224,6 @@
         {% endwith %}
         {% endcomment %}
     </div>
-</div>
 {% endblock page_review %}
-
+</div>
 {% endblock page_container %}

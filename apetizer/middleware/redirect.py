@@ -17,6 +17,9 @@ class ItemRedirect(object):
     """
     def process_request(self, request):
         
+        # dispacth caching
+        object_tree_cache.purge()
+        
         # bypass the redirect for the staff users
         if request.user and request.user.is_staff:
             return
@@ -37,7 +40,7 @@ class ItemRedirect(object):
     def process_response(self, request, response):
         
         # dispacth caching
-        object_tree_cache.purge()
+        # object_tree_cache.purge()
         
         # dispatch indexing
         

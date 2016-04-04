@@ -6,7 +6,9 @@ Created on 24 juin 2015
 
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from django.utils.text import slugify
 
+from apetizer.directory.items import _search_drilldown_cache
 from apetizer.views.content import ContentView
 from apetizer.views.directory import DirectoryView
 from apetizer.views.semantic import SemanticView
@@ -62,6 +64,13 @@ class FrontView(DirectoryView, UIView, SemanticView, UserView):
 
     def render_html(self, request, template_args, result_message, result_status,
                     **kwargs):
+        
+        path = kwargs['node'].id
+        
+        if _search_drilldown_cache.data_map.has_key(path):
+            data = _search_drilldown_cache.data_map.get_key_data(path)
+            for key in data:
+                template_args[ slugify(key).replace('-','_') ] = data[key]
         
         if kwargs['action'] in FrontView.class_actions:
             return ContentView.render_html(self, request, template_args,

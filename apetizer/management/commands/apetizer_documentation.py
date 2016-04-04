@@ -30,8 +30,8 @@ class Command(BaseCommand):
         akey = str(uuid.uuid4())
         kwargs['pipe'] = {'akey':akey,
                           'action':'doc',
-                          'path':'/',
-                          'locale':'fr',
+                          'path':'/localhost',
+                          'locale':'en',
                           'status':'added',
                           }
         
@@ -41,12 +41,6 @@ class Command(BaseCommand):
         documentation.visible = False
         documentation.save()
         
-        # project roadmap
-        #roadmap = Item.objects.get_or_create_url(doc_root+'/roadmap/', **kwargs)
-        #issues = Item.objects.get_or_create_url(doc_root+'/issues/', **kwargs)
-        
-        #
-        #api = Item.objects.get_or_create_url(doc_root+'/api/', **kwargs)
         
         #
         actions = Item.objects.get_or_create_url(doc_root+'/actions/', **kwargs)
@@ -54,32 +48,42 @@ class Command(BaseCommand):
         # create the action vocabulary node
         actions = FrontView.get_actions()
         for action in actions:
+            
             action_item = Item.objects.get_or_create_url(doc_root+'/actions/'+action+'/', **kwargs)
             # get the documentation function class name
             action_item.label = get_class_that_defined_method(getattr(FrontView, 'process_' + action)).__name__
             
             # get the documentation function docstring
             docstring = getattr(FrontView, 'process_' + action).__doc__
-            if docstring:
-                action_item.description = docstring
-                    
+            
+            action_item.description = str(docstring)
             action_item.save()
         
         
         status = Item.objects.get_or_create_url(doc_root+'/status/', **kwargs)
+        
         statuses = get_distincts(Moderation.objects.filter().exclude(status__isnull=True), 'status')
         for s in statuses:
-            workers = Item.objects.get_or_create_url(doc_root+'/status/'+s.status, **kwargs)
+            status_item = Item.objects.get_or_create_url(doc_root+'/status/'+s.status, **kwargs)
         
-        # create the workers list
-        #workers = Item.objects.get_or_create_url(doc_root+'/api/workers/', **kwargs)
+        
+        # create the dependencies list
+        install = Item.objects.get_or_create_url(doc_root+'/install/', **kwargs)
+        
+        # create the dependencies list
+        dependencies = Item.objects.get_or_create_url(doc_root+'/requirements/', **kwargs)
+        
+        #
+        api = Item.objects.get_or_create_url(doc_root+'/api/', **kwargs)
+        api.behavior = 'api'
+        api.save()
         
         # create the source code tree
-        source = Item.objects.get_or_create_url(doc_root+'/', **kwargs)
+        source = Item.objects.get_or_create_url(doc_root+'/source', **kwargs)
         
         for root_package in ('apetizer',):# 'static', 'install.md', 'requirements.txt', 'manage.py' ):
         
-            apetizer = Item.objects.get_or_create_url(doc_root+'/'+root_package+'/', **kwargs)
+            apetizer = Item.objects.get_or_create_url(doc_root+'/source/'+root_package+'/', **kwargs)
             for root, dirs, files in os.walk(root_package):
                 
                 for dir in dirs:
@@ -87,7 +91,7 @@ class Command(BaseCommand):
                     if dir == '__pycache__':
                         continue
                     
-                    fileitem = Item.objects.get_or_create_url(doc_root+'/'+os.path.join(root, dir), **kwargs)
+                    fileitem = Item.objects.get_or_create_url(doc_root+'/source/'+os.path.join(root, dir), **kwargs)
                     
                     fileitem.label = 'Package'
                     fileitem.title = dir
@@ -96,7 +100,7 @@ class Command(BaseCommand):
                     
                 for file in files:
                     if file.endswith(".py"):
-                        fileitem = Item.objects.get_or_create_url(doc_root+'/'+os.path.join(root, file), **kwargs)
+                        fileitem = Item.objects.get_or_create_url(doc_root+'/source/'+os.path.join(root, file), **kwargs)
                         
                         fileitem.label = 'Module'
                         fileitem.title = os.path.splitext(file)[0]
@@ -119,7 +123,7 @@ class Command(BaseCommand):
                         fileitem.save()
                     
                     elif file.endswith(".html"):
-                        fileitem = Item.objects.get_or_create_url(doc_root+'/'+os.path.join(root, file), **kwargs)
+                        fileitem = Item.objects.get_or_create_url(doc_root+'/source/'+os.path.join(root, file), **kwargs)
                         
                         #fileitem.behavior = 'upload'
                         fileitem.label = 'Template Html'
@@ -138,10 +142,4 @@ class Command(BaseCommand):
                         fileitem.content = content
                         fileitem.save()
         
-        # create the dependencies list
-        install = Item.objects.get_or_create_url(doc_root+'/install/', **kwargs)
-        
-        # create the dependencies list
-        dependencies = Item.objects.get_or_create_url(doc_root+'/requirements/', **kwargs)
-
 

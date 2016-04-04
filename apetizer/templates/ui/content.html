@@ -5,13 +5,10 @@
 {% include 'apetizer/tags/action_forms.html' %}
 {% endblock %}
 
-{% block content %}
-{% content_item currentNode %}
-{% endblock %}
 
 https://github.com/NextStepWebs/simplemde-markdown-editor
 
-{% block extra-scripts %}
+{% block Zextra-scripts %}
 
 {{ block.super }}
 <script type="text/javascript" src="{% static 'components/ckeditor/ckeditor.js' %}"></script>

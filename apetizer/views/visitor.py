@@ -23,13 +23,14 @@ class VisitorView(ActionPipeView):
     view_name = 'visitor'
     view_template = 'register/view.html'
     
-    class_actions = ['validate', 'privatize', 'profile']
-    class_actions_forms = {'profile': (VisitorForm,),
+    class_actions = ['validate', 'authenticate', 'profile', 'privatize']
+    class_actions_forms = {'authenticate': (VisitorForm, VisitorValidateForm),
                            'privatize': (VisitorPrivatizeForm,),
                            'validate': (VisitorValidateForm,),}
     
-    class_action_templates = {'validate': 'register/validate.html',
-                              'profile': 'register/profile.html',
+    class_action_templates = {'profile': 'register/profile.html',
+                              'validate': 'register/validate.html',
+                              'authenticate': 'register/validate.html',
                               'privatize': 'ui/base.html',}
     
     pipe_table = ModelStore()
@@ -41,10 +42,10 @@ class VisitorView(ActionPipeView):
         user_pipe = OrderedDict([
                                   ('email',
                                    {'class': self.__class__,
-                                    'action': 'profile'}),
+                                    'action': 'authenticate'}),
                                   ('username',
                                    {'class': self.__class__,
-                                    'action': 'profile'}),
+                                    'action': 'authenticate'}),
                                   ('validated',
                                    {'class': self.__class__,
                                     'action': 'validate'}),
@@ -98,9 +99,9 @@ class VisitorView(ActionPipeView):
             return super(VisitorView, self).get_forms_instances(action, user_profile, kwargs)
 
 
-    def process_profile(self, request, user_profile, input_data, template_args, **kwargs):
+    def process_authenticate(self, request, user_profile, input_data, template_args, **kwargs):
         """
-        Display full user profile
+        Propose to a visitor to authenticate using it's email address
         """
         # check for an existing user account
         #if not user_profile.validated and template_args['currentNode'].validated:
@@ -121,8 +122,11 @@ class VisitorView(ActionPipeView):
         """
         
         return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
-        
-            
+    
+    def process_profile(self, request, user_profile, input_data, template_args, **kwargs):
+        return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
+
+
     def process_validate(self, request, user_profile, input_data, template_args, **kwargs):
         """
         Check for email token activation

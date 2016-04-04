@@ -62,6 +62,8 @@ class ApiView(ActionView):
         """
         Tests wether the view should return json or html rendering
         """
+        print 'PATH'
+        print request.path
         return os.path.splitext(request.path)[1].lower() == '.json'
     
     

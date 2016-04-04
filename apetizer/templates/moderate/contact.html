@@ -1,8 +1,17 @@
 {% extends "ui/base.html" %}
 
 {% block body %}
+<div class="ui message">
+<h4>Contacter les contributeurs</h4>
+<p class=""></p>
+
+{% for contributor in currentNode.get_contributors %}
+<div class="ui right button" ><a href="{{ contributor.get_profile_item.get_url }}contact/">{{ contributor.get_full_name }}</a></div>
+{% endfor %}
+
 <div class="container">
     {% include 'apetizer/tags/action_forms.html' %}
+</div>
 </div>
 {{ block.super }}
 {% endblock %}

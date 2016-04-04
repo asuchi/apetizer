@@ -47,7 +47,7 @@ def get_or_create_notebook(node):
         'writable': True,
     }
     """
-    fname = os.path.join(settings.MEDIA_ROOT, node.id+'.ipynb')
+    fname = os.path.join(os.getcwd(), 'resource', node.id+'.ipynb')
     
     ## is there a file ?
     if not os.path.exists(fname):
@@ -80,7 +80,7 @@ def API_json_parser(obj):
         return obj
 
 def save_notebook(nb, node):
-    fname = os.path.join(settings.MEDIA_ROOT, node.id+'.ipynb')
+    fname = os.path.join(os.getcwd(), 'resource', node.id+'.ipynb')
     # write changes
     with io.open(fname, 'w', encoding='utf-8') as f:
         f.write(unicode(json.dumps(nb, default=API_json_parser)))

@@ -1,5 +1,5 @@
 {% extends "ui/base.html" %}
-{% load i18n thumbnail multiuploader staticfiles verbatim %}
+{% load i18n multiuploader staticfiles verbatim %}
 
 {% block Zcontent %}
 <div class="ui grid">
@@ -27,8 +27,8 @@
 {% endblock %}
 
 {% block extra-scripts %}
-
 {{ block.super }}
+
 {% comment %}
 <script src="{% static "components/multiuploader/scripts/jquery.tmpl.min.js" %}"></script>
 <script src="{% static "components/multiuploader/scripts/jquery.iframe-transport.js" %}"></script>
@@ -88,7 +88,9 @@
 	        var opts = {{ multiuploader_form.options|safe }};
 	
 	        // Making new RegExp from django string
-	        opts['acceptFileTypes'] = new RegExp('/.+$/i');
+	        //opts['acceptFileTypes'] = new RegExp('/\/.+$/i');
+	        //opts['acceptFileTypes'] = new RegExp("^.*\\." + 'jpg|png' + "[^.]+$", "i"),
+	        opts['acceptFileTypes'] = new RegExp(opts['acceptFileTypes'], 'i');
 	        opts['maxNumberOfFiles'] = opts['maxNumberOfFiles'];
 	
 	        $(multiuploaderSelector).fileupload(opts);

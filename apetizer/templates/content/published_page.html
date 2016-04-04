@@ -1,48 +1,93 @@
-{% load content_tags momentjs markdown_deux_tags moderate_tags %}
-<div id="{{ currentNode.id }}">
+{% load i18n content_tags momentjs markdown_deux_tags moderate_tags %}
+<div id="{{ currentNode.id }}" class="ui item">
+
+{% if current_page.number > 1 %}
+<div class="ui vertical segment">
+{% with dd_request_path=request.path %}
+    <ol class="ui pagination centered menu">
+        {% if current_page.has_previous %}
+        <li class="item">
+            <a href="{{ dd_request_path|get_paginator_page_url:current_page.previous_page_number }}" data-page="{{ current_page.previous_page_number }}"><i class="icon-caret-left"></i>&nbsp;&nbsp;{% trans "Previous" %}</a>
+        </li>
+        {% endif %}
+        
+        {% for page in paginator.page_range %}
+        {% if forloop.counter <= 10 %}
+        <li class="item {% if current_page.number == page %}active{% endif %}">
+            <a href="{{ dd_request_path|get_paginator_page_url:page }}" data-page="{{ page }}">{{ page }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        
+        <li class="item">
+            {% if current_page.has_next %}
+            <a href="{{ dd_request_path|get_paginator_page_url:current_page.next_page_number }}" data-page="{{ current_page.next_page_number }}">{% trans "Next" %}&nbsp;&nbsp;<i class="icon-caret-right"></i></a>
+            {% else %}
+            <span>{% trans "Next" %}&nbsp;&nbsp;<i class="icon-caret-right"></i></span>
+            {% endif %}
+        </li>
+    </ol>
+</div>
+{% endwith %}
+</div>
+{% else %}
 {% autoescape off %}
 {% content_render item.content %}
 {% endautoescape %}
+{% endif %}
+<div class="ui vertical segment">
 {% if not nodes|length %}
 {% else %}
-    {% for node in current_page.object_list %}
-        {% if node.order|slugify == input_data.order and input_data.label %}
-        <a class="anchor" id="{{ node.label|slugify }}-form" />
-        {% endif %}
+{% for node in current_page.object_list %}
+
+    {% if node.order|slugify == input_data.order and input_data.label %}
+    <a class="anchor" id="{{ node.label|slugify }}-form" />
+    {% endif %}
         
     {% ifchanged node.label %}
-        {% if not forloop.first %}</div></div>{% endif %}
+
+        {% if not forloop.first %}</div>
+        </div>{% endif %}
         <div class="item">
             <a class="anchor" id="{{node.label|slugify}}"></a>
             <div class="item" >
-                <h2 class="header">{{ node.label }}<a class="anchor" id="{{ node.label }}"></a>
-                {% if node.label == node.title and not node.is_leaf_node %}
-                    <a class="ui right floated primary button"  href="{{ node.get_url }}" >Lire plus <i class="right chevron icon"></i></a>
-                    </h2>
-                    <div class="description">
-                    {{ node.description|markdown }}
-                    </div>
+                <h2 class="header"><span class="elabel">{{ node.label }}</span><a class="anchor" id="{{ node.label }}"></a>
+                {% if node.label == node.title %}
+                {% if node.is_leaf_node and not node.content %}
+                <a class="ui right floated button" href="{{ node.get_url }}" ><i class="right chevron icon"></i></a>
                 {% else %}
-                    <a class="ui right floated button" href="{{ node.get_url }}" ><i class="right chevron icon"></i></a>
+                <a class="ui right floated button"  href="{{ node.get_url }}" >
+                    {% if node.get_children_count %}
+                    <i class="ui icon list"></i> {{ node.get_children_count }} 
+                    {% endif %}
+                <i class="right chevron icon"></i></a>
+                {% endif %}
+                </h2>
+                
+                {% if node.description|length < 512 %}<div class="description edescription">{{ node.description|markdown }}</div>{% endif %}
+                {% else %}
                     </h2>
                 {% endif %}
             </div>
             <div class="ui divided items">
-        {% endifchanged %}
-        
-        {% ifchanged node.label %}
+    {% endifchanged %}
+    
+    {% ifchanged node.label %}
         {% if not forloop.first %}
         <div class="ui hidden divider"></div>
         {% endif %}
-        {% endifchanged %}
+    {% else %}
+        
+    {% endifchanged %}
+        
         
         {% if node.label != node.title %}
         <div class="item">
             {% if not node.behavior == 'image' %}
             {% if node.image %}
-            <div class="image">
-                <img class="" src="{{ node.get_image.url }}" />
-            </div>
+            <a href="{{ node.get_url }}" class="ui small image">
+                <img src="{{ node.get_image.url }}" />
+            </a>
             {% endif %}
             {% endif %}
             <div class="middle aligned content">
@@ -53,29 +98,42 @@
                     {% content_breadcrumb node %}
                 {% endifchanged %}
                 {% endif %}
-                {% if node.behavior == 'image' and node.image %}
+                
+                <span class="ui right floated" >
+                {% if node.is_leaf_node and not node.content %}
+                    <a class="ui button" href="{{ node.get_url }}" ><i class="right chevron icon"></i></a>
+                {% else %}
+                    <a class="ui primary labeled button" href="{{ node.get_url }}" >
+                        {% if node.get_children_count %}
+                        <span><i class="ui icon list"></i> {{ node.get_children_count }} </span>
+                        {% endif %}
+                        <i class="right chevron icon"></i>
+                    </a>
                 {% endif %}
+                </span>
                 
                 <h4 class="header" ><a href="{{ node.get_url }}view/" class="header">{{ node.title }}</a></h4>
-                <p class="meta ">{{ node.description|markdown }}</p>
+                
+                <p class="meta" >{{ node.description|markdown }}</p>
                 
                 {% if node.behavior == 'image' and node.image %}
-                    <div class="ui item">
-                        <img class="ui extra large image" src="{{ node.get_image.url }}" />
-                    </div>
+                    <a href="{{ node.get_url }}image/" class="ui large image">
+                        <img src="{{ node.get_image.url }}" />
+                    </a>
                 {% elif node.behavior == 'upload' and node.file %}
                     <div class="ui item">
-                        <a class="ui right floated" href="{{ node.file.url }}" >Telecharger {{ node.title }}</a>
+                        <a class="ui right floated" href="{{ node.get_url }}file/" >Fichier</a>
                     </div>
                 {% elif node.behavior == 'related' and node.related_url %}
                     <div class="ui item">
-                        <iframe src="{{ node.related_url }}" width="100%" height="320" border="0" style="border:1px solid gray;" ></iframe>
-                        <a class="ui right floated primary button"  href="{{ node.get_url }}" >Lire plus <i class="right chevron icon"></i></a>
+                        <a class="ui mini button" href="{{ node.related_url }}" target="{{ node.id }}" >{{ node.related_url }}</a>
                     </div>
-                {% elif not node.is_leaf_node %}
-                    <a class="ui right floated primary button"  href="{{ node.get_url }}" >Lire plus <i class="right chevron icon"></i></a>
+                {% endif %}
+                
+                {% if not node.is_leaf_node %}
+                    <a class="ui "  href="{{ node.get_url }}" >Lire plus ...<i class="right chevron icon"></i></a>
                 {% else %}
-                    
+                
                 {% endif %}
                 
             </div>
@@ -85,8 +143,43 @@
         {% if forloop.last %}
         </div></div>
         {% endif %}
+        
         <div class="ui hidden divider"></div>
     {% empty %}
     {% endfor %}
-{% endif %} 
+{% endif %}
 </div>
+
+{% if paginator.num_pages > 1 %}
+<div class="ui vertical segment">
+{% with dd_request_path=request.path %}
+    <ol class="ui pagination centered menu">
+        {% if current_page.has_previous %}
+        <li class="item">
+            <a href="{{ dd_request_path|get_paginator_page_url:current_page.previous_page_number }}" data-page="{{ current_page.previous_page_number }}"><i class="icon-caret-left"></i>&nbsp;&nbsp;{% trans "Previous" %}</a>
+        </li>
+        {% endif %}
+        
+        {% for page in paginator.page_range %}
+        {% if forloop.counter <= 10 %}
+        <li class="item {% if current_page.number == page %}active{% endif %}">
+            <a href="{{ dd_request_path|get_paginator_page_url:page }}" data-page="{{ page }}">{{ page }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        
+        <li class="item">
+            {% if current_page.has_next %}
+            <a href="{{ dd_request_path|get_paginator_page_url:current_page.next_page_number }}" data-page="{{ current_page.next_page_number }}">{% trans "Next" %}&nbsp;&nbsp;<i class="icon-caret-right"></i></a>
+            {% else %}
+            <span>{% trans "Next" %}&nbsp;&nbsp;<i class="icon-caret-right"></i></span>
+            {% endif %}
+        </li>
+    </ol>
+{% endwith %}
+</div>
+{% endif %}
+
+</div>
+    
+    

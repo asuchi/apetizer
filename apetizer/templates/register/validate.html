@@ -1,13 +1,11 @@
-{% extends 'register/profile.html' %}
+{% extends 'register/base.html' %}
 
-{% block page_head %}
+{% block body %}
 <div class="ui fluid container full height">
     {% if DEBUG  %}
     {% endif %}
     <div class="ui segment">
         <p>Entrez votre clef pour valider cette session.</p>
-        <p>Par cette action je valide que je ne suis pas une machine.</p>
-        <p>{{ user_profile.get_token }}</p>
         <hr />
         {% include 'register/tags/form.html' %}
         {% if DEBUG  %}

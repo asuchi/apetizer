@@ -11,7 +11,7 @@
         <div class="ui segment">
             <a class="anchor" id="{{node.label|slugify}}"></a>
             <div class="item" >
-                <h2 class="header">{{ node.label }}<a class="anchor" id="{{ node.label }}"></a>
+                <h2 class="header"><span class="elabel">{{ node.label }}</span><a class="anchor" id="{{ node.label }}"></a>
                 {% if node.label == node.title %}
                     {% if not node.is_leaf_node %}
                     <a class="ui right floated primary button"  href="{{ node.get_url }}view/" >Lire plus <i class="right chevron icon"></i></a>
@@ -19,9 +19,7 @@
                     <a class="ui mini right floated button"  href="{{ node.get_url }}translate/" >Editer <i class="right chevron icon"></i></a>
                     {% endif %}
                     </h2>
-                    <div class="description">
-                    {{ node.description|markdown }}
-                    </div>
+                    <div class="description edescription">{{ node.description|markdown }}</div>
                 {% else %}
                 </h2>
                 {% endif %}
@@ -44,9 +42,10 @@
         <div class="ui item">
         
             {% if node.behavior == 'image' and node.image %}
-                <img class="ui large image " src="{{ node.image.url }}" />
+            <a class="image" href="{{ node.get_url }}" >
+                <img class="" src="{{ node.image.url }}" />
+            </a>
             {% endif %}
-            
             
             <div class="middle aligned content">
                 <a class="anchor" id="{{ node.slug }}"></a>
@@ -56,9 +55,8 @@
                 </div>
                 {% endif %}
                 
-                <h4 class="header" ><a href="{{ node.get_url }}view/" class="header">{{ node.title }}
-                </a></h4>
-                <p class="meta ">{{ node.description|markdown }}</p>
+                <h4 class="header" ><a href="{{ node.get_url }}view/" class="header">{{ node.title }}</a></h4>
+                <p class="meta edescription">{{ node.description|markdown }}</p>
                 {% if node.behavior == 'image' and node.image %}
                     
                 {% elif node.behavior == 'upload' and node.file %}
@@ -94,14 +92,6 @@
         {% if forloop.last %}
         </div></div>
         {% endif %}
-        
-        {% if node.order|slugify == input_data.order and input_data.label %}
-            {% if action == 'upload' %}
-                <div class="ui divider"></div>
-                <div class="ui vertical segment">{% include 'ui/tags/upload.html' %}</div>
-            {% endif %}
-        {% endif %}
-        
         <div class="ui hidden divider"></div>
     {% empty %}
     {% endfor %}
@@ -135,26 +125,5 @@
     {% endwith %}
     {% endif %}
     
-    <a class="anchor" id="bottom" />
-    <div class="ui horizontal list">
-        <a class="ui item " href="upload/" title="Ajouter"><i class="ui icon upload"></i> Ajouter des images, fichiers</a>
-    </div>
-    
-    {% if not input_data.label and request.GET.order != '-1'  %}
-        {% if action == 'add' %}
-            <div class="ui segment">{% include 'content/tags/form.html' %}</div>
-        {% elif action == 'upload' %}
-            <div class="ui segment">{% include 'ui/tags/upload.html' %}</div>
-        {% endif %}
-    {% endif %}
-    
-    {% if parentNodes|length %}
-    <div class="ui hidden divider"></div>
-    {% for node in parentNodes %}
-        {% if node.parent != node.parent %}
-            <div class="{{ node.get_url }}" >{{ node.get_url }}</div>
-        {% endif %}
-    {% endfor %}
-    {% endif %}
 
     

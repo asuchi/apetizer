@@ -12,9 +12,10 @@ from django.http import HttpResponseRedirect
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from apetizer.forms.register import AuthenticateLoginForm, AuthenticatePasswordForm, \
-   RegisterForm, AuthenticateAgreeForm, UserForm, VisitorForm
-from apetizer.models import Visitor
+from apetizer.forms.register import AuthenticateLoginForm, \
+                                    AuthenticatePasswordForm, \
+                                    AuthenticateAgreeForm, \
+                                    UserForm
 from apetizer.views.visitor import VisitorView
 
 
@@ -44,10 +45,10 @@ class UserView(VisitorView):
         main_scenario = OrderedDict([
                                           ('username',
                                            {'class': self.__class__,
-                                            'action': 'profile'}),
+                                            'action': 'authenticate'}),
                                           ('email',
                                            {'class': self.__class__,
-                                            'action': 'profile'}),
+                                            'action': 'authenticate'}),
                                           ('first_name',
                                            {'class': self.__class__,
                                             'action': 'register'}),
@@ -125,13 +126,6 @@ class UserView(VisitorView):
         """
         Set a password for the current user
         """
-        # profile must have username and email
-        if not user_profile.email or not user_profile.username:
-            return HttpResponseRedirect(user_profile.get_url()+'profile/')
-        
-        if not user_profile.validated:
-            return HttpResponseRedirect(user_profile.get_url()+'validate/')
-        
         #return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
         # is ther a user logged in ?
         if request.user.is_authenticated():

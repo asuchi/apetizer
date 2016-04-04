@@ -39,6 +39,7 @@ class ItemDrilldown(Drilldown):
         items = Item.objects.filter(visible=True,).order_by('parent')
         
         for item in items:
+            print item.get_url()
             self.index_item(item)
         
         if settings.DEBUG:

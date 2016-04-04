@@ -1,7 +1,7 @@
 {% extends "content/page.html" %}
 {% load i18n leaflet_tags %}
 
-{% block page_container %}
+{% block page_article %}
 <div class="ui sixteen width column" style="position:relative;width:100%;padding:0px;">
 {% leaflet_map "content-map" callback="window.map_init_basic" %}
 </div>

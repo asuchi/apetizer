@@ -1,16 +1,83 @@
-{% extends "apetizer/base.html" %}
+{% extends "content/base.html" %}
+{% load momentjs %}
 
 {% block page_head %}
+{% with messages=user_profile.get_messages %}
+{% if messages|length %}
+<div class="row">
+<div class="ui two wide column">
+</div>
+<div class="ui one wide column">
+    <i class="ui big icon mail disabled"></i>
+</div>
+<div class="ui ten wide column">
+    <div class="ui feed">
+        {% for message in messages %}
+            <div class="event">
+                <div class="label">                                
+                    <div class="ui image avatar" ><img src="{{ message.get_image.url }}" /></div>
+                </div>
+                <div class="content">
+                    <div class="summary">   
+                        <a href="{{ message.visitor.get_url }}" >{{ message.get_full_name }}</a>, 
+                        <div class="date" >{% moment_from_now message.modified_date %}</div>
+                    </div>
+                    <div class="extra text">
+                        <div class="ui sub header">{{ message.subject }}</div>
+                        <div class="">{{ message.message }}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="ui three wide centered column">
+    <a class="head link" href="">Messages ({{ messages|length }})</a>
+</div>
+</div>
+{% endif %}
+{% endwith %}
+
+{% comment %}
+<div class="row">
+    <div class="ui sixteen wide column">
+        <div class="ui vertical segment">
+            <div class="ui five columns grid">
+                {% with moderations=user_profile.get_contributions %}
+                <div class="column">
+                    <h3 class="header">{{ moderations|length }} contributions</h3>
+                </div>
+                {% endwith %}
+                {% with moderations=user_profile.get_proposed %}
+                <div class="column ">
+                    <h3 class="header">{{ moderations|length }} propositions</h3>
+                </div>
+                {% endwith %}
+                {% with moderations=user_profile.get_votes %}
+                <div class=" column ">
+                    <h3 class="header">{{ moderations|length }} votes</h3>
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endcomment %}
+
+{% endblock %}
+
+{% block page_toolbar %}
 <div class="ui sixteen wide column" >
     <div class="ui secondary pointing menu" >
-        <a class="active item" href="{{ user_profile.get_url }}profile/" >Mon activité</a>
-        <a class="item right" href="{{ user_profile.get_url }}index/" >Ma page</a>
+        <a class="item" href="{{ user_profile.get_url }}view/" >Ma Page</a>
+        <a class="{% if action == 'profile' %}active {% endif %}item right" href="{{ user_profile.get_url }}profile/" >Mon Activité</a>
+        <a class="{% if action == 'account' %}active {% endif %}item" href="{{ user_profile.get_url }}account/" >Mon Compte</a>
         {% if request.user.is_authenticated %}
-        <a class="item" href="{{ user_profile.get_url }}account/" >Mon Compte</a>
         {% else %}
-        <a class="item" href="{{ user_profile.get_url }}account/" >M'enregistrer</a>
+        <a class="{% if action == 'authenticate' %}active {% endif %}item" href="{{ user_profile.get_url }}authenticate/" >M'authentifier</a>
+        <a class="{% if action == 'register' %}active {% endif %}item" href="{{ user_profile.get_url }}register/" >M'enregistrer</a>
         {% endif%}
-        <a class="active right item" href="{{ user_profile.get_url }}dashboard/" >Tableau de bord</a>
+        <a class="{% if action == 'dashboard' %}active {% endif %}right item" href="{{ user_profile.get_url }}dashboard/" >Tableau de bord</a>
         {% comment %}
         <a class="item" href="privatize/" >Privatize</a>
         <a class="item" href="profile/?status=" >Activité ()</a>
@@ -21,10 +88,20 @@
         {% endcomment %}
     </div>
 </div>
+{% endblock %}
 
-<div class="ui sixteen wide column">
-    <div class="ui warning message">
-    {% include 'apetizer/tags/action_forms.html' %}
+{% block page_container %}
+<div class="row" >
+    <div class="ui six wide column">
+    {% block column %}
+    {% endblock %}
+    </div>
+    <div class="ui ten wide column">
+        {% block body %}
+        <div class="ui warning message">
+        {% include 'apetizer/tags/action_forms.html' %}
+        </div>
+        {% endblock %}
     </div>
 </div>
 {% endblock %}

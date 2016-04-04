@@ -25,6 +25,7 @@ def markdown_to_item(node, md, recurse=False):
 			and lines[1][0:2] == '# ':
 			node.title = lines[1][2:]
 			ol = 2
+	
 	if not node.label: node.label = node.id
 	if not node.title: node.title = node.label
 	

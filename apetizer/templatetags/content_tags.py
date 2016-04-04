@@ -3,6 +3,8 @@ Created on 22 janv. 2013
 
 @author: rux
 '''
+import traceback
+
 from django import template
 from django.template import Template
 
@@ -14,9 +16,16 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def content_render( context, string ):
-    return string
-    t = Template( string )
-    return t.render( context )
+    try:
+        t = Template( string )
+        return t.render( context )
+    except:
+        stack = traceback.format_stack()
+        html = '<div class="ui message error">'
+        for el in stack:
+            html += '<p>'+unicode(el)+'</p>'
+        html += '</div>'
+        return html
 
 @register.inclusion_tag('content/tags/image.html', takes_context=True)
 def content_item_image( context, item, width, height, display='fixed' ):

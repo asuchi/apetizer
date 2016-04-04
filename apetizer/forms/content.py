@@ -64,7 +64,7 @@ class ItemRenameForm(ActionModelForm):
     title = _('Rename this item')
     class Meta:
         model = Translation
-        fields = ('slug',)
+        fields = ('slug', 'type',)
 
 class ItemChangeForm(ActionModelForm):
     class Meta:
@@ -83,7 +83,7 @@ class ItemFileForm(ActionModelForm):
     title = _('Modify this item')
     class Meta:
         model = Item
-        fields = ('file',)
+        fields = ('file', 'related_cron')
 
 class ItemCodeForm(ActionModelForm):
     slug = 'item_code'
@@ -91,11 +91,10 @@ class ItemCodeForm(ActionModelForm):
     class Meta:
         model = Translation
         fields = ('content',)
-
 class ItemPublishForm(ActionModelForm):
     class Meta:
         model = Item
-        fields = ('behavior', 'type', 'published')
+        fields = ('behavior', 'published')
 
 class ItemDataForm(ActionModelForm):
     slug = 'item_data'
@@ -128,7 +127,7 @@ class ItemTimingForm(ActionModelForm):
     slug = 'item_timing'
     title = _('Timing for this item')
     
-    start = DateTimeField(input_formats=DATETIME_FORMATS,)
+    start = DateTimeField(input_formats=DATETIME_FORMATS,required=False)
     end = DateTimeField(input_formats=DATETIME_FORMATS,required=False)
     
     class Meta:
@@ -153,7 +152,7 @@ class ItemRelatedForm(ActionModelForm):
     title = _('Related for this item')
     class Meta:
         model = Item
-        fields = ('related_url', 'related_cron')
+        fields = ('related_url',)
 
 
 

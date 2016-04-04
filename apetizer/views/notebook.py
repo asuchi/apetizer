@@ -45,31 +45,28 @@ class NotebookView(ContentView):
                 cell_node = Item(id=cell_id, parent=node, **kwargs['pipe'])
             
             if cell.cell_type == 'code':
-                cell_node.behavior = 'view'
-                cell_node.published = False
-                
                 #
                 content = u''
                 for output in cell.outputs:
                     if output.output_type == 'stream' and 'stream' == 'stdout':
                         content += output.get('text', u'')
-                
                 cell_node.content = content
-                if cell_node.content:
-                    cell_node.visible = True
-                else:
-                    cell_node.visible = True
                 
-                if not cell_node.title:
-                    cell_node.title = 'Code'
+                #if cell_node.content:
+                #    cell_node.visible = True
+                #else:
+                cell_node.visible = False
                 
-                if not cell_node.label:
-                    cell_node.label = cell_node.title
+                #if not cell_node.title:
+                #    cell_node.title = 'Code'
+                
+                #if not cell_node.label:
+                #    cell_node.label = cell_node.title
                 
             elif cell.cell_type == 'markdown':
                 
-                cell_node.behavior = 'view'
-                cell_node.content = '<i>markdown rendered html</i>'
+                #cell_node.behavior = 'view'
+                #cell_node.content = '<i>markdown rendered html</i>'
                 
                 cell_node.visible = True
                 
@@ -84,7 +81,7 @@ class NotebookView(ContentView):
         
         #
         if not node.file:
-            node.file = node.id+'.ipynb'
+            node.file = 'resource/'+node.id+'.ipynb'
             node.save()
         
         return HttpResponseRedirect(node.get_url()+'view/')
@@ -125,7 +122,7 @@ class NotebookView(ContentView):
         
         #
         if not node.file:
-            node.file = node.id+'.ipynb'
+            node.file = 'resource/'+node.id+'.ipynb'
             node.save()
         
         return HttpResponseRedirect(node.get_url()+'file/')
