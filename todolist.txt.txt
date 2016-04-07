@@ -1,0 +1,13 @@
+Tache:
+
+Mettre Terme et condition dans creative commons.
+Enregistrement sur champ auto-editable
+Action call sur fichier jupiter
+Génerer un fichier m3u avec la liste des fichiers uploader.
+Modifier le lien "Ajouter des images, ajouter UN fichier" 
+Corriger bug sur page index
+ Ajouter un bouton masquer 
+problème sur lien reéorder
+faire en python un instance  de controle de lancement api vlc
+Raccourcis pour cloner un item coté model
+Création d'un kernel par requete.
