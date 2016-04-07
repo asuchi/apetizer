@@ -90,4 +90,24 @@ le développeur peut alors créer des scripts de comportement et leur assigner u
 
 a lot More comming about this ... keep in touch
 
+# Installation d'un raspberrypi
 
+raspberrypi login: pi
+pass: raspberry
+
+Trouver le réseau : ifconfig
+(double tabulation permet l'affichage de la liste sous un répertoire)
+ 
+startx
+
+Le raspberry doit être connecté au wifi
+
+sudo apt-get install build-essential git python-pip python-dev
+sudo apt-get install libjpeg8-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev
+
+sudo pip install git+http://github.com/biodigitals/apetizer.gi#egg=Apetizer
+
+Installation du projet django
+
+
+Aller sur adresseipduraspberry:8888
