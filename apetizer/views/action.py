@@ -202,7 +202,10 @@ class ActionView(View):
         """
         Override this method to retreive instance for action
         """
-        return tuple()
+        if 'instances' in kwargs:
+            return kwargs['instances']
+        else:
+            return tuple()
     
     def get_forms_data(self, *forms):
         """
@@ -378,6 +381,8 @@ class ActionView(View):
         """
         
         action = kwargs.get('action', None)
+        if not action in self.get_actions():
+            raise Http404
         
         if self.__getattribute__('process_'+action):
             response = self.__getattribute__('process_'+action)(request,

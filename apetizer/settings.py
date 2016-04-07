@@ -10,8 +10,8 @@ ALLOWED_HOSTS = ["*"]
 STATIC_ROOT = os.getcwd()+"/static"
 STATIC_URL = "/static/"
 
-MEDIA_ROOT = os.getcwd()+"/media"
-MEDIA_URL = "/media/"
+MEDIA_ROOT = os.getcwd()
+MEDIA_URL = '/'
 
 TEMPLATE_DIRS = (
     os.getcwd()+'/theme/templates/',

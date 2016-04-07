@@ -106,7 +106,11 @@ class VisitorPrivatizeForm(ActionPipeForm):
                                                                 _(u'xxxxxxxxxxxx')}
                                                          ))
 
-
+class AuthenticateForm(ActionModelForm):
+    class Meta:
+        fields = ('username', 'email')
+        model = User
+    
 class UserForm(ActionModelForm):
     
     class Meta:

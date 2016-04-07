@@ -47,6 +47,23 @@ class ItemAddForm(ActionModelForm):
         fields = ('label', 'title', 'description','order')
 
 
+class ItemPutForm(ActionModelForm):
+    class Meta:
+        model = Item
+        fields = ('label', 'title', 'description', 'order', 
+                  'latitude', 'longitude',
+                  'start', 'end',
+                  'related_url', 'related_cron',
+                  'image', 'file',
+                  'content', 'published',
+                  'data', 'type', 'slug',
+                  'behavior', 
+                  'email', 'username', 'status',
+                  'subject', 'message'
+                  )
+
+
+
 class ItemReorderForm(ActionModelForm):
     class Meta:
         model = Item

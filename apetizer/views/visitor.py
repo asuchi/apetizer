@@ -24,7 +24,7 @@ class VisitorView(ActionPipeView):
     view_template = 'register/view.html'
     
     class_actions = ['validate', 'authenticate', 'profile', 'privatize']
-    class_actions_forms = {'authenticate': (VisitorForm, VisitorValidateForm),
+    class_actions_forms = {'authenticate': (VisitorValidateForm),
                            'privatize': (VisitorPrivatizeForm,),
                            'validate': (VisitorValidateForm,),}
     

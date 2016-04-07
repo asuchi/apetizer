@@ -7,6 +7,7 @@ setup(
     author='Nicolas Danjean',
     author_email='nicolas@biodigitals.com',
     packages=['apetizer',
+              'apetizer.directory',
               'apetizer.forms',
               'apetizer.management',
               'apetizer.middleware',
@@ -37,6 +38,7 @@ setup(
         "six>=1.8.0",
         'django-jsonfield',
         'django-leaflet',
+        'requests-oauthlib'
     ],
     entry_points = {
         'console_scripts': [

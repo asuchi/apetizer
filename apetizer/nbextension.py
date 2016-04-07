@@ -51,20 +51,17 @@ def load_jupyter_server_extension(nb_server_app):
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apetizer.settings")
     # add cwd to path
     sys.path.append(os.getcwd())
-
+    
     django.setup()
     
     from django.conf import settings
-    settings.MEDIA_URL = '/notebooks/medias/'
+    settings.MEDIA_URL = '/notebooks/'
     
     wsgi_app = tornado.wsgi.WSGIContainer(django.core.handlers.wsgi.WSGIHandler())
     
-    # you should add your django app statics to the serveur on config
-    #
+    # you have to add your collected statics to the jupyter config
     # 
     tornado_app = [
-      #(r'/static/(.*)', tornado.web.StaticFileHandler, {'path': os.getcwd()+'/static' }),
-      (r'/medias/(.*)', tornado.web.StaticFileHandler, {'path': os.getcwd()+'/medias' }),
       (r'/media/(.*)', tornado.web.StaticFileHandler, {'path': os.getcwd()+'/media' }),
       (r"(.+).ws", ApetizerSocket),
       ('.*/query.json$', tornado.web.FallbackHandler, dict(fallback=wsgi_app)),
@@ -73,8 +70,8 @@ def load_jupyter_server_extension(nb_server_app):
     web_app.add_handlers(host_pattern, tornado_app)
     
     # start indexing
-    from apetizer.directory.items import _search_drilldown_cache
-    spawn(_search_drilldown_cache.load_items, tuple(), {})
+    #from apetizer.directory.items import _search_drilldown_cache
+    #spawn(_search_drilldown_cache.load_items, tuple(), {})
 
 def spawn(function, fargs, fkwargs):
     """

@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from apetizer.forms.register import AuthenticateLoginForm, \
                                     AuthenticatePasswordForm, \
                                     AuthenticateAgreeForm, \
-                                    UserForm
+                                    UserForm, RegisterForm, AuthenticateForm
 from apetizer.views.visitor import VisitorView
 
 
@@ -29,6 +29,7 @@ class UserView(VisitorView):
     
     class_actions_forms = {'login': (AuthenticateLoginForm,),
                            'register': (UserForm, 
+                                        AuthenticateForm,
                                         AuthenticatePasswordForm,
                                         AuthenticateAgreeForm),
                            'account': (UserForm, ),
@@ -126,20 +127,19 @@ class UserView(VisitorView):
         """
         Set a password for the current user
         """
-        #return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
         # is ther a user logged in ?
         if request.user.is_authenticated():
             # the user should be able to set it's password
             # ask him the current one to change to a anew one
-            return HttpResponseRedirect(user_profile.get_url()+'profile/')
+            return HttpResponseRedirect('account/')
         else:
             try:
                 user = get_user_model().objects.get(username=user_profile.username)
                 messages.add_message(request, messages.WARNING, _("A user with this username already exists"))
-                return HttpResponseRedirect(user_profile.get_url()+'profile/')
+                return HttpResponseRedirect('register/')
             except ObjectDoesNotExist:
                 return self.manage_pipe(request, user_profile, input_data, template_args, **kwargs)
-
+        
 
     def process_account(self, request, user_profile, input_data, template_args, **kwargs):
         """
@@ -182,5 +182,7 @@ class UserView(VisitorView):
                         user_profile.username = auth_user.username
                         user_profile.email = auth_user.email
                         user_profile.save()
+                        
+                        return HttpResponseRedirect('dashboard/')
         
         return super(UserView, self).manage_action_completed(request, user_profile, template_args, **kwargs)

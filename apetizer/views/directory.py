@@ -3,19 +3,16 @@ Created on 2 mars 2014
 
 @author: rux
 '''
-import json
+from __future__ import absolute_import
+
 import logging
-import pprint
 import re
 
-from django.conf import settings
-from django.http.response import Http404
 from django.template.defaultfilters import slugify
 
 from apetizer.directory.items import _search_drilldown_cache
 from apetizer.forms.search import DirectoryQueryForm
 from apetizer.models import Item
-from apetizer.views.action import ActionView
 from apetizer.views.api import ApiView
 
 

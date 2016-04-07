@@ -277,7 +277,13 @@ class DataPath(AuditedModel):
             objects.append(objects_by_key[k])
         
         return objects
-
+    
+    
+    def get_as_dict(self):
+        
+        model_data = model_to_dict(self)
+        
+        return model_data
 
     def is_visible(self):
         if self.published == True or self.published == None:
@@ -1325,7 +1331,6 @@ class Item(Translation):
         return the data conbtained in item as a python object
         """
         self.data = dump_json(value)
-    
     
     
     def get_author(self):

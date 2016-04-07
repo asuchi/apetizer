@@ -18,7 +18,7 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _, get_language
 from apetizer.forms.content import ItemTranslateForm, ItemDeleteForm, \
-    MultiUploadForm, ItemAddForm, ItemLocationForm, \
+    MultiUploadForm, ItemAddForm, ItemPutForm, ItemLocationForm, \
     ItemTimingForm, ItemDataForm, ItemRelatedForm, ItemImageForm, \
     ItemCodeForm, ItemRedirectForm, ItemPublishForm, ItemRenameForm, \
     ItemReorderForm, ItemFileForm
@@ -29,15 +29,14 @@ from apetizer.views.moderate import ModerateView
 from apetizer.views.notebook import NotebookView
 from apetizer.views.program import ProgramView
 from apetizer.views.visitor import VisitorView
+from apetizer.views.items import ItemView
 
 
 log = logging
 
-#restricted_actions = ['image', 'upload', 'program', 'content']
-restricted_actions = []
 message_deactivated_action = _('Sorry, this action requires a fully registred login.')
 
-class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
+class UIView(NotebookView, ItemView, ProgramView, ModerateView, VisitorView):
     
     view_name = 'ui'
     view_template = "ui/base.html"
@@ -52,7 +51,7 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
 
     class_actions_forms = {
                     'add':(ItemAddForm,),
-                    
+                    'put':(ItemPutForm,),
                     'reorder':(ItemReorderForm,),
                     'translate':(ItemTranslateForm,),
                     'location':(ItemLocationForm,),
@@ -137,7 +136,11 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
                 
                 return (translation,)
             
-            elif action in ('add',):
+            elif 'instances' in kwargs:
+                return kwargs['instances']
+            
+            elif action in ('add', 'put'):
+                
                 parentNode = kwargs['node']
                 
                 item = Item()
@@ -168,11 +171,11 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
     
     def process(self, request, user_profile, input_data, template_args, **kwargs):
         
-        if kwargs.get('action') in restricted_actions:
+        if kwargs.get('action') in self.class_actions:
             if not user_profile.validated \
                 or not request.user.is_authenticated():
                 messages.error(request, message_deactivated_action)
-                return HttpResponseRedirect(self.get_reversed_action(self.view_name, 'view', kwargs))
+                return HttpResponseRedirect('login/?next='+request.path)
         
         return super(UIView, self).process(request, user_profile, input_data, template_args, **kwargs)
 
@@ -184,8 +187,14 @@ class UIView(NotebookView, ProgramView, ModerateView, VisitorView):
     
     def process_put(self, request, user_profile, input_data, template_args, **kwargs):
         """
-        Put data to existing or new item
+        Put properties to an existing or new item
         """
+        if input_data.has_key('id'):
+            try:
+                kwargs['instances'] = (Item.objects.get(input_data['id']))
+            except:
+                return self.render(request, template_args, {}, 'Object not found', 404)
+        
         return self.manage_item_pipe(request, user_profile, input_data, template_args, **kwargs)
     
     def process_rename(self, request, user_profile, input_data, template_args, **kwargs):
